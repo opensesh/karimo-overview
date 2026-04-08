@@ -1,3 +1,4 @@
+export { Navigation } from "./Navigation";
 export { Hero } from "./Hero";
 export { PipelineAnimation } from "./PipelineAnimation";
 export { ProcessTimeline } from "./ProcessTimeline";
