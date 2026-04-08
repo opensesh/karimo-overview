@@ -1,0 +1,189 @@
+/* =============================================================================
+   KARIMO Overview - Theme Variables
+   Based on Open Session Design System (BOS-3.0)
+   ============================================================================= */
+
+:root {
+  /* -------------------------------------------------------------------------
+     Brand Colors
+     ------------------------------------------------------------------------- */
+  --color-brand-50: #fff7ed;
+  --color-brand-100: #ffedd5;
+  --color-brand-200: #fed7aa;
+  --color-brand-300: #fdba74;
+  --color-brand-400: #ff7a38;
+  --color-brand-500: #fe5102; /* Aperol - Primary */
+  --color-brand-600: #e64400;
+  --color-brand-700: #c73a00;
+  --color-brand-800: #9a3000;
+  --color-brand-900: #7c2800;
+  --color-brand-950: #431400;
+
+  /* -------------------------------------------------------------------------
+     Warm Gray Scale (tinted toward Vanilla)
+     ------------------------------------------------------------------------- */
+  --color-gray-50: #faf8f5;
+  --color-gray-100: #f5f3f0;
+  --color-gray-200: #e7e5e2;
+  --color-gray-300: #d6d3d1;
+  --color-gray-400: #a8a29e;
+  --color-gray-500: #78716c;
+  --color-gray-600: #57534e;
+  --color-gray-700: #44403a;
+  --color-gray-800: #363230;
+  --color-gray-900: #262322;
+  --color-gray-950: #1c1a17;
+
+  /* -------------------------------------------------------------------------
+     Core Brand Colors (Original)
+     ------------------------------------------------------------------------- */
+  --color-black: #000000;
+  --color-charcoal: #191919;
+  --color-vanilla: #fffaee;
+  --color-aperol: #fe5102;
+  --color-black80: #383838;
+  --color-black70: #4a4a4a;
+  --color-black60: #595959;
+  --color-black50: #787878;
+  --color-black30: #c7c7c7;
+  --color-black10: #f0f0f0;
+}
+
+/* =============================================================================
+   Dark Mode (Default for KARIMO - dark theme site)
+   ============================================================================= */
+
+:root {
+  /* Backgrounds */
+  --bg-primary: #000000;       /* Pure black for pipeline background */
+  --bg-secondary: #191919;     /* Charcoal - elevated surfaces */
+  --bg-tertiary: #262322;      /* Subtle containers */
+  --bg-inverse: #faf8f5;       /* Light backgrounds */
+
+  /* Brand backgrounds */
+  --bg-brand-solid: #fe5102;
+  --bg-brand-subtle: #431400;
+
+  /* Foregrounds / Text */
+  --fg-primary: #fffaee;       /* Vanilla */
+  --fg-secondary: #a8a29e;
+  --fg-tertiary: #78716c;
+  --fg-inverse: #1c1a17;
+  --fg-brand: #ff7a38;         /* Lighter brand for readability */
+  --fg-on-brand: #1c1a17;      /* Text on bright brand surfaces */
+  --fg-on-brand-glisten: #faf8f5;
+
+  /* Borders */
+  --border-primary: #44403a;
+  --border-secondary: #363230;
+  --border-tertiary: #262322;
+  --border-brand: #fe5102;
+
+  /* Button colors */
+  --button-primary-bg: #fe5102;
+  --button-primary-fg: #ffffff;
+  --button-primary-hover: #ff7a38;
+
+  --button-secondary-bg: transparent;
+  --button-secondary-fg: #fffaee;
+  --button-secondary-border: #44403a;
+  --button-secondary-hover: #363230;
+
+  /* Focus ring */
+  --focus-ring: #ff7a38;
+  --focus-ring-offset: #000000;
+
+  /* Shadows - subtle in dark mode */
+  --shadow-color: 0 0 0;
+  --shadow-sm: 0 1px 2px 0 rgb(var(--shadow-color) / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(var(--shadow-color) / 0.4), 0 2px 4px -2px rgb(var(--shadow-color) / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(var(--shadow-color) / 0.4), 0 4px 6px -4px rgb(var(--shadow-color) / 0.3);
+  --shadow-xl: 0 20px 25px -5px rgb(var(--shadow-color) / 0.5), 0 8px 10px -6px rgb(var(--shadow-color) / 0.3);
+}
+
+/* =============================================================================
+   Typography
+   ============================================================================= */
+
+:root {
+  /* Font Families */
+  --font-display: 'Neue Haas Display', 'Helvetica Neue', system-ui, sans-serif;
+  --font-body: 'Neue Haas Text', 'Helvetica Neue', system-ui, sans-serif;
+  --font-accent: 'OffBit', 'SF Mono', monospace;
+  --font-mono: 'SF Mono', 'Fira Code', monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-4xl: 2.25rem;     /* 36px */
+  --text-5xl: 3rem;        /* 48px */
+  --text-6xl: 3.75rem;     /* 60px */
+
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.1;
+  --leading-snug: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.03em;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
+  --tracking-widest: 0.2em;
+}
+
+/* =============================================================================
+   Motion / Animation
+   ============================================================================= */
+
+:root {
+  /* Durations */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 400ms;
+  --duration-slowest: 600ms;
+
+  /* Easings */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-power4-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+/* =============================================================================
+   Spacing & Layout
+   ============================================================================= */
+
+:root {
+  /* Container widths */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1440px;
+
+  /* Section padding */
+  --section-padding-y: 5rem;
+  --section-padding-x: 1.5rem;
+
+  /* Border radius */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+  --radius-cta: 1.875rem; /* 30px */
+}

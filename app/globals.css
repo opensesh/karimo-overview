@@ -1,64 +1,158 @@
 @import "tailwindcss";
+@import "../styles/theme.css";
 
-:root {
-  --color-black: #000000;
-  --color-charcoal: #191919;
-  --color-vanilla: #FFFAEE;
-  --color-aperol: #FE5102;
-  --color-black80: #383838;
-  --color-black70: #4A4A4A;
-  --color-black60: #595959;
-  --color-black50: #787878;
-  --color-black30: #C7C7C7;
-  --color-black10: #F0F0F0;
+/* =============================================================================
+   Font Face Definitions
+   ============================================================================= */
 
-  --background: var(--color-charcoal);
-  --foreground: var(--color-vanilla);
+@font-face {
+  font-family: 'Neue Haas Display';
+  src: url('https://www.opensesh.app/api/brand/assets/download/open-session/fonts/NeueHaasDisplayMedium 2.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
 }
 
+@font-face {
+  font-family: 'Neue Haas Display';
+  src: url('https://www.opensesh.app/api/brand/assets/download/open-session/fonts/NeueHaasDisplayBold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Haas Display';
+  src: url('https://www.opensesh.app/api/brand/assets/download/open-session/fonts/NeueHaasDisplayLight.woff2') format('woff2');
+  font-weight: 300;
+  font-display: swap;
+}
+
+/* =============================================================================
+   Tailwind Theme Mapping
+   ============================================================================= */
+
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-accent: var(--color-aperol);
+  /* Colors */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-inverse: var(--bg-inverse);
+  --color-bg-brand-solid: var(--bg-brand-solid);
+  --color-bg-brand-subtle: var(--bg-brand-subtle);
+
+  --color-fg-primary: var(--fg-primary);
+  --color-fg-secondary: var(--fg-secondary);
+  --color-fg-tertiary: var(--fg-tertiary);
+  --color-fg-inverse: var(--fg-inverse);
+  --color-fg-brand: var(--fg-brand);
+
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+  --color-border-tertiary: var(--border-tertiary);
+  --color-border-brand: var(--border-brand);
+
+  /* Brand colors */
+  --color-aperol: var(--color-brand-500);
+  --color-vanilla: var(--color-vanilla);
+  --color-charcoal: var(--color-charcoal);
+
+  /* Font families */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+}
+
+/* =============================================================================
+   Base Styles
+   ============================================================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--fg-primary);
+  font-family: var(--font-body);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
+/* =============================================================================
+   Selection
+   ============================================================================= */
+
+::selection {
+  background: var(--color-brand-500);
+  color: var(--color-vanilla);
+}
+
+/* =============================================================================
+   Scrollbar
+   ============================================================================= */
+
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-black80);
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-black50);
+  background: var(--border-primary);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-black30);
+  background: var(--fg-tertiary);
 }
 
-/* Selection color */
-::selection {
-  background: var(--color-aperol);
-  color: var(--color-vanilla);
+/* =============================================================================
+   Animation Keyframes
+   ============================================================================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* Animation utilities */
 @keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -75,30 +169,20 @@ body {
   }
 }
 
-@keyframes flowRight {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
+/* =============================================================================
+   Utility Classes
+   ============================================================================= */
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out forwards;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-pulse-slow {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.animate-flow {
-  animation: flowRight 2s ease-in-out infinite;
+.animate-slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Stagger delays */
@@ -108,3 +192,90 @@ body {
 .stagger-4 { animation-delay: 0.4s; }
 .stagger-5 { animation-delay: 0.5s; }
 .stagger-6 { animation-delay: 0.6s; }
+
+/* =============================================================================
+   Container Utilities
+   ============================================================================= */
+
+.container-main {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--section-padding-x);
+}
+
+.container-wide {
+  width: 100%;
+  padding: 0 5%;
+}
+
+@media (min-width: 1024px) {
+  .container-wide {
+    padding: 0 6%;
+  }
+}
+
+/* =============================================================================
+   Section Utilities
+   ============================================================================= */
+
+.section-padding {
+  padding-top: var(--section-padding-y);
+  padding-bottom: var(--section-padding-y);
+}
+
+/* =============================================================================
+   Typography Utilities
+   ============================================================================= */
+
+.text-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+.text-heading {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+}
+
+.text-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: var(--leading-normal);
+}
+
+.text-accent {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+}
+
+/* =============================================================================
+   Focus States
+   ============================================================================= */
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* =============================================================================
+   Reduced Motion
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
