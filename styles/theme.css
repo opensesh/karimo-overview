@@ -35,7 +35,10 @@
   --color-gray-950: #1c1a17;
 
   /* -------------------------------------------------------------------------
-     Core Brand Colors (Original)
+     Legacy Brand Colors (DEPRECATED)
+     Used by KarimoPipeline.tsx hardcoded colors.
+     Prefer semantic tokens (--bg-primary, --fg-primary, etc.) for new components.
+     These will be removed when KarimoPipeline migrates to semantic tokens.
      ------------------------------------------------------------------------- */
   --color-black: #000000;
   --color-charcoal: #191919;
@@ -107,8 +110,8 @@
 
 :root {
   /* Font Families */
-  --font-display: 'Neue Haas Display', 'Helvetica Neue', system-ui, sans-serif;
-  --font-body: 'Neue Haas Text', 'Helvetica Neue', system-ui, sans-serif;
+  --font-display: 'Neue Haas Display', system-ui, sans-serif;
+  --font-body: 'Neue Haas Text', system-ui, sans-serif;
   --font-accent: 'OffBit', 'SF Mono', monospace;
   --font-mono: 'SF Mono', 'Fira Code', monospace;
 
