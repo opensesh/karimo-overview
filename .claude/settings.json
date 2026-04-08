@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Write(/Users/alexbouhdary/Documents/GitHub.nosync/karimo-overview/**)",
+      "Edit(/Users/alexbouhdary/Documents/GitHub.nosync/karimo-overview/**)"
+    ]
+  }
+}
