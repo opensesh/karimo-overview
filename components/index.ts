@@ -3,3 +3,7 @@ export { PipelineAnimation } from "./PipelineAnimation";
 export { ProcessTimeline } from "./ProcessTimeline";
 export { OrchestrationViz } from "./OrchestrationViz";
 export { AdoptionPhases } from "./AdoptionPhases";
+export { KarimoPipeline } from "./KarimoPipeline";
+export { ProcessSection } from "./ProcessSection";
+export { OrchestrationSection } from "./OrchestrationSection";
+export { AdoptionSection } from "./AdoptionSection";
