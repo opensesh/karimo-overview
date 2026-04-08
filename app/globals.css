@@ -1,8 +1,12 @@
 @import "tailwindcss";
+@source not "../../.claude";
+@source not "../../.karimo";
 @import "../styles/theme.css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* =============================================================================
-   Font Face Definitions
+   Font Face Declarations - Open Session Typography System
    ============================================================================= */
 
 /* Neue Haas Display - Display/Headings */
@@ -66,10 +70,11 @@
 
 /* =============================================================================
    Tailwind Theme Mapping
+   Using @theme inline for Tailwind v4 compatibility
    ============================================================================= */
 
 @theme inline {
-  /* Colors */
+  /* Background colors */
   --color-bg-primary: var(--bg-primary);
   --color-bg-secondary: var(--bg-secondary);
   --color-bg-tertiary: var(--bg-tertiary);
@@ -77,49 +82,88 @@
   --color-bg-brand-solid: var(--bg-brand-solid);
   --color-bg-brand-subtle: var(--bg-brand-subtle);
 
+  /* Foreground / text colors */
   --color-fg-primary: var(--fg-primary);
   --color-fg-secondary: var(--fg-secondary);
   --color-fg-tertiary: var(--fg-tertiary);
   --color-fg-inverse: var(--fg-inverse);
   --color-fg-brand: var(--fg-brand);
+  --color-fg-on-brand: var(--fg-on-brand);
+  --color-fg-on-brand-glisten: var(--fg-on-brand-glisten);
 
+  /* Border colors */
   --color-border-primary: var(--border-primary);
   --color-border-secondary: var(--border-secondary);
   --color-border-tertiary: var(--border-tertiary);
   --color-border-brand: var(--border-brand);
 
-  /* Brand colors */
+  /* Brand color scale */
+  --color-brand-50: var(--color-brand-50);
+  --color-brand-100: var(--color-brand-100);
+  --color-brand-200: var(--color-brand-200);
+  --color-brand-300: var(--color-brand-300);
+  --color-brand-400: var(--color-brand-400);
+  --color-brand-500: var(--color-brand-500);
+  --color-brand-600: var(--color-brand-600);
+  --color-brand-700: var(--color-brand-700);
+  --color-brand-800: var(--color-brand-800);
+  --color-brand-900: var(--color-brand-900);
+  --color-brand-950: var(--color-brand-950);
+
+  /* Gray color scale */
+  --color-warm-gray-50: var(--color-gray-50);
+  --color-warm-gray-100: var(--color-gray-100);
+  --color-warm-gray-200: var(--color-gray-200);
+  --color-warm-gray-300: var(--color-gray-300);
+  --color-warm-gray-400: var(--color-gray-400);
+  --color-warm-gray-500: var(--color-gray-500);
+  --color-warm-gray-600: var(--color-gray-600);
+  --color-warm-gray-700: var(--color-gray-700);
+  --color-warm-gray-800: var(--color-gray-800);
+  --color-warm-gray-900: var(--color-gray-900);
+  --color-warm-gray-950: var(--color-gray-950);
+
+  /* Legacy brand color aliases */
   --color-aperol: var(--color-brand-500);
   --color-vanilla: var(--color-vanilla);
   --color-charcoal: var(--color-charcoal);
 
   /* Font families */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-display);
+  --font-family-display: 'Neue Haas Display', system-ui, sans-serif;
+  --font-family-body: 'Neue Haas Text', system-ui, sans-serif;
+  --font-family-accent: 'OffBit', 'SF Mono', monospace;
+  --font-family-mono: 'SF Mono', 'Fira Code', monospace;
+
+  /* Shadows */
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
 }
 
 /* =============================================================================
    Base Styles
    ============================================================================= */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  background: var(--bg-primary);
+  background-color: var(--bg-primary);
   color: var(--fg-primary);
   font-family: var(--font-body);
-  line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* =============================================================================
+   Focus Styles
+   ============================================================================= */
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* =============================================================================
@@ -127,8 +171,8 @@ body {
    ============================================================================= */
 
 ::selection {
-  background: var(--color-brand-500);
-  color: var(--color-vanilla);
+  background-color: var(--bg-brand-solid);
+  color: white;
 }
 
 /* =============================================================================
@@ -137,6 +181,7 @@ body {
 
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -153,7 +198,190 @@ body {
 }
 
 /* =============================================================================
-   Animation Keyframes
+   Typography Classes
+   ============================================================================= */
+
+.text-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+.text-heading {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+}
+
+.text-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: var(--leading-normal);
+}
+
+.text-accent {
+  font-family: var(--font-accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+.text-mono {
+  font-family: var(--font-mono);
+}
+
+/* =============================================================================
+   Section Label - OffBit 101 Bold Treatment
+   ============================================================================= */
+
+.section-label {
+  font-family: var(--font-accent);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--bg-brand-solid);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+/* Brand variant -- same color, kept for compatibility */
+.section-label--brand {
+  color: var(--bg-brand-solid);
+}
+
+/* =============================================================================
+   Container
+   ============================================================================= */
+
+.container-main {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--section-padding-x);
+  padding-right: var(--section-padding-x);
+}
+
+@media (min-width: 768px) {
+  .container-main {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-main {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+.container-wide {
+  width: 100%;
+  max-width: 1920px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+@media (min-width: 1024px) {
+  .container-wide {
+    padding-left: 6%;
+    padding-right: 6%;
+  }
+}
+
+/* =============================================================================
+   Section Utilities
+   ============================================================================= */
+
+.section-padding {
+  padding-top: var(--section-padding-y);
+  padding-bottom: var(--section-padding-y);
+}
+
+/* =============================================================================
+   Prose / Rich Text Content
+   ============================================================================= */
+
+.prose {
+  max-width: 65ch;
+}
+
+.prose p {
+  margin-bottom: 1.5em;
+}
+
+.prose h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+}
+
+.prose h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose a {
+  color: var(--fg-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose a:hover {
+  text-decoration: none;
+}
+
+.prose ul,
+.prose ol {
+  margin-bottom: 1.5em;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin-bottom: 0.5em;
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--border-brand);
+  padding-left: 1em;
+  margin-left: 0;
+  font-style: italic;
+  color: var(--fg-secondary);
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: var(--radius-sm);
+}
+
+.prose pre {
+  background: var(--bg-inverse);
+  color: var(--fg-inverse);
+  padding: 1em;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin-bottom: 1.5em;
+}
+
+.prose pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* =============================================================================
+   Animations
    ============================================================================= */
 
 @keyframes fadeIn {
@@ -198,6 +426,17 @@ body {
   }
 }
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -207,20 +446,47 @@ body {
   }
 }
 
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes cursor-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes text-glisten {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -50% 0; }
+}
+
 /* =============================================================================
-   Utility Classes
+   Animation Utility Classes
    ============================================================================= */
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+  animation: fadeIn var(--duration-slow) var(--ease-out) forwards;
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInUp var(--duration-slow) var(--ease-spring) forwards;
 }
 
 .animate-slide-up {
-  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp var(--duration-slow) var(--ease-spring) forwards;
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }
 
 /* Stagger delays */
@@ -231,84 +497,26 @@ body {
 .stagger-5 { animation-delay: 0.5s; }
 .stagger-6 { animation-delay: 0.6s; }
 
-/* =============================================================================
-   Container Utilities
-   ============================================================================= */
-
-.container-main {
-  width: 100%;
-  max-width: var(--container-xl);
-  margin: 0 auto;
-  padding: 0 var(--section-padding-x);
+/* ActionButton brand text -- vanilla flash sweep on hover */
+.action-button-glisten {
+  background: linear-gradient(
+    90deg,
+    var(--fg-on-brand) 0%,
+    var(--fg-on-brand) 40%,
+    var(--fg-on-brand-glisten) 48%,
+    var(--fg-on-brand-glisten) 52%,
+    var(--fg-on-brand) 60%,
+    var(--fg-on-brand) 100%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.container-wide {
-  width: 100%;
-  padding: 0 5%;
-}
-
-@media (min-width: 1024px) {
-  .container-wide {
-    padding: 0 6%;
-  }
-}
-
-/* =============================================================================
-   Section Utilities
-   ============================================================================= */
-
-.section-padding {
-  padding-top: var(--section-padding-y);
-  padding-bottom: var(--section-padding-y);
-}
-
-/* =============================================================================
-   Typography Utilities
-   ============================================================================= */
-
-.section-label {
-  font-family: var(--font-accent);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  color: var(--bg-brand-solid);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-widest);
-}
-
-.text-display {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: var(--tracking-tight);
-  line-height: var(--leading-tight);
-}
-
-.text-heading {
-  font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: var(--tracking-tight);
-  line-height: var(--leading-snug);
-}
-
-.text-body {
-  font-family: var(--font-body);
-  font-weight: 400;
-  line-height: var(--leading-normal);
-}
-
-.text-accent {
-  font-family: var(--font-accent);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wider);
-}
-
-/* =============================================================================
-   Focus States
-   ============================================================================= */
-
-:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+.group:hover .action-button-glisten {
+  animation: text-glisten 800ms var(--ease-power4-in-out) forwards;
 }
 
 /* =============================================================================
