@@ -5,27 +5,57 @@
    Font Face Definitions
    ============================================================================= */
 
+/* Neue Haas Display - Display/Headings */
 @font-face {
   font-family: 'Neue Haas Display';
-  src: url('https://www.opensesh.app/api/brand/assets/download/open-session/fonts/NeueHaasDisplayMedium 2.woff2') format('woff2');
-  font-weight: 500;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Haas Display';
-  src: url('https://www.opensesh.app/api/brand/assets/download/open-session/fonts/NeueHaasDisplayBold.ttf') format('truetype');
+  src: url('/fonts/NeueHaasDisplayBold.woff2') format('woff2');
   font-weight: 700;
+  font-style: normal;
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Neue Haas Display';
-  src: url('https://www.opensesh.app/api/brand/assets/download/open-session/fonts/NeueHaasDisplayLight.woff2') format('woff2');
-  font-weight: 300;
+  src: url('/fonts/NeueHaasDisplayMedium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Neue Haas Display';
+  src: url('/fonts/NeueHaasDisplayRoman.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Neue Haas Text - Body Copy */
+@font-face {
+  font-family: 'Neue Haas Text';
+  src: url('/fonts/NeueHaasTextRegular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Haas Text';
+  src: url('/fonts/NeueHaasTextMedium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Haas Text';
+  src: url('/fonts/NeueHaasTextBold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* OffBit 101 Bold - Accent/Labels (max 2 per viewport) */
 @font-face {
   font-family: 'OffBit';
   src: url('/fonts/OffBit-101Bold.woff2') format('woff2');
