@@ -52,7 +52,7 @@ function StepChip({
       className="text-heading whitespace-nowrap"
       style={{
         padding: "8px 16px",
-        border: `1px solid ${dimmed ? "var(--border-tertiary)" : "var(--fg-primary)"}`,
+        border: `1px solid ${dimmed ? "var(--border-tertiary)" : glowing ? "rgba(254,81,2,0.5)" : "var(--fg-primary)"}`,
         borderRadius: "4px",
         fontSize: "13px",
         letterSpacing: "0.12em",
@@ -61,8 +61,9 @@ function StepChip({
         transform: visible ? "scale(1)" : "scale(0.88)",
         transition: "all 0.32s cubic-bezier(0.16, 1, 0.3, 1)",
         boxShadow: glowing
-          ? "0 0 18px -3px rgba(255,250,238,0.12), inset 0 0 10px -3px rgba(255,250,238,0.05)"
+          ? "0 0 20px -4px rgba(254,81,2,0.3), 0 0 8px -2px rgba(254,81,2,0.15), inset 0 0 8px -3px rgba(254,81,2,0.08)"
           : "none",
+        animation: glowing ? "chip-pulse 0.7s ease-in-out infinite" : "none",
       }}
     >
       {label}
@@ -74,19 +75,23 @@ function StepChip({
 function SmallArrow({
   visible,
   dimmed,
+  glowing,
 }: {
   visible: boolean;
   dimmed: boolean;
+  glowing?: boolean;
 }) {
+  const color = glowing ? "#FE5102" : "var(--fg-primary)";
   return (
     <svg
       width="18"
       height="8"
       viewBox="0 0 18 8"
       style={{
-        opacity: visible ? (dimmed ? 0.15 : 0.4) : 0,
+        opacity: visible ? (dimmed ? 0.15 : glowing ? 0.7 : 0.4) : 0,
         transition: "opacity 0.25s ease",
         flexShrink: 0,
+        filter: glowing ? "drop-shadow(0 0 3px rgba(254,81,2,0.4))" : "none",
       }}
     >
       <line
@@ -94,13 +99,13 @@ function SmallArrow({
         y1="4"
         x2="12"
         y2="4"
-        stroke="var(--fg-primary)"
+        stroke={color}
         strokeWidth="1"
       />
       <polyline
         points="10,1.5 14,4 10,6.5"
         fill="none"
-        stroke="var(--fg-primary)"
+        stroke={color}
         strokeWidth="1"
       />
     </svg>
@@ -148,24 +153,35 @@ function PhaseArrow({
   );
 }
 
-// ─── Angular Loop SVG ──────────────────────────────────────
+// ─── Angular Loop SVG with glowing stroke pulse ───────────
 function AngularLoop({
   visible,
   looping,
   finished,
   width,
+  loopId,
 }: {
   visible: boolean;
   looping: boolean;
   finished: boolean;
   width: number;
+  loopId: string;
 }) {
   const h = 24;
   const inset = 16;
   const w = width;
   const pathD = `M ${w - inset} 0 L ${w - inset} ${h} L ${inset} ${h} L ${inset} 0`;
-  const strokeColor = looping ? "var(--fg-primary)" : "var(--fg-tertiary)";
+  const baseColor = looping ? "var(--fg-primary)" : "var(--fg-tertiary)";
   const op = visible ? (looping ? 1 : finished ? 0.22 : 0.5) : 0;
+
+  // Calculate total path length for stroke-dashoffset animation
+  const rightDown = h;
+  const across = w - 2 * inset;
+  const leftUp = h;
+  const totalLen = rightDown + across + leftUp;
+
+  // Unique gradient ID per loop
+  const gradId = `loop-pulse-${loopId}`;
 
   return (
     <svg
@@ -179,38 +195,62 @@ function AngularLoop({
         overflow: "visible",
       }}
     >
+      {/* Gradient for glowing stroke */}
+      {looping && (
+        <defs>
+          <linearGradient id={gradId} gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="transparent" />
+            <stop offset="30%" stopColor="#FE5102" stopOpacity="0" />
+            <stop offset="45%" stopColor="#FE5102" stopOpacity="0.8" />
+            <stop offset="50%" stopColor="#FF8844" stopOpacity="1" />
+            <stop offset="55%" stopColor="#FE5102" stopOpacity="0.8" />
+            <stop offset="70%" stopColor="#FE5102" stopOpacity="0" />
+            <stop offset="100%" stopColor="transparent" />
+          </linearGradient>
+        </defs>
+      )}
+
+      {/* Base path */}
       <path
         d={pathD}
         fill="none"
-        stroke={strokeColor}
+        stroke={baseColor}
         strokeWidth="1.5"
         style={{
           filter: looping
-            ? "drop-shadow(0 0 3px rgba(255,250,238,0.2))"
+            ? "drop-shadow(0 0 3px rgba(255,250,238,0.15))"
             : "none",
         }}
       />
+
+      {/* Glowing orange stroke pulse — travels the path twice */}
+      {looping && (
+        <path
+          d={pathD}
+          fill="none"
+          stroke={`url(#${gradId})`}
+          strokeWidth="3"
+          strokeDasharray={`${totalLen * 0.35} ${totalLen * 0.65}`}
+          style={{
+            filter: "drop-shadow(0 0 6px rgba(254,81,2,0.7)) drop-shadow(0 0 12px rgba(254,81,2,0.3))",
+          }}
+        >
+          <animate
+            attributeName="stroke-dashoffset"
+            values={`${totalLen};${-totalLen}`}
+            dur="0.7s"
+            repeatCount="indefinite"
+          />
+        </path>
+      )}
+
+      {/* Arrow head at top-left */}
       <polyline
         points={`${inset - 3.5},5 ${inset},-1 ${inset + 3.5},5`}
         fill="none"
-        stroke={strokeColor}
+        stroke={baseColor}
         strokeWidth="1.5"
       />
-      {looping && (
-        <circle
-          r="2"
-          fill="var(--bg-brand-solid)"
-          style={{
-            filter: "drop-shadow(0 0 4px rgba(254,81,2,0.6))",
-          }}
-        >
-          <animateMotion
-            dur="0.55s"
-            repeatCount="indefinite"
-            path={pathD}
-          />
-        </circle>
-      )}
     </svg>
   );
 }
@@ -269,39 +309,9 @@ function PhaseCard({
           }
         `}
       >
-        {/* Steps row */}
-        <div className="flex items-center gap-1.5 justify-center">
-          {phase.steps.map((step, i) => (
-            <div key={step} className="flex items-center gap-1.5">
-              <StepChip
-                label={step}
-                visible={now >= phase.stepTimes[i]}
-                glowing={isLooping}
-                dimmed={otherFocused}
-              />
-              {i < chipCount - 1 && (
-                <SmallArrow
-                  visible={now >= phase.stepTimes[i + 1]}
-                  dimmed={otherFocused}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Angular loop */}
-        <div className="flex justify-center mt-0.5">
-          <AngularLoop
-            visible={now >= phase.loopStart}
-            looping={isLooping}
-            finished={isFinished}
-            width={estW}
-          />
-        </div>
-
-        {/* Label — inside card */}
+        {/* Label — inside card, above chips */}
         <div
-          className="flex flex-col items-center mt-1"
+          className="flex flex-col items-center mb-3"
           style={{
             opacity: now >= phase.loopStart ? 1 : 0,
             transform:
@@ -331,6 +341,38 @@ function PhaseCard({
           >
             {phase.sublabel}
           </span>
+        </div>
+
+        {/* Steps row */}
+        <div className="flex items-center gap-1.5 justify-center">
+          {phase.steps.map((step, i) => (
+            <div key={step} className="flex items-center gap-1.5">
+              <StepChip
+                label={step}
+                visible={now >= phase.stepTimes[i]}
+                glowing={isLooping}
+                dimmed={otherFocused}
+              />
+              {i < chipCount - 1 && (
+                <SmallArrow
+                  visible={now >= phase.stepTimes[i + 1]}
+                  dimmed={otherFocused}
+                  glowing={isLooping}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Angular loop */}
+        <div className="flex justify-center mt-0.5">
+          <AngularLoop
+            visible={now >= phase.loopStart}
+            looping={isLooping}
+            finished={isFinished}
+            width={estW}
+            loopId={phase.id}
+          />
         </div>
       </div>
     </div>

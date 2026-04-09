@@ -119,48 +119,51 @@ export const adoptionPhases = [
   {
     phase: 1,
     title: "Execute PRD",
-    subtitle: "Start here",
+    description:
+      "Kick off your first PRD — pick something just a little too big for plan mode. KARIMO interviews you, breaks the work into tasks, and runs an agent team across isolated worktrees. You watch PRs land while you do other things.",
     features: [
       "PRD interviews with AI",
       "Agent team execution",
       "Wave-based parallel work",
       "PRs target main directly",
     ],
-    requirement: "Works out of the box",
+    objective: "Feel the difference between prompting and orchestrating",
   },
   {
     phase: 2,
     title: "Automate Review",
-    subtitle: "Add quality gates",
+    description:
+      "Turn on quality gates. Every PR gets reviewed by Greptile or Claude before it merges — with automated revision loops that fix findings without you lifting a finger. When Sonnet can't resolve it, Opus steps in.",
     features: [
-      "Greptile ($30/mo) or Claude Review",
+      "Greptile or Claude code review",
       "Automated revision loops",
       "Model escalation (Sonnet → Opus)",
       "Hard gate after 3 failures",
     ],
-    requirement: "Run /karimo:configure --review",
+    objective: "Ship with confidence you didn't have to earn manually",
   },
   {
     phase: 3,
     title: "Monitor",
-    subtitle: "Full visibility",
+    description:
+      "Full visibility into what KARIMO is doing and has done. A real-time dashboard, PR-based status tracking, GitHub labels for every state transition, and execution metrics you can actually use to improve your workflow.",
     features: [
       "/karimo:dashboard command",
       "PR-based status tracking",
       "GitHub labels for state",
       "Execution metrics",
     ],
-    requirement: "GitHub MCP configured",
+    objective: "Know exactly where every task stands without checking",
   },
 ] as const;
 
-// Pipeline animation timing (ms) ~4.8s total
+// Pipeline animation timing (ms) ~6s total
+// Each loop runs for 1.4s = 2 full stroke-pulse cycles at 0.7s each
 export const pipelineTimeline = {
-  research: 100, plan: 350, loop1In: 550, loop1End: 1500,
-  run: 1600, tasks: 1800, autoReview: 2000, loop2In: 2200, loop2End: 3150,
-  orchestrate: 3250, inspect: 3450, loop3In: 3650, loop3End: 4600,
-  merge: 4500,
-  done: 4800,
+  research: 100, plan: 350, loop1In: 550, loop1End: 1950,
+  tasks: 2100, autoReview: 2350, loop2In: 2550, loop2End: 3950,
+  orchestrate: 4100, inspect: 4350, merge: 4550, loop3In: 4750, loop3End: 6150,
+  done: 6400,
 } as const;
 
 // Unified pipeline phases — maps loops → commands, strategy, terminal preview
