@@ -28,14 +28,13 @@ Clear all caches and restart the development server for a fresh start.
 
 5. **Start the dev server:**
    ```bash
-   bun dev
+   npm run dev
    ```
 
 6. **Confirm startup** - let the user know the server is running and on which port.
 
 ## Notes
 
-- This command should be run from the BOS-3.0 directory
-- Use `/bos` first if you're not already there
+- This command should be run from the karimo-overview directory
 - The `.next/` cache can grow to 600+ MB over time
 - Clearing caches resolves most "stale build" issues
