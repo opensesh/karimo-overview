@@ -37,9 +37,9 @@ export function HeroSection() {
         }}
       />
 
-      <div className="max-w-xl mx-auto relative">
+      <div className="max-w-3xl mx-auto relative flex flex-col items-center text-center">
         {/* ASCII Art — desktop */}
-        <div className="hidden sm:flex flex-col relative">
+        <div className="hidden sm:flex flex-col items-center relative">
           {KARIMO_ASCII_ART.map((line, i) => (
             <motion.div
               key={i}
@@ -69,7 +69,7 @@ export function HeroSection() {
         </motion.h1>
 
         {/* Badge chips */}
-        <div className="flex flex-wrap gap-3 mt-6 relative">
+        <div className="flex flex-wrap justify-center gap-3 mt-6 relative">
           {badges.map((badge, i) => (
             <motion.div
               key={badge.label}
@@ -97,7 +97,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.2, ease }}
-          className="max-w-lg mt-6 text-fg-secondary font-body leading-relaxed relative"
+          className="max-w-lg mt-6 text-fg-secondary font-body leading-relaxed relative text-center"
         >
           KARIMO is a{" "}
           <strong className="text-fg-primary font-medium">
@@ -130,7 +130,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.4, ease }}
-          className="border-l border-border-brand pl-4 mt-5 text-fg-tertiary relative"
+          className="border-l border-border-brand pl-4 mt-5 text-fg-tertiary relative text-left"
         >
           <strong className="text-fg-secondary">Philosophy:</strong> You are the
           architect, agents are the builders
