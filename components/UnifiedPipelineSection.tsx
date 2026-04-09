@@ -256,44 +256,10 @@ function PhaseCard({
           "transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease",
       }}
     >
-      {/* Label — above the card */}
-      <div
-        className="flex flex-col items-center mb-2"
-        style={{
-          opacity: now >= phase.loopStart ? 1 : 0,
-          transform:
-            now >= phase.loopStart ? "translateY(0)" : "translateY(5px)",
-          transition: "all 0.4s ease",
-        }}
-      >
-        <span
-          className="text-heading text-lg tracking-wide"
-          style={{
-            color: isLooping
-              ? "var(--fg-primary)"
-              : "var(--fg-tertiary)",
-            transition: "color 0.3s ease",
-          }}
-        >
-          {phase.label}
-        </span>
-        <span
-          className="text-body text-sm tracking-normal"
-          style={{
-            color: isLooping
-              ? "var(--fg-secondary)"
-              : "var(--fg-tertiary)",
-            transition: "color 0.3s ease",
-          }}
-        >
-          {phase.sublabel}
-        </span>
-      </div>
-
-      {/* Bordered card wrapper — visible after animation */}
+      {/* Bordered card wrapper */}
       <div
         className={`
-          rounded-lg p-4 pb-2 transition-all duration-300
+          rounded-lg p-4 pb-3 transition-all duration-300
           ${
             animDone
               ? focused
@@ -331,6 +297,40 @@ function PhaseCard({
             finished={isFinished}
             width={estW}
           />
+        </div>
+
+        {/* Label — inside card */}
+        <div
+          className="flex flex-col items-center mt-1"
+          style={{
+            opacity: now >= phase.loopStart ? 1 : 0,
+            transform:
+              now >= phase.loopStart ? "translateY(0)" : "translateY(5px)",
+            transition: "all 0.4s ease",
+          }}
+        >
+          <span
+            className="text-heading text-lg tracking-wide"
+            style={{
+              color: isLooping
+                ? "var(--fg-primary)"
+                : "var(--fg-tertiary)",
+              transition: "color 0.3s ease",
+            }}
+          >
+            {phase.label}
+          </span>
+          <span
+            className="text-body text-sm tracking-normal"
+            style={{
+              color: isLooping
+                ? "var(--fg-secondary)"
+                : "var(--fg-tertiary)",
+              transition: "color 0.3s ease",
+            }}
+          >
+            {phase.sublabel}
+          </span>
         </div>
       </div>
     </div>
@@ -636,74 +636,6 @@ export function UnifiedPipelineSection() {
               )}
             </div>
           ))}
-
-          {/* MERGE step — after Loop 3 with dotted connector */}
-          <div className="flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-3">
-            {/* Dotted connector */}
-            <svg
-              width="32"
-              height="8"
-              viewBox="0 0 32 8"
-              className="hidden md:block"
-              style={{
-                opacity: now >= T.merge ? 0.35 : 0,
-                transition: "opacity 0.4s ease",
-                flexShrink: 0,
-                alignSelf: "center",
-                marginTop: "24px",
-              }}
-            >
-              <line
-                x1="2"
-                y1="4"
-                x2="22"
-                y2="4"
-                stroke="var(--fg-primary)"
-                strokeWidth="1"
-                strokeDasharray="2 3"
-              />
-              <polyline
-                points="20,1.5 24,4 20,6.5"
-                fill="none"
-                stroke="var(--fg-primary)"
-                strokeWidth="1"
-              />
-            </svg>
-            {/* Mobile: vertical dotted connector */}
-            <div
-              className="md:hidden w-px h-6 border-l border-dashed border-border-secondary"
-              style={{
-                opacity: now >= T.merge ? 0.4 : 0,
-                transition: "opacity 0.3s ease",
-              }}
-            />
-            {/* Merge chip */}
-            <div
-              className="flex flex-col items-center"
-              style={{
-                opacity: now >= T.merge ? 1 : 0,
-                transform: now >= T.merge ? "scale(1)" : "scale(0.88)",
-                transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-                marginTop: "24px",
-              }}
-            >
-              <StepChip
-                label="MERGE"
-                visible={now >= T.merge}
-                glowing={now >= T.merge && now < T.done}
-                dimmed={false}
-              />
-              <span
-                className="text-body text-xs text-fg-tertiary mt-2 tracking-wide"
-                style={{
-                  opacity: now >= T.merge ? 1 : 0,
-                  transition: "opacity 0.3s ease 0.2s",
-                }}
-              >
-                /karimo:merge
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* Hint text */}
