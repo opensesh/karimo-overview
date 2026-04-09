@@ -159,6 +159,7 @@ export const pipelineTimeline = {
   research: 100, plan: 350, loop1In: 550, loop1End: 1500,
   run: 1600, tasks: 1800, autoReview: 2000, loop2In: 2200, loop2End: 3150,
   orchestrate: 3250, inspect: 3450, loop3In: 3650, loop3End: 4600,
+  merge: 4500,
   done: 4800,
 } as const;
 
@@ -167,7 +168,7 @@ export const pipelinePhases = [
   {
     id: "loop1",
     label: "Loop 1",
-    sublabel: "Human",
+    sublabel: "Human-Led",
     steps: ["RESEARCH", "PLAN"],
     stepTimes: [pipelineTimeline.research, pipelineTimeline.plan],
     loopStart: pipelineTimeline.loop1In,
@@ -192,7 +193,7 @@ export const pipelinePhases = [
   {
     id: "loop2",
     label: "Loop 2",
-    sublabel: "Claude",
+    sublabel: "Claude-Led",
     steps: ["RUN", "TASKS", "AUTO-REVIEW"],
     stepTimes: [pipelineTimeline.run, pipelineTimeline.tasks, pipelineTimeline.autoReview],
     loopStart: pipelineTimeline.loop2In,
@@ -216,7 +217,7 @@ export const pipelinePhases = [
   {
     id: "loop3",
     label: "Loop 3",
-    sublabel: "Configurable",
+    sublabel: "Auto or Manual",
     steps: ["ORCHESTRATE", "INSPECT"],
     stepTimes: [pipelineTimeline.orchestrate, pipelineTimeline.inspect],
     loopStart: pipelineTimeline.loop3In,
