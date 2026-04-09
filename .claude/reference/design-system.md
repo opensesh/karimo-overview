@@ -598,7 +598,7 @@ The `bos-local/no-broken-opacity-pattern` rule automatically detects and fixes b
 // Auto-fixed to: bg-bg-secondary/30
 ```
 
-Run `bun run lint --fix` to automatically fix any broken patterns in your code.
+Run `npm run lint -- --fix` to automatically fix any broken patterns in your code.
 
 ---
 

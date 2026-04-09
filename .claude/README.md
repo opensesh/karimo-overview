@@ -6,6 +6,9 @@ Welcome to the BOS Claude configuration for KARIMO Overview.
 
 | Task               | Go To                        |
 | ------------------ | ---------------------------- |
+| KARIMO commands    | `commands/karimo/`           |
+| Building a feature | `plugins/feature-dev/`       |
+| Reviewing code     | `plugins/pr-review-toolkit/` |
 | Design system      | `reference/design-system.md` |
 | Brand questions    | `brand/identity/`            |
 | Writing content    | `brand/writing/`             |
@@ -17,6 +20,22 @@ Welcome to the BOS Claude configuration for KARIMO Overview.
 ├── claude.md              # Main development guide
 ├── README.md              # This file
 ├── settings.json          # Permissions
+├── commands/              # Slash commands
+│   ├── karimo/            # KARIMO commands (plan, run, merge, etc.)
+│   ├── audit-components.md
+│   ├── audit-devprops.md
+│   └── ...
+├── skills/                # Auto-activating knowledge
+│   ├── karimo/            # KARIMO skill
+│   ├── brand-guidelines/
+│   ├── frontend-design/
+│   ├── incremental-commits/
+│   └── ...
+├── plugins/               # Full-featured packages
+│   ├── feature-dev/
+│   ├── code-review/
+│   ├── pr-review-toolkit/
+│   └── ...
 ├── brand/                 # Brand content (identity, writing)
 │   ├── identity/          # Brand identity, art direction, messaging
 │   └── writing/           # Writing style guides

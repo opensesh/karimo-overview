@@ -36,6 +36,9 @@ karimo-overview/
 
 | Folder       | Purpose                              |
 | ------------ | ------------------------------------ |
+| `commands/`  | Slash commands (karimo, audit, etc.) |
+| `skills/`    | Auto-activating contextual knowledge |
+| `plugins/`   | Full capability packages             |
 | `brand/`     | Brand identity docs, writing guides  |
 | `reference/` | Design system reference              |
 
