@@ -1,3 +1,13 @@
+// KARIMO ASCII art (from README)
+export const KARIMO_ASCII_ART = [
+  "██╗  ██╗   █████╗   ██████╗   ██╗  ███╗   ███╗   ██████╗",
+  "██║ ██╔╝  ██╔══██╗  ██╔══██╗  ██║  ████╗ ████║  ██╔═══██╗",
+  "█████╔╝   ███████║  ██████╔╝  ██║  ██╔████╔██║  ██║   ██║",
+  "██╔═██╗   ██╔══██║  ██╔══██╗  ██║  ██║╚██╔╝██║  ██║   ██║",
+  "██║  ██╗  ██║  ██║  ██║  ██║  ██║  ██║ ╚═╝ ██║  ╚██████╔╝",
+  "╚═╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝     ╚═╝   ╚═════╝",
+] as const;
+
 // Brand color tokens
 export const colors = {
   black: "#000000",
@@ -144,7 +154,91 @@ export const adoptionPhases = [
   },
 ] as const;
 
-// Wave animation data
+// Pipeline animation timing (ms) ~4.8s total
+export const pipelineTimeline = {
+  research: 100, plan: 350, loop1In: 550, loop1End: 1500,
+  run: 1600, tasks: 1800, autoReview: 2000, loop2In: 2200, loop2End: 3150,
+  orchestrate: 3250, inspect: 3450, loop3In: 3650, loop3End: 4600,
+  done: 4800,
+} as const;
+
+// Unified pipeline phases — maps loops → commands, strategy, terminal preview
+export const pipelinePhases = [
+  {
+    id: "loop1",
+    label: "Loop 1",
+    sublabel: "Human",
+    steps: ["RESEARCH", "PLAN"],
+    stepTimes: [pipelineTimeline.research, pipelineTimeline.plan],
+    loopStart: pipelineTimeline.loop1In,
+    loopEnd: pipelineTimeline.loop1End,
+    commands: [processSteps[0], processSteps[1]],
+    strategicLoop: {
+      title: "Interview Refinement",
+      description: "PRD interviews refine until requirements are clear. The interviewer loops back when answers are vague or contradictory, ensuring the PRD is agent-ready before execution begins.",
+    },
+    terminalLines: [
+      { type: "command" as const, text: "claude /karimo:research" },
+      { type: "output" as const, text: "→ Scanning project structure..." },
+      { type: "output" as const, text: "→ Analyzing 847 files across 12 directories" },
+      { type: "output" as const, text: "→ Research complete. Ready for planning." },
+      { type: "blank" as const, text: "" },
+      { type: "command" as const, text: "claude /karimo:plan" },
+      { type: "output" as const, text: "→ Starting PRD interview..." },
+      { type: "output" as const, text: '? What feature are you building? › "Auth system"' },
+      { type: "output" as const, text: "→ Generating PRD with 6 tasks across 3 waves" },
+    ],
+  },
+  {
+    id: "loop2",
+    label: "Loop 2",
+    sublabel: "Claude",
+    steps: ["RUN", "TASKS", "AUTO-REVIEW"],
+    stepTimes: [pipelineTimeline.run, pipelineTimeline.tasks, pipelineTimeline.autoReview],
+    loopStart: pipelineTimeline.loop2In,
+    loopEnd: pipelineTimeline.loop2End,
+    commands: [processSteps[2], processSteps[3]],
+    strategicLoop: {
+      title: "Task Revision",
+      description: "Failed tasks get revised with model escalation. Sonnet attempts first, and on failure the PM agent escalates to Opus for deeper reasoning — up to 3 revision attempts per task.",
+    },
+    terminalLines: [
+      { type: "command" as const, text: "claude /karimo:run" },
+      { type: "output" as const, text: "→ Phase 1: Pre-execution validation..." },
+      { type: "output" as const, text: "→ Spawning wave 1: task-1a, task-1b (parallel)" },
+      { type: "output" as const, text: "→ task-1a: worktree created, implementing..." },
+      { type: "output" as const, text: "→ task-1b: worktree created, implementing..." },
+      { type: "output" as const, text: "→ task-1a: PR #12 created → Greptile reviewing..." },
+      { type: "output" as const, text: "→ task-1a: Review passed ✓" },
+      { type: "output" as const, text: "→ task-1b: Revision 1 triggered (score: 6/10)" },
+    ],
+  },
+  {
+    id: "loop3",
+    label: "Loop 3",
+    sublabel: "Configurable",
+    steps: ["ORCHESTRATE", "INSPECT"],
+    stepTimes: [pipelineTimeline.orchestrate, pipelineTimeline.inspect],
+    loopStart: pipelineTimeline.loop3In,
+    loopEnd: pipelineTimeline.loop3End,
+    commands: [processSteps[4], processSteps[5]],
+    strategicLoop: {
+      title: "Review Revision",
+      description: "The review-architect validates integration across task PRs, reconciles merge conflicts, and triggers revisions up to 3 times before hard-gating.",
+    },
+    terminalLines: [
+      { type: "command" as const, text: "claude /karimo:merge" },
+      { type: "output" as const, text: "→ Review-architect validating integration..." },
+      { type: "output" as const, text: "→ Reconciling 4 task PRs into feature branch" },
+      { type: "output" as const, text: "→ Conflict detected in src/auth/types.ts" },
+      { type: "output" as const, text: "→ Auto-resolving with review-architect..." },
+      { type: "output" as const, text: "→ All conflicts resolved ✓" },
+      { type: "output" as const, text: "→ Feature PR #18 ready for your approval" },
+    ],
+  },
+] as const;
+
+// Wave animation data (legacy, kept for backward compat)
 export const waveData = [
   {
     wave: 1,
@@ -168,3 +262,175 @@ export const waveData = [
     ],
   },
 ] as const;
+
+// Orchestration phase types
+export type PhaseId = "planning" | "execution" | "review";
+
+export interface OrchestrationPhase {
+  id: PhaseId;
+  label: string;
+  shortLabel: string;
+  description: string;
+}
+
+export interface PlanningNode {
+  id: string;
+  label: string;
+  sublabel: string;
+  type: "prd" | "briefs" | "dependencies";
+}
+
+export interface WorktreeTask {
+  id: string;
+  name: string;
+  status: "complete" | "active" | "pending";
+  worktreeBranch: string;
+  mergeTarget: string;
+}
+
+export interface WaveNode {
+  wave: number;
+  tasks: WorktreeTask[];
+}
+
+export interface ReviewNode {
+  id: string;
+  type: "pr-create" | "review-loop" | "final-merge";
+  label: string;
+  sublabel?: string;
+  iterations?: number;
+}
+
+export interface OrchestrationData {
+  phases: OrchestrationPhase[];
+  featureBranch: string;
+  planning: PlanningNode[];
+  execution: { waves: WaveNode[] };
+  review: ReviewNode[];
+}
+
+export const orchestrationData: OrchestrationData = {
+  phases: [
+    {
+      id: "planning",
+      label: "Planning",
+      shortLabel: "Plan",
+      description: "PRD decomposition on main",
+    },
+    {
+      id: "execution",
+      label: "Execution",
+      shortLabel: "Exec",
+      description: "Feature branch + wave execution",
+    },
+    {
+      id: "review",
+      label: "Review & Merge",
+      shortLabel: "Review",
+      description: "PR review and merge to main",
+    },
+  ],
+  featureBranch: "feature/auth-system",
+  planning: [
+    {
+      id: "prd",
+      label: "PRD Created",
+      sublabel: "/karimo:plan",
+      type: "prd",
+    },
+    {
+      id: "briefs",
+      label: "Task Briefs",
+      sublabel: "Decomposed",
+      type: "briefs",
+    },
+    {
+      id: "deps",
+      label: "Dependency Graph",
+      sublabel: "tasks.yaml",
+      type: "dependencies",
+    },
+  ],
+  execution: {
+    waves: [
+      {
+        wave: 1,
+        tasks: [
+          {
+            id: "task-1a",
+            name: "Setup auth types",
+            status: "complete",
+            worktreeBranch: "worktree/prd-1-task-1a",
+            mergeTarget: "feature/auth-system",
+          },
+          {
+            id: "task-1b",
+            name: "Create user model",
+            status: "complete",
+            worktreeBranch: "worktree/prd-1-task-1b",
+            mergeTarget: "feature/auth-system",
+          },
+        ],
+      },
+      {
+        wave: 2,
+        tasks: [
+          {
+            id: "task-2a",
+            name: "Implement login",
+            status: "complete",
+            worktreeBranch: "worktree/prd-1-task-2a",
+            mergeTarget: "feature/auth-system",
+          },
+          {
+            id: "task-2b",
+            name: "Add session middleware",
+            status: "complete",
+            worktreeBranch: "worktree/prd-1-task-2b",
+            mergeTarget: "feature/auth-system",
+          },
+        ],
+      },
+      {
+        wave: 3,
+        tasks: [
+          {
+            id: "task-3a",
+            name: "Build login UI",
+            status: "active",
+            worktreeBranch: "worktree/prd-1-task-3a",
+            mergeTarget: "feature/auth-system",
+          },
+          {
+            id: "task-3b",
+            name: "Add auth tests",
+            status: "pending",
+            worktreeBranch: "worktree/prd-1-task-3b",
+            mergeTarget: "feature/auth-system",
+          },
+        ],
+      },
+    ],
+  },
+  review: [
+    {
+      id: "pr",
+      type: "pr-create",
+      label: "PR Created",
+      sublabel: "feature → main",
+    },
+    {
+      id: "review",
+      type: "review-loop",
+      label: "Code Review",
+      sublabel: "Greptile",
+      iterations: 2,
+    },
+    {
+      id: "merge",
+      type: "final-merge",
+      label: "Merged",
+      sublabel: "→ main",
+    },
+  ],
+};

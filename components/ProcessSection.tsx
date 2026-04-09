@@ -1,3 +1,4 @@
+// DEPRECATED: Replaced by UnifiedPipelineSection
 "use client";
 
 import { useState } from "react";
