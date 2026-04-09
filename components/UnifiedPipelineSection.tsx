@@ -586,7 +586,7 @@ export function UnifiedPipelineSection() {
   const animDone = now >= T.done;
 
   return (
-    <section className="section-padding container-wide bg-bg-primary relative overflow-hidden">
+    <section id="pipeline" className="section-padding container-wide bg-bg-primary relative overflow-hidden">
       {/* Noise texture */}
       <div
         className="absolute inset-0 opacity-[0.025] pointer-events-none"
@@ -597,28 +597,6 @@ export function UnifiedPipelineSection() {
       />
 
       <div className="relative max-w-6xl mx-auto">
-        {/* Section header */}
-        <div className="text-center mb-12">
-          <motion.span
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="section-label"
-          >
-            HOW IT WORKS
-          </motion.span>
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
-          >
-            The KARIMO Pipeline
-          </motion.h2>
-        </div>
-
         {/* Pipeline timeline */}
         <div className="flex flex-col items-center gap-6 md:flex-row md:items-start md:justify-center md:gap-3">
           {pipelinePhases.map((phase, i) => (
