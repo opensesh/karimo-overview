@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { pipelinePhases } from "@/lib/constants";
 import { smoothTransition } from "@/lib/motion";
@@ -8,159 +8,26 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 
 // ─── Types ─────────────────────────────────────────────────
 type PipelinePhase = (typeof pipelinePhases)[number];
-type LoopAnimState = "idle" | "playing" | "done";
-
-// ─── Animation Constants ──────────────────────────────────
-const CHIP_GLOW_MS = 400;
-const RETURN_PULSE_MS = 1400; // 2 cycles at 0.7s each
-
-// ─── Per-Loop Animation Clock ─────────────────────────────
-function useLoopAnims() {
-  const [states, setStates] = useState<Record<string, LoopAnimState>>({
-    loop1: "idle",
-    loop2: "idle",
-    loop3: "idle",
-  });
-  const startTimes = useRef<Record<string, number>>({});
-  const [elapsed, setElapsed] = useState<Record<string, number>>({
-    loop1: 0,
-    loop2: 0,
-    loop3: 0,
-  });
-  const rafRef = useRef<number | null>(null);
-
-  const startLoop = useCallback((loopId: string) => {
-    setStates((s) => ({ ...s, [loopId]: "playing" }));
-    startTimes.current[loopId] = performance.now();
-  }, []);
-
-  const resetAll = useCallback(() => {
-    setStates({ loop1: "idle", loop2: "idle", loop3: "idle" });
-    setElapsed({ loop1: 0, loop2: 0, loop3: 0 });
-    startTimes.current = {};
-  }, []);
-
-  useEffect(() => {
-    const tick = () => {
-      const now = performance.now();
-      let anyPlaying = false;
-
-      setElapsed((prev) => {
-        const next = { ...prev };
-        for (const loopId of Object.keys(startTimes.current)) {
-          const start = startTimes.current[loopId];
-          if (start != null) {
-            const phase = pipelinePhases.find((p) => p.id === loopId);
-            if (!phase) continue;
-            const chipCount = phase.steps.length;
-            const totalDuration = chipCount * CHIP_GLOW_MS + RETURN_PULSE_MS + 200;
-            const e = now - start;
-            next[loopId] = e;
-
-            if (e < totalDuration) {
-              anyPlaying = true;
-            } else {
-              // Mark as done
-              setStates((s) =>
-                s[loopId] === "playing" ? { ...s, [loopId]: "done" } : s,
-              );
-              delete startTimes.current[loopId];
-            }
-          }
-        }
-        return next;
-      });
-
-      if (anyPlaying || Object.keys(startTimes.current).length > 0) {
-        rafRef.current = requestAnimationFrame(tick);
-      } else {
-        rafRef.current = null;
-      }
-    };
-
-    // Start RAF if any loop is playing
-    const hasPlaying = Object.values(states).some((s) => s === "playing");
-    if (hasPlaying && rafRef.current == null) {
-      rafRef.current = requestAnimationFrame(tick);
-    }
-
-    return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-    };
-  }, [states]);
-
-  return { states, elapsed, startLoop, resetAll };
-}
-
-// ─── Sequential Glow State ───────────────────────────────
-function getSequentialState(
-  elapsed: number,
-  chipCount: number,
-): { chip: number; arrow: number; phase: "idle" | "forward" | "return" | "done" } {
-  if (elapsed <= 0) return { chip: -1, arrow: -1, phase: "idle" };
-
-  const forwardEnd = chipCount * CHIP_GLOW_MS;
-
-  if (elapsed < forwardEnd) {
-    const chipIdx = Math.min(
-      Math.floor(elapsed / CHIP_GLOW_MS),
-      chipCount - 1,
-    );
-    // Arrow glows when the chip after it is active
-    const arrowIdx = chipIdx > 0 ? chipIdx - 1 : -1;
-    return { chip: chipIdx, arrow: arrowIdx, phase: "forward" };
-  }
-
-  if (elapsed < forwardEnd + RETURN_PULSE_MS + 200) {
-    return { chip: -1, arrow: -1, phase: "return" };
-  }
-
-  return { chip: -1, arrow: -1, phase: "done" };
-}
 
 // ─── Step Chip ─────────────────────────────────────────────
 function StepChip({
   label,
-  visible,
-  isActiveChip,
   dimmed,
 }: {
   label: string;
-  visible: boolean;
-  isActiveChip: boolean;
   dimmed: boolean;
 }) {
-  const borderColor = dimmed
-    ? "var(--border-tertiary)"
-    : isActiveChip
-      ? "rgba(254,81,2,0.6)"
-      : "var(--fg-primary)";
-
-  const shadow = isActiveChip
-    ? "0 0 24px -2px rgba(254,81,2,0.5), 0 0 10px -2px rgba(254,81,2,0.3), inset 0 0 8px -3px rgba(254,81,2,0.1)"
-    : "none";
-
   return (
     <div
       className="text-heading whitespace-nowrap"
       style={{
         padding: "8px 16px",
-        border: `1px solid ${borderColor}`,
+        border: `1px solid ${dimmed ? "var(--border-tertiary)" : "var(--fg-primary)"}`,
         borderRadius: "4px",
         fontSize: "13px",
         letterSpacing: "0.12em",
-        color: dimmed
-          ? "var(--fg-tertiary)"
-          : isActiveChip
-            ? "var(--fg-primary)"
-            : "var(--fg-primary)",
-        opacity: visible ? 1 : 0,
-        transform: visible ? "scale(1)" : "scale(0.88)",
+        color: dimmed ? "var(--fg-tertiary)" : "var(--fg-primary)",
         transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
-        boxShadow: shadow,
       }}
     >
       {label}
@@ -169,35 +36,23 @@ function StepChip({
 }
 
 // ─── Small Arrow Between Chips ─────────────────────────────
-function SmallArrow({
-  visible,
-  dimmed,
-  glowing,
-}: {
-  visible: boolean;
-  dimmed: boolean;
-  glowing?: boolean;
-}) {
-  const color = glowing ? "#FE5102" : "var(--fg-primary)";
+function SmallArrow({ dimmed }: { dimmed: boolean }) {
   return (
     <svg
       width="18"
       height="8"
       viewBox="0 0 18 8"
       style={{
-        opacity: visible ? (dimmed ? 0.15 : glowing ? 0.7 : 0.4) : 0,
+        opacity: dimmed ? 0.15 : 0.4,
         transition: "opacity 0.25s ease",
         flexShrink: 0,
-        filter: glowing
-          ? "drop-shadow(0 0 3px rgba(254,81,2,0.4))"
-          : "none",
       }}
     >
-      <line x1="0" y1="4" x2="12" y2="4" stroke={color} strokeWidth="1" />
+      <line x1="0" y1="4" x2="12" y2="4" stroke="var(--fg-primary)" strokeWidth="1" />
       <polyline
         points="10,1.5 14,4 10,6.5"
         fill="none"
-        stroke={color}
+        stroke="var(--fg-primary)"
         strokeWidth="1"
       />
     </svg>
@@ -205,13 +60,7 @@ function SmallArrow({
 }
 
 // ─── Dashed Arrow Between Phases ───────────────────────────
-function PhaseArrow({
-  visible,
-  dimmed,
-}: {
-  visible: boolean;
-  dimmed: boolean;
-}) {
+function PhaseArrow({ dimmed }: { dimmed: boolean }) {
   return (
     <svg
       width="24"
@@ -219,7 +68,7 @@ function PhaseArrow({
       viewBox="0 0 24 8"
       className="hidden md:block"
       style={{
-        opacity: visible ? (dimmed ? 0.1 : 0.3) : 0,
+        opacity: dimmed ? 0.1 : 0.3,
         transition: "opacity 0.3s ease",
         flexShrink: 0,
         alignSelf: "flex-start",
@@ -245,33 +94,18 @@ function PhaseArrow({
   );
 }
 
-// ─── Angular Loop SVG with glowing stroke pulse ───────────
+// ─── Angular Loop SVG (always visible, static) ─────────────
 function AngularLoop({
-  visible,
-  returnPulse,
-  finished,
   width,
-  loopId,
+  dimmed,
 }: {
-  visible: boolean;
-  returnPulse: boolean;
-  finished: boolean;
   width: number;
-  loopId: string;
+  dimmed: boolean;
 }) {
   const h = 24;
   const inset = 16;
   const w = width;
   const pathD = `M ${w - inset} 0 L ${w - inset} ${h} L ${inset} ${h} L ${inset} 0`;
-  const baseColor = returnPulse ? "var(--fg-primary)" : "var(--fg-tertiary)";
-  const op = visible ? (returnPulse ? 1 : finished ? 0.22 : 0.5) : 0;
-
-  const rightDown = h;
-  const across = w - 2 * inset;
-  const leftUp = h;
-  const totalLen = rightDown + across + leftUp;
-
-  const gradId = `loop-pulse-${loopId}`;
 
   return (
     <svg
@@ -280,66 +114,21 @@ function AngularLoop({
       viewBox={`0 -3 ${w} ${h + 9}`}
       className="hidden md:block"
       style={{
-        opacity: op,
+        opacity: dimmed ? 0.15 : 0.35,
         transition: "opacity 0.35s ease",
         overflow: "visible",
       }}
     >
-      {returnPulse && (
-        <defs>
-          <linearGradient id={gradId} gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="transparent" />
-            <stop offset="35%" stopColor="#FE5102" stopOpacity="0" />
-            <stop offset="45%" stopColor="#FE5102" stopOpacity="0.9" />
-            <stop offset="50%" stopColor="#FFFAEE" stopOpacity="1" />
-            <stop offset="55%" stopColor="#FE5102" stopOpacity="0.9" />
-            <stop offset="65%" stopColor="#FE5102" stopOpacity="0" />
-            <stop offset="100%" stopColor="transparent" />
-          </linearGradient>
-        </defs>
-      )}
-
-      {/* Base path */}
       <path
         d={pathD}
         fill="none"
-        stroke={baseColor}
+        stroke="var(--fg-tertiary)"
         strokeWidth="1.5"
-        style={{
-          filter: returnPulse
-            ? "drop-shadow(0 0 3px rgba(255,250,238,0.15))"
-            : "none",
-        }}
       />
-
-      {/* Glowing pulse — 2 cycles then stops */}
-      {returnPulse && (
-        <path
-          d={pathD}
-          fill="none"
-          stroke={`url(#${gradId})`}
-          strokeWidth="4"
-          strokeDasharray={`${totalLen * 0.25} ${totalLen * 0.75}`}
-          style={{
-            filter:
-              "drop-shadow(0 0 6px rgba(254,81,2,0.7)) drop-shadow(0 0 12px rgba(254,81,2,0.3))",
-          }}
-        >
-          <animate
-            attributeName="stroke-dashoffset"
-            values={`${totalLen};${-totalLen}`}
-            dur="0.7s"
-            repeatCount="2"
-            fill="freeze"
-          />
-        </path>
-      )}
-
-      {/* Arrow head at top-left */}
       <polyline
         points={`${inset - 3.5},5 ${inset},-1 ${inset + 3.5},5`}
         fill="none"
-        stroke={baseColor}
+        stroke="var(--fg-tertiary)"
         strokeWidth="1.5"
       />
     </svg>
@@ -349,43 +138,25 @@ function AngularLoop({
 // ─── Phase Card (Desktop) ────────────────────────────────
 function PhaseCard({
   phase,
-  animState,
-  animElapsed,
   focused,
   otherFocused,
-  allDone,
   onFocus,
 }: {
   phase: PipelinePhase;
-  animState: LoopAnimState;
-  animElapsed: number;
   focused: boolean;
   otherFocused: boolean;
-  allDone: boolean;
   onFocus: (id: string) => void;
 }) {
   const chipCount = phase.steps.length;
   const arrowCount = chipCount - 1;
   const estW = chipCount * 88 + arrowCount * 24;
 
-  const isPlaying = animState === "playing";
-  const isDone = animState === "done";
-  const clickable = allDone || isDone;
-
-  const glowState = isPlaying
-    ? getSequentialState(animElapsed, chipCount)
-    : { chip: -1, arrow: -1, phase: "done" as const };
-
-  const showChips = isPlaying || isDone || allDone;
-  const showReturnPulse = isPlaying && glowState.phase === "return";
-
   return (
     <div
       data-interactive
-      onClick={() => clickable && !focused && onFocus(phase.id)}
+      onClick={() => !focused && onFocus(phase.id)}
       className={`
-        relative flex flex-col items-center gap-1 transition-all duration-[450ms]
-        ${clickable ? "cursor-pointer" : "cursor-default"}
+        relative flex flex-col items-center gap-1 cursor-pointer
         ${focused ? "z-10" : "z-[1]"}
       `}
       style={{
@@ -403,80 +174,35 @@ function PhaseCard({
         className={`
           rounded-lg p-4 pb-3 transition-all duration-300
           ${
-            clickable
-              ? focused
-                ? "border border-border-primary bg-bg-secondary/50"
-                : "border border-border-secondary hover:border-border-primary hover:bg-bg-secondary/30"
-              : "border border-transparent"
+            focused
+              ? "border border-border-primary bg-bg-secondary/50"
+              : "border border-border-secondary hover:border-border-primary hover:bg-bg-secondary/30"
           }
         `}
       >
         {/* Label */}
-        <div
-          className="flex flex-col items-center mb-3"
-          style={{
-            opacity: showChips ? 1 : 0,
-            transform: showChips ? "translateY(0)" : "translateY(5px)",
-            transition: "all 0.4s ease",
-          }}
-        >
-          <span
-            className="text-heading text-xl tracking-wide"
-            style={{
-              color: isPlaying ? "var(--fg-primary)" : "var(--fg-tertiary)",
-              transition: "color 0.3s ease",
-            }}
-          >
+        <div className="flex flex-col items-center mb-3">
+          <span className="text-heading text-xl tracking-wide text-fg-primary">
             {phase.label}
           </span>
-          <span
-            className="text-body text-sm tracking-normal"
-            style={{
-              color: isPlaying
-                ? "var(--fg-secondary)"
-                : "var(--fg-tertiary)",
-              transition: "color 0.3s ease",
-            }}
-          >
+          <span className="text-body text-sm tracking-normal text-fg-tertiary">
             {phase.sublabel}
           </span>
         </div>
 
         {/* Steps row */}
         <div className="flex items-center gap-1.5 justify-center">
-          {phase.steps.map((step, i) => {
-            const chipVisible =
-              showChips &&
-              (isPlaying ? animElapsed >= i * CHIP_GLOW_MS * 0.5 : true);
-            return (
-              <div key={step} className="flex items-center gap-1.5">
-                <StepChip
-                  label={step}
-                  visible={chipVisible}
-                  isActiveChip={isPlaying && glowState.chip === i}
-                  dimmed={otherFocused}
-                />
-                {i < chipCount - 1 && (
-                  <SmallArrow
-                    visible={chipVisible}
-                    dimmed={otherFocused}
-                    glowing={isPlaying && glowState.arrow === i}
-                  />
-                )}
-              </div>
-            );
-          })}
+          {phase.steps.map((step, i) => (
+            <div key={step} className="flex items-center gap-1.5">
+              <StepChip label={step} dimmed={otherFocused} />
+              {i < chipCount - 1 && <SmallArrow dimmed={otherFocused} />}
+            </div>
+          ))}
         </div>
 
         {/* Angular loop */}
         <div className="flex justify-center mt-0.5">
-          <AngularLoop
-            visible={showChips}
-            returnPulse={showReturnPulse}
-            finished={isDone || allDone}
-            width={estW}
-            loopId={phase.id}
-          />
+          <AngularLoop width={estW} dimmed={otherFocused} />
         </div>
       </div>
     </div>
@@ -522,25 +248,11 @@ function MobileLoopTab({
 }
 
 // ─── Mobile Expanded Card ────────────────────────────────
-function MobileExpandedCard({
-  phase,
-  animState,
-  animElapsed,
-}: {
-  phase: PipelinePhase;
-  animState: LoopAnimState;
-  animElapsed: number;
-}) {
+function MobileExpandedCard({ phase }: { phase: PipelinePhase }) {
   const chipCount = phase.steps.length;
-  const isPlaying = animState === "playing";
-  const showChips = isPlaying || animState === "done";
-  const glowState = isPlaying
-    ? getSequentialState(animElapsed, chipCount)
-    : { chip: -1, arrow: -1, phase: "done" as const };
 
   return (
     <div className="rounded-lg border border-border-primary bg-bg-secondary/50 p-4">
-      {/* Label */}
       <div className="flex flex-col items-center mb-3">
         <span className="text-heading text-xl tracking-wide text-fg-primary">
           {phase.label}
@@ -549,31 +261,13 @@ function MobileExpandedCard({
           {phase.sublabel}
         </span>
       </div>
-
-      {/* Steps row */}
       <div className="flex items-center gap-1.5 justify-center">
-        {phase.steps.map((step, i) => {
-          const chipVisible =
-            showChips &&
-            (isPlaying ? animElapsed >= i * CHIP_GLOW_MS * 0.5 : true);
-          return (
-            <div key={step} className="flex items-center gap-1.5">
-              <StepChip
-                label={step}
-                visible={chipVisible}
-                isActiveChip={isPlaying && glowState.chip === i}
-                dimmed={false}
-              />
-              {i < chipCount - 1 && (
-                <SmallArrow
-                  visible={chipVisible}
-                  dimmed={false}
-                  glowing={isPlaying && glowState.arrow === i}
-                />
-              )}
-            </div>
-          );
-        })}
+        {phase.steps.map((step, i) => (
+          <div key={step} className="flex items-center gap-1.5">
+            <StepChip label={step} dimmed={false} />
+            {i < chipCount - 1 && <SmallArrow dimmed={false} />}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -583,27 +277,16 @@ function MobileExpandedCard({
 function MobileLoopCarousel({
   activePhase,
   onSelectPhase,
-  animStates,
-  animElapsed,
 }: {
   activePhase: string;
   onSelectPhase: (id: string) => void;
-  animStates: Record<string, LoopAnimState>;
-  animElapsed: Record<string, number>;
 }) {
   return (
     <div className="flex flex-col gap-2">
       {pipelinePhases.map((phase) => {
         const isActive = phase.id === activePhase;
         if (isActive) {
-          return (
-            <MobileExpandedCard
-              key={phase.id}
-              phase={phase}
-              animState={animStates[phase.id] ?? "idle"}
-              animElapsed={animElapsed[phase.id] ?? 0}
-            />
-          );
+          return <MobileExpandedCard key={phase.id} phase={phase} />;
         }
         return (
           <MobileLoopTab
@@ -662,24 +345,15 @@ function CompactCommandDropdown({
         </svg>
       </button>
 
-      {/* CSS transition for mobile compat — no Framer Motion */}
       <div
         className={`overflow-hidden transition-all duration-300 ease-out ${
           isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="px-3 pb-3 border-t border-border-secondary pt-2.5">
-          <p className="text-body text-xs text-fg-secondary mb-2">
+          <p className="text-body text-sm text-fg-secondary leading-relaxed">
             {command.description}
           </p>
-          <ul className="space-y-1">
-            {command.details.map((detail, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs">
-                <span className="text-fg-brand mt-0.5">→</span>
-                <span className="text-body text-fg-primary">{detail}</span>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </div>
@@ -695,19 +369,19 @@ function InlineTerminal({
   commandLabel: string;
 }) {
   return (
-    <div className="rounded-lg border border-border-secondary bg-bg-primary overflow-hidden min-h-[220px] flex flex-col">
+    <div className="rounded-lg border border-border-secondary bg-bg-primary overflow-hidden h-full flex flex-col">
       {/* Terminal chrome */}
       <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border-secondary shrink-0">
         <div className="w-2 h-2 rounded-full bg-fg-tertiary/30" />
         <div className="w-2 h-2 rounded-full bg-fg-tertiary/30" />
         <div className="w-2 h-2 rounded-full bg-fg-tertiary/30" />
-        <span className="ml-2 text-xs text-fg-tertiary font-family-mono">
+        <span className="ml-2 text-xs text-fg-tertiary font-family-mono truncate">
           {commandLabel}
         </span>
       </div>
 
       {/* Terminal body */}
-      <div className="p-3 overflow-x-auto flex-1">
+      <div className="p-3 flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={commandLabel}
@@ -731,7 +405,7 @@ function InlineTerminal({
                   visible: { opacity: 1, x: 0 },
                 }}
                 transition={{ duration: 0.2 }}
-                className={`font-family-mono text-xs whitespace-nowrap ${
+                className={`font-family-mono text-xs break-words whitespace-pre-wrap ${
                   line.type === "command" ? "text-fg-brand" : "text-fg-secondary"
                 }`}
               >
@@ -812,11 +486,11 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
             </span>
           </div>
 
-          {/* 3-column grid (desktop) / single column (mobile) */}
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_minmax(0,1fr)_1fr] gap-4">
-            {/* Explanation + Input/Output */}
-            <div className="order-1 space-y-3">
-              <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-4">
+          {/* 3-column grid — all columns stretch to same height */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+            {/* LEFT: Explanation + Input/Output */}
+            <div className="order-1 flex flex-col gap-3">
+              <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-4 flex-1">
                 <span
                   className="text-xs text-fg-brand uppercase tracking-widest"
                   style={{ fontFamily: "var(--font-accent)", fontWeight: 700 }}
@@ -826,22 +500,14 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
                 <p className="text-body text-sm text-fg-secondary mt-2 leading-relaxed">
                   {phase.explanation.description}
                 </p>
-                <ul className="mt-3 space-y-1.5">
-                  {phase.explanation.bullets.map((b, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm">
-                      <span className="text-fg-brand mt-0.5">→</span>
-                      <span className="text-body text-fg-primary">{b}</span>
-                    </li>
-                  ))}
-                </ul>
               </div>
 
-              {/* Input / Output */}
+              {/* Input / Output — fixed-width labels */}
               <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-3">
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   <div className="flex items-start gap-3">
                     <span
-                      className="text-xs text-fg-brand uppercase tracking-widest shrink-0 mt-0.5"
+                      className="text-xs text-fg-brand uppercase tracking-widest shrink-0 mt-0.5 w-14"
                       style={{
                         fontFamily: "var(--font-accent)",
                         fontWeight: 700,
@@ -855,7 +521,7 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
                   </div>
                   <div className="flex items-start gap-3">
                     <span
-                      className="text-xs text-fg-brand uppercase tracking-widest shrink-0 mt-0.5"
+                      className="text-xs text-fg-brand uppercase tracking-widest shrink-0 mt-0.5 w-14"
                       style={{
                         fontFamily: "var(--font-accent)",
                         fontWeight: 700,
@@ -871,7 +537,7 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
               </div>
             </div>
 
-            {/* Terminal (center) */}
+            {/* CENTER: Terminal — stretches to match column height */}
             <div className="order-2 min-w-0">
               <InlineTerminal
                 lines={
@@ -884,7 +550,7 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
               />
             </div>
 
-            {/* Command dropdowns */}
+            {/* RIGHT: Command dropdowns */}
             <div className="order-3 space-y-2">
               {phase.commands.map((cmd, i) => (
                 <CompactCommandDropdown
@@ -902,60 +568,94 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
   );
 }
 
+// ─── Playback Controls ───────────────────────────────────
+function PlaybackControls({
+  isPlaying,
+  onTogglePlay,
+  onRestart,
+}: {
+  isPlaying: boolean;
+  onTogglePlay: () => void;
+  onRestart: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      {/* Play/Pause */}
+      <button
+        data-interactive
+        onClick={onTogglePlay}
+        className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-1"
+        aria-label={isPlaying ? "Pause" : "Play"}
+      >
+        {isPlaying ? (
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+            <rect x="2" y="1" width="3.5" height="12" rx="0.5" />
+            <rect x="8.5" y="1" width="3.5" height="12" rx="0.5" />
+          </svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+            <path d="M3 1.5v11l9-5.5L3 1.5z" />
+          </svg>
+        )}
+      </button>
+      {/* Restart */}
+      <button
+        data-interactive
+        onClick={onRestart}
+        className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-1"
+        aria-label="Restart"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M1.5 2v4h4" />
+          <path d="M2.5 6A5 5 0 1 1 2 8.5" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 // ─── Main Section ──────────────────────────────────────────
 export function UnifiedPipelineSection() {
   const [focusedPhase, setFocusedPhase] = useState<string>("loop1");
-  const sectionRef = useRef<HTMLElement>(null);
-  const hasTriggered = useRef(false);
-  const { states, elapsed, startLoop, resetAll } = useLoopAnims();
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Intersection Observer — trigger Loop 1 on scroll into view
+  // Auto-play cycles through loops every 6s
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasTriggered.current) {
-          hasTriggered.current = true;
-          startLoop("loop1");
-        }
-      },
-      { threshold: 0.3 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [startLoop]);
+    if (!isAutoPlaying) {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+      return;
+    }
 
-  // Handle phase focus — trigger animation on click if idle
-  const handleFocus = useCallback(
-    (id: string) => {
-      setFocusedPhase(id);
-      if (states[id] === "idle") {
-        startLoop(id);
-      }
-    },
-    [states, startLoop],
-  );
+    autoPlayRef.current = setInterval(() => {
+      setFocusedPhase((prev) => {
+        const idx = pipelinePhases.findIndex((p) => p.id === prev);
+        return pipelinePhases[(idx + 1) % pipelinePhases.length].id;
+      });
+    }, 6000);
 
-  const replay = useCallback(() => {
+    return () => {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+    };
+  }, [isAutoPlaying]);
+
+  const handleFocus = (id: string) => {
+    setIsAutoPlaying(false);
+    setFocusedPhase(id);
+  };
+
+  const handleTogglePlay = () => {
+    setIsAutoPlaying((prev) => !prev);
+  };
+
+  const handleRestart = () => {
     setFocusedPhase("loop1");
-    resetAll();
-    hasTriggered.current = false;
-    // Small delay so state clears before re-triggering
-    requestAnimationFrame(() => {
-      hasTriggered.current = true;
-      startLoop("loop1");
-    });
-  }, [resetAll, startLoop]);
-
-  const allDone = Object.values(states).every(
-    (s) => s === "done" || s === "idle",
-  ) && states.loop1 === "done";
+    setIsAutoPlaying(true);
+  };
 
   return (
     <section
       id="pipeline"
-      ref={sectionRef}
       className="bg-bg-secondary relative overflow-hidden pt-8 pb-20"
     >
       {/* Noise texture */}
@@ -968,45 +668,33 @@ export function UnifiedPipelineSection() {
       />
 
       <div className="relative max-w-5xl mx-auto px-6">
-        {/* Header */}
+        {/* Header with playback controls */}
         <div className="mb-14">
           <SectionLabel>PROCESS</SectionLabel>
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{
-              duration: 0.6,
-              delay: 0.1,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
-          >
-            Code Sequence
-          </motion.h2>
+          <div className="flex items-center justify-between mt-4">
+            <h2 className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary">
+              Code Sequence
+            </h2>
+            <PlaybackControls
+              isPlaying={isAutoPlaying}
+              onTogglePlay={handleTogglePlay}
+              onRestart={handleRestart}
+            />
+          </div>
         </div>
 
         {/* Desktop: horizontal pipeline */}
         <div className="hidden md:flex md:items-start md:justify-center md:gap-6 max-w-5xl mx-auto">
           {pipelinePhases.map((phase, i) => (
-            <div
-              key={phase.id}
-              className="flex items-start gap-6"
-            >
+            <div key={phase.id} className="flex items-start gap-6">
               <PhaseCard
                 phase={phase}
-                animState={states[phase.id] ?? "idle"}
-                animElapsed={elapsed[phase.id] ?? 0}
                 focused={focusedPhase === phase.id}
                 otherFocused={focusedPhase !== phase.id}
-                allDone={allDone}
                 onFocus={handleFocus}
               />
               {i < pipelinePhases.length - 1 && (
                 <PhaseArrow
-                  visible={
-                    states[pipelinePhases[i + 1].id] !== "idle" || allDone
-                  }
                   dimmed={focusedPhase !== pipelinePhases[i + 1].id}
                 />
               )}
@@ -1019,19 +707,11 @@ export function UnifiedPipelineSection() {
           <MobileLoopCarousel
             activePhase={focusedPhase}
             onSelectPhase={handleFocus}
-            animStates={states}
-            animElapsed={elapsed}
           />
         </div>
 
         {/* Hint text */}
-        <div
-          className="text-center mt-8 transition-opacity duration-500"
-          style={{
-            opacity: allDone ? 1 : 0,
-            pointerEvents: allDone ? "auto" : "none",
-          }}
-        >
+        <div className="text-center mt-8">
           <span className="text-body text-sm text-fg-tertiary">
             Click a loop to explore its commands
           </span>
@@ -1039,23 +719,6 @@ export function UnifiedPipelineSection() {
 
         {/* Detail panel */}
         <PhaseDetailPanel phaseId={focusedPhase} />
-
-        {/* Replay button */}
-        <div
-          className="flex justify-center mt-8 transition-opacity duration-500"
-          style={{
-            opacity: allDone ? 1 : 0,
-            pointerEvents: allDone ? "auto" : "none",
-          }}
-        >
-          <button
-            data-interactive
-            onClick={replay}
-            className="text-heading text-xs tracking-widest uppercase text-fg-tertiary border border-border-secondary rounded px-4 py-1.5 hover:border-border-primary hover:text-fg-primary transition-all duration-200 cursor-pointer"
-          >
-            Replay
-          </button>
-        </div>
       </div>
     </section>
   );
