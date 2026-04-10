@@ -152,6 +152,7 @@ function PhaseCard({
   const chipCount = phase.steps.length;
   const arrowCount = chipCount - 1;
   const estW = chipCount * 88 + arrowCount * 24;
+  const loopNum = phase.id.replace("loop", "");
 
   return (
     <div
@@ -172,6 +173,16 @@ function PhaseCard({
           "transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease",
       }}
     >
+      {/* Loop tab */}
+      <span
+        className={`
+          text-accent text-xs font-bold px-2 py-0.5 rounded mb-1 transition-colors duration-200
+          ${focused ? "bg-bg-brand-solid text-fg-primary" : "bg-bg-secondary text-fg-tertiary"}
+        `}
+      >
+        L{loopNum}
+      </span>
+
       <div
         className={`
           rounded-lg p-4 pb-3 transition-all duration-300
@@ -184,11 +195,11 @@ function PhaseCard({
       >
         {/* Label */}
         <div className="flex flex-col items-center mb-3">
-          <span className="text-body text-sm tracking-normal text-fg-tertiary">
-            {phase.sublabel}
-          </span>
           <span className="text-heading text-xl tracking-wide text-fg-primary">
             {phase.label}
+          </span>
+          <span className="text-body text-sm tracking-normal text-fg-tertiary">
+            {phase.sublabel}
           </span>
         </div>
 
@@ -224,9 +235,14 @@ function MobileLoopTab({
       onClick={onClick}
       className="w-full flex items-center justify-between px-5 py-3.5 rounded-lg border border-border-secondary bg-bg-tertiary hover:border-border-primary transition-colors cursor-pointer"
     >
-      <span className="text-heading text-sm text-fg-primary">
-        {phase.label}
-      </span>
+      <div className="flex items-center gap-2">
+        <span className="text-accent text-xs font-bold px-2 py-0.5 rounded bg-bg-secondary text-fg-tertiary">
+          L{phase.id.replace("loop", "")}
+        </span>
+        <span className="text-heading text-sm text-fg-primary">
+          {phase.label}
+        </span>
+      </div>
       <svg
         className="w-4 h-4 text-fg-tertiary"
         fill="none"
@@ -251,11 +267,11 @@ function MobileExpandedCard({ phase }: { phase: PipelinePhase }) {
   return (
     <div className="rounded-lg border border-border-primary bg-bg-secondary/50 px-5 py-6">
       <div className="flex flex-col items-center mb-4">
-        <span className="text-body text-sm tracking-normal text-fg-secondary">
-          {phase.sublabel}
-        </span>
         <span className="text-heading text-xl tracking-wide text-fg-primary">
           {phase.label}
+        </span>
+        <span className="text-body text-sm tracking-normal text-fg-secondary">
+          {phase.sublabel}
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-2 justify-center">
@@ -640,7 +656,7 @@ export function UnifiedPipelineSection() {
   return (
     <section
       id="pipeline"
-      className="bg-bg-secondary relative overflow-hidden pt-8 pb-20"
+      className="bg-bg-secondary relative overflow-hidden pt-8 pb-20 min-h-screen"
     >
       {/* Noise texture */}
       <div
