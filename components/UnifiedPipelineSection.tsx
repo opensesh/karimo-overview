@@ -369,7 +369,7 @@ function InlineTerminal({
   commandLabel: string;
 }) {
   return (
-    <div className="rounded-lg border border-border-secondary bg-bg-primary overflow-hidden h-full flex flex-col">
+    <div className="rounded-lg border border-border-secondary bg-bg-primary overflow-hidden min-h-[240px] flex flex-col">
       {/* Terminal chrome */}
       <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border-secondary shrink-0">
         <div className="w-2 h-2 rounded-full bg-fg-tertiary/30" />
@@ -486,11 +486,11 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
             </span>
           </div>
 
-          {/* 3-column grid — all columns stretch to same height */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+          {/* 3-column grid — consistent height across columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-start">
             {/* LEFT: Explanation + Input/Output */}
             <div className="order-1 flex flex-col gap-3">
-              <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-4 flex-1">
+              <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-4">
                 <span
                   className="text-xs text-fg-brand uppercase tracking-widest"
                   style={{ fontFamily: "var(--font-accent)", fontWeight: 700 }}
