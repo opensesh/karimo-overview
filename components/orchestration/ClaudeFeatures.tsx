@@ -24,7 +24,7 @@ const claudeFeatures: ClaudeFeature[] = [
     title: "Worktree Isolation",
     description:
       "Each task executes in its own git worktree. No conflicts, no race conditions.",
-    href: `${DOCS_BASE}/cli-usage#agents`,
+    href: `${DOCS_BASE}/common-workflows`,
     date: "Mar 2026",
   },
   {
@@ -40,7 +40,7 @@ const claudeFeatures: ClaudeFeature[] = [
     title: "Agent Teams",
     description:
       "Coordinate multiple agents working on related tasks simultaneously.",
-    href: `${DOCS_BASE}/cli-usage#agents`,
+    href: `${DOCS_BASE}/sub-agents`,
     date: "Sep 2025",
   },
   {
@@ -48,7 +48,7 @@ const claudeFeatures: ClaudeFeature[] = [
     title: "Skills",
     description:
       "Reusable capability modules that extend agent knowledge and behavior.",
-    href: `${DOCS_BASE}/skills`,
+    href: `${DOCS_BASE}/slash-commands`,
     date: "Jan 2026",
   },
   {
@@ -80,7 +80,7 @@ const claudeFeatures: ClaudeFeature[] = [
     title: "Branch Assertion",
     description:
       "PM Agent verifies branch state before and after each operation.",
-    href: `${DOCS_BASE}/cli-usage#agents`,
+    href: `${DOCS_BASE}/common-workflows`,
     date: "Sep 2025",
   },
   {
@@ -88,7 +88,7 @@ const claudeFeatures: ClaudeFeature[] = [
     title: "Loop Detection",
     description:
       "Automatic detection of revision loops prevents infinite cycles.",
-    href: `${DOCS_BASE}/cli-usage#agents`,
+    href: `${DOCS_BASE}/common-workflows`,
     date: "Sep 2025",
   },
   {
@@ -96,7 +96,7 @@ const claudeFeatures: ClaudeFeature[] = [
     title: "Crash Recovery",
     description:
       "Execution state reconstructed from git. Resume exactly where you left off.",
-    href: `${DOCS_BASE}/cli-usage#agents`,
+    href: `${DOCS_BASE}/common-workflows`,
     date: "Sep 2025",
   },
 ];
