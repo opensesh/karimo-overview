@@ -139,13 +139,21 @@ function FeatureCard({
   feature,
   iconSrc,
   cardWidth,
+  showCards,
+  animDelay,
 }: {
   feature: ClaudeFeature;
   iconSrc: string;
   cardWidth: number;
+  showCards: boolean;
+  animDelay: number;
 }) {
   return (
-    <div
+    <motion.div
+      draggable={false}
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={showCards ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{ duration: 0.5, delay: animDelay, ease: [0.16, 1, 0.3, 1] }}
       className="group block rounded-xl overflow-hidden
                  bg-bg-tertiary border border-border-secondary
                  hover:border-border-brand hover:-translate-y-1
@@ -153,8 +161,7 @@ function FeatureCard({
                  cursor-pointer"
       style={{ width: cardWidth, minWidth: cardWidth }}
       onClick={(e) => {
-        // Only navigate if this wasn't a drag
-        if (!(e.defaultPrevented)) {
+        if (!e.defaultPrevented) {
           window.open(feature.href, '_blank', 'noopener,noreferrer');
         }
       }}
@@ -192,7 +199,7 @@ function FeatureCard({
           {feature.date}
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -494,28 +501,14 @@ export function ClaudeFeatures() {
               const dataIndex = i % TOTAL;
               const feature = claudeFeatures[dataIndex];
               return (
-                <motion.div
+                <FeatureCard
                   key={`c-${i}`}
-                  draggable={false}
-                  className="contents"
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={
-                    showCards
-                      ? { opacity: 1, y: 0, scale: 1 }
-                      : {}
-                  }
-                  transition={{
-                    duration: 0.5,
-                    delay: Math.min(i, 4) * 0.08,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                >
-                  <FeatureCard
-                    feature={feature}
-                    iconSrc={getIconForFeature(dataIndex)}
-                    cardWidth={cardWidth}
-                  />
-                </motion.div>
+                  feature={feature}
+                  iconSrc={getIconForFeature(dataIndex)}
+                  cardWidth={cardWidth}
+                  showCards={showCards}
+                  animDelay={Math.min(i, 4) * 0.08}
+                />
               );
             })}
           </motion.div>
