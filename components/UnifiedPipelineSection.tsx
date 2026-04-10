@@ -13,18 +13,20 @@ type PipelinePhase = (typeof pipelinePhases)[number];
 function StepChip({
   label,
   dimmed,
+  compact,
 }: {
   label: string;
   dimmed: boolean;
+  compact?: boolean;
 }) {
   return (
     <div
       className="text-heading whitespace-nowrap"
       style={{
-        padding: "8px 16px",
+        padding: compact ? "6px 10px" : "8px 16px",
         border: `1px solid ${dimmed ? "var(--border-tertiary)" : "var(--fg-primary)"}`,
         borderRadius: "4px",
-        fontSize: "13px",
+        fontSize: compact ? "11px" : "13px",
         letterSpacing: "0.12em",
         color: dimmed ? "var(--fg-tertiary)" : "var(--fg-primary)",
         transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -220,16 +222,11 @@ function MobileLoopTab({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-border-secondary bg-bg-tertiary hover:border-border-primary transition-colors cursor-pointer"
+      className="w-full flex items-center justify-between px-5 py-3.5 rounded-lg border border-border-secondary bg-bg-tertiary hover:border-border-primary transition-colors cursor-pointer"
     >
-      <div className="flex items-center gap-2">
-        <span className="text-heading text-sm text-fg-primary">
-          {phase.label}
-        </span>
-        <span className="text-body text-xs text-fg-tertiary">
-          {phase.sublabel}
-        </span>
-      </div>
+      <span className="text-heading text-sm text-fg-primary">
+        {phase.label}
+      </span>
       <svg
         className="w-4 h-4 text-fg-tertiary"
         fill="none"
@@ -252,8 +249,8 @@ function MobileExpandedCard({ phase }: { phase: PipelinePhase }) {
   const chipCount = phase.steps.length;
 
   return (
-    <div className="rounded-lg border border-border-primary bg-bg-secondary/50 p-4">
-      <div className="flex flex-col items-center mb-3">
+    <div className="rounded-lg border border-border-primary bg-bg-secondary/50 px-5 py-6">
+      <div className="flex flex-col items-center mb-4">
         <span className="text-heading text-xl tracking-wide text-fg-primary">
           {phase.label}
         </span>
@@ -261,10 +258,10 @@ function MobileExpandedCard({ phase }: { phase: PipelinePhase }) {
           {phase.sublabel}
         </span>
       </div>
-      <div className="flex items-center gap-1.5 justify-center">
+      <div className="flex flex-wrap items-center gap-2 justify-center">
         {phase.steps.map((step, i) => (
-          <div key={step} className="flex items-center gap-1.5">
-            <StepChip label={step} dimmed={false} />
+          <div key={step} className="flex items-center gap-2">
+            <StepChip label={step} dimmed={false} compact />
             {i < chipCount - 1 && <SmallArrow dimmed={false} />}
           </div>
         ))}
@@ -670,7 +667,7 @@ export function UnifiedPipelineSection() {
       <div className="relative max-w-5xl mx-auto px-6">
         {/* Header with playback controls */}
         <div className="mb-14">
-          <SectionLabel>PROCESS</SectionLabel>
+          <SectionLabel>OVERVIEW</SectionLabel>
           <div className="flex items-center justify-between mt-4">
             <h2 className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary">
               Code Sequence

@@ -271,7 +271,7 @@ export const pipelineTimeline = {
 export const pipelinePhases = [
   {
     id: "loop1",
-    label: "Loop 1",
+    label: "Foundation",
     sublabel: "Human-Led",
     steps: ["CONFIGURE", "RESEARCH", "PLAN"],
     stepTimes: [pipelineTimeline.configure, pipelineTimeline.research, pipelineTimeline.plan],
@@ -294,7 +294,7 @@ export const pipelinePhases = [
   },
   {
     id: "loop2",
-    label: "Loop 2",
+    label: "Decomposition",
     sublabel: "Claude-Led",
     steps: ["TASKS", "REVIEW"],
     stepTimes: [pipelineTimeline.tasks, pipelineTimeline.autoReview],
@@ -313,7 +313,7 @@ export const pipelinePhases = [
   },
   {
     id: "loop3",
-    label: "Loop 3",
+    label: "Orchestration",
     sublabel: "Auto or Manual",
     steps: ["ORCHESTRATE", "INSPECT", "MERGE"],
     stepTimes: [pipelineTimeline.orchestrate, pipelineTimeline.inspect, pipelineTimeline.merge],
