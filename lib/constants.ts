@@ -368,6 +368,12 @@ export interface WaveNode {
   tasks: WorktreeTask[];
 }
 
+export interface PhaseDescription {
+  title: string;
+  description: string;
+  howItWorks: string[];
+}
+
 export interface OrchestrationData {
   phases: OrchestrationPhase[];
   featureBranch: string;
@@ -377,6 +383,7 @@ export interface OrchestrationData {
   waveMappings: WaveMapping[];
   execution: { waves: WaveNode[] };
   reviewSteps: { id: string; label: string; sublabel: string }[];
+  phaseDescriptions: Record<PhaseId, PhaseDescription>;
 }
 
 // Wave colors for visual coding
@@ -474,4 +481,36 @@ export const orchestrationData: OrchestrationData = {
     { id: "clean", label: "Fix Errors", sublabel: "Auto or Manual" },
     { id: "merge", label: "Merge", sublabel: "Pass tests to main" },
   ],
+  phaseDescriptions: {
+    planning: {
+      title: "Planning Phase",
+      description: "You are the architect. Research discovers external dependencies, standards, and internal patterns. A structured interview captures your requirements into a PRD. Task briefs and a dependency graph are generated automatically.",
+      howItWorks: [
+        "Research scans external deps, API docs, standards + internal patterns, components, conventions",
+        "Structured PRD interview captures requirements (~10 min via /karimo:plan)",
+        "Task briefs generated from research + PRD artifacts",
+        "Dependency graph maps execution order into parallelizable waves",
+      ],
+    },
+    execution: {
+      title: "Execution Phase",
+      description: "Tasks execute in parallel waves using git worktree isolation. Each task runs in its own worktree with model routing — Sonnet for simple tasks, Opus for complex. Built-in safeguards prevent stuck loops and wrong-branch commits.",
+      howItWorks: [
+        "Waves execute in parallel using native git worktree isolation",
+        "Model routing: Sonnet for simple tasks, Opus for complex — auto-escalation on failure",
+        "4-layer branch assertion validates state before and after each operation",
+        "Loop detection via semantic fingerprinting catches stuck tasks",
+      ],
+    },
+    review: {
+      title: "Review & Merge Phase",
+      description: "Each PR is automatically reviewed via Greptile or Claude Code Review. Simple findings are auto-fixed by Sonnet; complex ones escalate to Opus. After passing review, the feature branch merges to main with clean atomic history.",
+      howItWorks: [
+        "Automated code review via Greptile or Claude Code Review",
+        "Sonnet auto-fixes simple findings, escalates to Opus for complex issues",
+        "Up to 3 review loops before requiring human intervention",
+        "Final merge to main with clean, atomic commit history",
+      ],
+    },
+  },
 };
