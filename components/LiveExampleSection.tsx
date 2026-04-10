@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import { motion, useInView } from "framer-motion";
+import { useState, useMemo, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTimeline } from "@/hooks/useTimeline";
 import { useParallax } from "@/components/ui/ParallaxSection";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -12,6 +12,24 @@ import {
   TIMELINE_EVENTS,
   TIMELINE_DURATION,
 } from "@/lib/vscode-data";
+
+// ─── Chapters ─────────────────────────────────────────────
+
+const CHAPTERS = [
+  { label: "Research", time: 0, endTime: 9999 },
+  { label: "Planning", time: 10000, endTime: 14999 },
+  { label: "Wave 1", time: 15000, endTime: 20999 },
+  { label: "Wave 2-3", time: 21000, endTime: 28999 },
+  { label: "Wave 4", time: 29000, endTime: 35999 },
+  { label: "Complete", time: 36000, endTime: TIMELINE_DURATION },
+];
+
+function getActiveChapter(currentTime: number): number {
+  for (let i = CHAPTERS.length - 1; i >= 0; i--) {
+    if (currentTime >= CHAPTERS[i].time) return i;
+  }
+  return 0;
+}
 
 // ─── Derived State Helpers ────────────────────────────────
 
@@ -45,7 +63,6 @@ function deriveTimelineTabs(currentTime: number): string[] {
       tabs.push(event.payload);
     }
   }
-  // Keep max 5 tabs
   return tabs.slice(-5);
 }
 
@@ -99,40 +116,132 @@ function PlaybackControls({
   );
 }
 
-// ─── Progress Bar ─────────────────────────────────────────
+// ─── Progress Bar with Chapters ───────────────────────────
 
-function ProgressBar({
+function ProgressWithChapters({
   progress,
+  currentTime,
+  isPlaying,
   onSeek,
+  onPause,
 }: {
   progress: number;
+  currentTime: number;
+  isPlaying: boolean;
   onSeek: (time: number) => void;
+  onPause: () => void;
 }) {
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const activeChapter = getActiveChapter(currentTime);
+
+  const handleBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const ratio = (e.clientX - rect.left) / rect.width;
     onSeek(ratio * TIMELINE_DURATION);
+    if (isPlaying) onPause();
+  };
+
+  const handleChapterClick = (time: number) => {
+    onSeek(time);
+    if (isPlaying) onPause();
   };
 
   return (
-    <div
-      className="relative w-full h-1 rounded-full cursor-pointer mt-3 group"
-      style={{ background: "#333" }}
-      onClick={handleClick}
-    >
+    <div className="mt-4">
+      {/* Progress bar */}
       <div
-        className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-100"
-        style={{ width: `${progress * 100}%`, background: "#007acc" }}
-      />
-      {/* Hover thumb */}
-      <div
-        className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{
-          left: `calc(${progress * 100}% - 5px)`,
-          background: "#007acc",
-        }}
-      />
+        className="relative w-full h-1 rounded-full cursor-pointer group"
+        style={{ background: "#333" }}
+        onClick={handleBarClick}
+      >
+        <div
+          className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-100"
+          style={{ width: `${progress * 100}%`, background: "#007acc" }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{
+            left: `calc(${progress * 100}% - 5px)`,
+            background: "#007acc",
+          }}
+        />
+        {/* Chapter tick marks */}
+        {CHAPTERS.slice(1).map((ch) => (
+          <div
+            key={ch.label}
+            className="absolute top-1/2 -translate-y-1/2 w-px h-2.5"
+            style={{
+              left: `${(ch.time / TIMELINE_DURATION) * 100}%`,
+              background: "#555",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Chapter buttons */}
+      <div className="flex gap-2 mt-3">
+        {CHAPTERS.map((ch, i) => {
+          const isActive = i === activeChapter;
+          return (
+            <button
+              key={ch.label}
+              onClick={() => handleChapterClick(ch.time)}
+              className="px-3 py-1.5 rounded-md text-xs transition-all duration-200 cursor-pointer"
+              style={{
+                background: isActive ? "rgba(0, 122, 204, 0.15)" : "transparent",
+                color: isActive ? "#4da6ff" : "#78716c",
+                border: `1px solid ${isActive ? "rgba(0, 122, 204, 0.3)" : "transparent"}`,
+              }}
+            >
+              {ch.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
+  );
+}
+
+// ─── Blur Overlay ─────────────────────────────────────────
+
+function BlurOverlay({ onPlay }: { onPlay: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+      className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer rounded-xl"
+      style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+      onClick={onPlay}
+    >
+      {/* Play button */}
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="flex flex-col items-center gap-4"
+      >
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center transition-transform hover:scale-110"
+          style={{
+            background: "rgba(0, 122, 204, 0.9)",
+            boxShadow: "0 0 40px rgba(0, 122, 204, 0.3)",
+          }}
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="#fff"
+            className="ml-1"
+          >
+            <path d="M6 4v16l14-8L6 4z" />
+          </svg>
+        </div>
+        <span className="text-sm text-fg-secondary">
+          Click to watch the full migration
+        </span>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -173,23 +282,13 @@ function MobileFallback() {
 
 export function LiveExampleSection() {
   const { ref: sectionRef, y } = useParallax(30);
-  const emulatorRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(emulatorRef, { once: true, margin: "-200px" });
-  const hasStarted = useRef(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   const timeline = useTimeline({
     duration: TIMELINE_DURATION,
     loop: true,
     autoPlay: false,
   });
-
-  // Auto-play when section enters viewport
-  useEffect(() => {
-    if (isInView && !hasStarted.current) {
-      hasStarted.current = true;
-      timeline.play();
-    }
-  }, [isInView, timeline]);
 
   // User interaction state
   const [userActiveFile, setUserActiveFile] = useState<string | null>(null);
@@ -220,7 +319,13 @@ export function LiveExampleSection() {
     ? [...new Set([...timelineTabs, ...userTabs])]
     : timelineTabs;
 
-  // Handlers
+  // ─── Handlers ───────────────────────────────────────────
+
+  const handlePlay = useCallback(() => {
+    setHasStarted(true);
+    timeline.play();
+  }, [timeline]);
+
   const handleFileSelect = useCallback(
     (contentKey: string) => {
       setUserInteracted(true);
@@ -255,6 +360,7 @@ export function LiveExampleSection() {
 
   const handleTogglePlay = useCallback(() => {
     if (!timeline.isPlaying) {
+      setHasStarted(true);
       setUserInteracted(false);
       setUserActiveFile(null);
     }
@@ -262,17 +368,35 @@ export function LiveExampleSection() {
   }, [timeline]);
 
   const handleRestart = useCallback(() => {
+    setHasStarted(true);
     setUserInteracted(false);
     setUserActiveFile(null);
     setUserTabs([]);
     timeline.restart();
   }, [timeline]);
 
+  const handleChapterSeek = useCallback(
+    (time: number) => {
+      setHasStarted(true);
+      setUserInteracted(false);
+      setUserActiveFile(null);
+      timeline.seek(time);
+    },
+    [timeline]
+  );
+
+  const handlePause = useCallback(() => {
+    timeline.pause();
+  }, [timeline]);
+
+  // Ref for scroll trapping
+  const emulatorWrapperRef = useRef<HTMLDivElement>(null);
+
   return (
     <section
       ref={sectionRef}
       id="live-example"
-      className="bg-bg-primary relative overflow-hidden py-16 lg:py-24"
+      className="bg-bg-primary relative overflow-hidden min-h-screen flex flex-col justify-center py-12 lg:py-16"
     >
       {/* Noise texture */}
       <div
@@ -286,7 +410,7 @@ export function LiveExampleSection() {
       <motion.div style={{ y }} className="relative">
         <div className="max-w-7xl mx-auto px-6">
           {/* Header */}
-          <div className="mb-8 lg:mb-12">
+          <div className="mb-6 lg:mb-8">
             <SectionLabel>LIVE EXAMPLE</SectionLabel>
             <div className="flex items-center justify-between mt-4">
               <div>
@@ -315,18 +439,42 @@ export function LiveExampleSection() {
                   mode session. Explore the actual output below.
                 </motion.p>
               </div>
-              <div className="hidden lg:block">
-                <PlaybackControls
-                  isPlaying={timeline.isPlaying}
-                  onTogglePlay={handleTogglePlay}
-                  onRestart={handleRestart}
-                />
-              </div>
+              {hasStarted && (
+                <div className="hidden lg:block">
+                  <PlaybackControls
+                    isPlaying={timeline.isPlaying}
+                    onTogglePlay={handleTogglePlay}
+                    onRestart={handleRestart}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
           {/* VS Code Emulator (desktop) */}
-          <div ref={emulatorRef} className="hidden lg:block">
+          <div
+            ref={emulatorWrapperRef}
+            className="hidden lg:block relative"
+            onWheel={(e) => {
+              // Trap scroll within emulator panels
+              const target = e.target as HTMLElement;
+              const scrollable = target.closest("[data-vscode-scroll]");
+              if (scrollable) {
+                const { scrollTop, scrollHeight, clientHeight } = scrollable;
+                const atTop = scrollTop === 0 && e.deltaY < 0;
+                const atBottom =
+                  scrollTop + clientHeight >= scrollHeight - 1 && e.deltaY > 0;
+                if (!atTop && !atBottom) {
+                  e.stopPropagation();
+                }
+              }
+            }}
+          >
+            {/* Blur overlay before play */}
+            <AnimatePresence>
+              {!hasStarted && <BlurOverlay onPlay={handlePlay} />}
+            </AnimatePresence>
+
             <VSCodeEmulator
               tree={FILE_TREE}
               activeFile={activeFile}
@@ -338,14 +486,20 @@ export function LiveExampleSection() {
               onTabSelect={handleTabSelect}
               onTabClose={handleTabClose}
             />
-            <ProgressBar progress={timeline.progress} onSeek={timeline.seek} />
+
+            <ProgressWithChapters
+              progress={timeline.progress}
+              currentTime={timeline.currentTime}
+              isPlaying={timeline.isPlaying}
+              onSeek={handleChapterSeek}
+              onPause={handlePause}
+            />
           </div>
 
           {/* Mobile fallback */}
           <MobileFallback />
         </div>
       </motion.div>
-
     </section>
   );
 }

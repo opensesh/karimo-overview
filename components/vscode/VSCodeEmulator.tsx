@@ -40,7 +40,7 @@ export function VSCodeEmulator({
       style={{
         gridTemplateColumns: "48px 240px 1fr 320px",
         gridTemplateRows: "36px 1fr 24px",
-        height: "600px",
+        height: "clamp(500px, calc(100vh - 280px), 700px)",
         border: `1px solid ${VSCODE.border}`,
         background: VSCODE.bg,
       }}

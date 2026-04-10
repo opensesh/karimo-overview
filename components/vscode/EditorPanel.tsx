@@ -215,6 +215,7 @@ export const EditorPanel = memo(function EditorPanel({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
+              data-vscode-scroll
               className="flex-1 overflow-auto"
             >
               <CodeView contentKey={activeFile} />

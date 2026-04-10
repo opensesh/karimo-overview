@@ -179,6 +179,7 @@ export const FileTree = memo(function FileTree({
 }: FileTreeProps) {
   return (
     <div
+      data-vscode-scroll
       className="row-start-2 overflow-y-auto overflow-x-hidden select-none"
       style={{
         background: VSCODE.sidebarBg,

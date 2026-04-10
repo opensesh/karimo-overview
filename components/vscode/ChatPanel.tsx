@@ -105,7 +105,7 @@ export const ChatPanel = memo(function ChatPanel({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3">
+      <div data-vscode-scroll className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3">
         {messages.map((msg, i) => (
           <MessageBubble
             key={i}
