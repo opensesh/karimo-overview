@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTimeline } from "@/hooks/useTimeline";
-import { useParallax } from "@/components/ui/ParallaxSection";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { VSCodeEmulator } from "@/components/vscode/VSCodeEmulator";
+import { VSCodeEmulator, type MobilePanel } from "@/components/vscode/VSCodeEmulator";
 import {
   FILE_TREE,
   CHAT_SCRIPT,
@@ -16,12 +15,12 @@ import {
 // ─── Chapters ─────────────────────────────────────────────
 
 const CHAPTERS = [
-  { label: "Research", time: 0, endTime: 9999 },
-  { label: "Planning", time: 10000, endTime: 14999 },
-  { label: "Wave 1", time: 15000, endTime: 20999 },
-  { label: "Wave 2-3", time: 21000, endTime: 28999 },
-  { label: "Wave 4", time: 29000, endTime: 35999 },
-  { label: "Complete", time: 36000, endTime: TIMELINE_DURATION },
+  { label: "Research", time: 0 },
+  { label: "Planning", time: 10000 },
+  { label: "Wave 1", time: 15000 },
+  { label: "Wave 2\u20113", time: 21000 },
+  { label: "Wave 4", time: 29000 },
+  { label: "Complete", time: 36000 },
 ];
 
 function getActiveChapter(currentTime: number): number {
@@ -66,70 +65,35 @@ function deriveTimelineTabs(currentTime: number): string[] {
   return tabs.slice(-5);
 }
 
-// ─── Playback Controls ───────────────────────────────────
+// ─── Speed Options ────────────────────────────────────────
 
-function PlaybackControls({
-  isPlaying,
-  onTogglePlay,
-  onRestart,
-}: {
-  isPlaying: boolean;
-  onTogglePlay: () => void;
-  onRestart: () => void;
-}) {
-  return (
-    <div className="flex items-center gap-1">
-      <button
-        onClick={onTogglePlay}
-        className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-1"
-        aria-label={isPlaying ? "Pause" : "Play"}
-      >
-        {isPlaying ? (
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-            <rect x="2" y="1" width="3.5" height="12" rx="0.5" />
-            <rect x="8.5" y="1" width="3.5" height="12" rx="0.5" />
-          </svg>
-        ) : (
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-            <path d="M3 1.5v11l9-5.5L3 1.5z" />
-          </svg>
-        )}
-      </button>
-      <button
-        onClick={onRestart}
-        className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-1"
-        aria-label="Restart"
-      >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M1.5 2v4h4" />
-          <path d="M2.5 6A5 5 0 1 1 2 8.5" />
-        </svg>
-      </button>
-    </div>
-  );
-}
+const SPEEDS = [1, 2, 3] as const;
 
-// ─── Progress Bar with Chapters ───────────────────────────
+// ─── Control Bar ──────────────────────────────────────────
+// Contains: chapters | progress bar | play/pause, restart, speed
 
-function ProgressWithChapters({
+function ControlBar({
   progress,
   currentTime,
   isPlaying,
+  speed,
+  hasStarted,
   onSeek,
-  onPause,
+  onTogglePlay,
+  onRestart,
+  onSetSpeed,
+  onChapterClick,
 }: {
   progress: number;
   currentTime: number;
   isPlaying: boolean;
+  speed: number;
+  hasStarted: boolean;
   onSeek: (time: number) => void;
-  onPause: () => void;
+  onTogglePlay: () => void;
+  onRestart: () => void;
+  onSetSpeed: (speed: number) => void;
+  onChapterClick: (time: number) => void;
 }) {
   const activeChapter = getActiveChapter(currentTime);
 
@@ -137,19 +101,115 @@ function ProgressWithChapters({
     const rect = e.currentTarget.getBoundingClientRect();
     const ratio = (e.clientX - rect.left) / rect.width;
     onSeek(ratio * TIMELINE_DURATION);
-    if (isPlaying) onPause();
-  };
-
-  const handleChapterClick = (time: number) => {
-    onSeek(time);
-    if (isPlaying) onPause();
   };
 
   return (
-    <div className="mt-4">
+    <div
+      className="rounded-xl border border-border-secondary bg-bg-secondary/50 px-3 py-2.5 sm:px-4 sm:py-3 mb-4"
+      style={{ backdropFilter: "blur(8px)" }}
+    >
+      {/* Row: chapters left, controls right */}
+      <div className="flex items-center justify-between gap-3">
+        {/* Chapters */}
+        <div className="flex gap-1 sm:gap-1.5 overflow-x-auto shrink min-w-0">
+          {CHAPTERS.map((ch, i) => {
+            const isActive = hasStarted && i === activeChapter;
+            return (
+              <button
+                key={ch.label}
+                onClick={() => onChapterClick(ch.time)}
+                className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-md text-[11px] sm:text-xs transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0"
+                style={{
+                  background: isActive
+                    ? "rgba(0, 122, 204, 0.15)"
+                    : "transparent",
+                  color: isActive ? "#4da6ff" : "#78716c",
+                  border: `1px solid ${
+                    isActive ? "rgba(0, 122, 204, 0.3)" : "transparent"
+                  }`,
+                }}
+              >
+                {ch.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Playback controls */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Speed buttons */}
+          <div className="flex items-center rounded-md overflow-hidden border border-border-secondary">
+            {SPEEDS.map((s) => (
+              <button
+                key={s}
+                onClick={() => onSetSpeed(s)}
+                className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-[11px] font-medium transition-colors cursor-pointer"
+                style={{
+                  background:
+                    speed === s ? "rgba(0, 122, 204, 0.2)" : "transparent",
+                  color: speed === s ? "#4da6ff" : "#78716c",
+                }}
+              >
+                {s}x
+              </button>
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div className="w-px h-4 bg-border-secondary" />
+
+          {/* Play/Pause */}
+          <button
+            onClick={onTogglePlay}
+            className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-1"
+            aria-label={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="currentColor"
+              >
+                <rect x="2" y="1" width="3.5" height="12" rx="0.5" />
+                <rect x="8.5" y="1" width="3.5" height="12" rx="0.5" />
+              </svg>
+            ) : (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="currentColor"
+              >
+                <path d="M3 1.5v11l9-5.5L3 1.5z" />
+              </svg>
+            )}
+          </button>
+
+          {/* Restart */}
+          <button
+            onClick={onRestart}
+            className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-1"
+            aria-label="Restart"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M1.5 2v4h4" />
+              <path d="M2.5 6A5 5 0 1 1 2 8.5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
       {/* Progress bar */}
       <div
-        className="relative w-full h-1 rounded-full cursor-pointer group"
+        className="relative w-full h-1 rounded-full cursor-pointer group mt-2.5"
         style={{ background: "#333" }}
         onClick={handleBarClick}
       >
@@ -176,27 +236,6 @@ function ProgressWithChapters({
           />
         ))}
       </div>
-
-      {/* Chapter buttons */}
-      <div className="flex gap-2 mt-3">
-        {CHAPTERS.map((ch, i) => {
-          const isActive = i === activeChapter;
-          return (
-            <button
-              key={ch.label}
-              onClick={() => handleChapterClick(ch.time)}
-              className="px-3 py-1.5 rounded-md text-xs transition-all duration-200 cursor-pointer"
-              style={{
-                background: isActive ? "rgba(0, 122, 204, 0.15)" : "transparent",
-                color: isActive ? "#4da6ff" : "#78716c",
-                border: `1px solid ${isActive ? "rgba(0, 122, 204, 0.3)" : "transparent"}`,
-              }}
-            >
-              {ch.label}
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 }
@@ -210,10 +249,12 @@ function BlurOverlay({ onPlay }: { onPlay: () => void }) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
       className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer rounded-xl"
-      style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+      style={{
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+      }}
       onClick={onPlay}
     >
-      {/* Play button */}
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -245,44 +286,11 @@ function BlurOverlay({ onPlay }: { onPlay: () => void }) {
   );
 }
 
-// ─── Mobile Fallback ──────────────────────────────────────
-
-function MobileFallback() {
-  const stats = [
-    { value: "20", label: "Tasks" },
-    { value: "4", label: "Waves" },
-    { value: "39", label: "Files" },
-    { value: "3h", label: "Total" },
-  ];
-
-  return (
-    <div className="lg:hidden">
-      <div className="rounded-xl border border-border-secondary bg-bg-tertiary p-6">
-        <p className="text-body text-sm text-fg-secondary text-center mb-4">
-          This interactive demo is best experienced on desktop.
-        </p>
-        <div className="flex justify-center gap-6">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-display text-2xl text-fg-primary">
-                {stat.value}
-              </div>
-              <div className="text-accent text-[10px] tracking-wider text-fg-tertiary uppercase mt-0.5">
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Main Section ─────────────────────────────────────────
 
 export function LiveExampleSection() {
-  const { ref: sectionRef, y } = useParallax(30);
   const [hasStarted, setHasStarted] = useState(false);
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>("chat");
 
   const timeline = useTimeline({
     duration: TIMELINE_DURATION,
@@ -334,6 +342,8 @@ export function LiveExampleSection() {
         prev.includes(contentKey) ? prev : [...prev, contentKey].slice(-5)
       );
       timeline.pause();
+      // On mobile, switch to editor panel when file is selected
+      setMobilePanel("editor");
     },
     [timeline]
   );
@@ -385,18 +395,11 @@ export function LiveExampleSection() {
     [timeline]
   );
 
-  const handlePause = useCallback(() => {
-    timeline.pause();
-  }, [timeline]);
-
-  // Ref for scroll trapping
-  const emulatorWrapperRef = useRef<HTMLDivElement>(null);
-
   return (
     <section
-      ref={sectionRef}
       id="live-example"
-      className="bg-bg-primary relative overflow-hidden min-h-screen flex flex-col justify-center py-12 lg:py-16"
+      className="bg-bg-primary relative overflow-hidden"
+      style={{ minHeight: "100dvh" }}
     >
       {/* Noise texture */}
       <div
@@ -407,74 +410,72 @@ export function LiveExampleSection() {
         }}
       />
 
-      <motion.div style={{ y }} className="relative">
-        <div className="max-w-7xl mx-auto px-6">
-          {/* Header */}
-          <div className="mb-6 lg:mb-8">
-            <SectionLabel>LIVE EXAMPLE</SectionLabel>
-            <div className="flex items-center justify-between mt-4">
-              <div>
-                <motion.h2
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary"
-                >
-                  A Real Migration, Start to Finish
-                </motion.h2>
-                <motion.p
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{
-                    duration: 0.6,
-                    delay: 0.1,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  className="text-body text-base text-fg-secondary mt-3 max-w-2xl"
-                >
-                  An entire Framer website migrated into a custom Next.js codebase.
-                  20 tasks, 4 waves, 39 files changed &mdash; all from a single plan
-                  mode session. Explore the actual output below.
-                </motion.p>
-              </div>
-              {hasStarted && (
-                <div className="hidden lg:block">
-                  <PlaybackControls
-                    isPlaying={timeline.isPlaying}
-                    onTogglePlay={handleTogglePlay}
-                    onRestart={handleRestart}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* VS Code Emulator (desktop) */}
-          <div
-            ref={emulatorWrapperRef}
-            className="hidden lg:block relative"
-            onWheel={(e) => {
-              // Trap scroll within emulator panels
-              const target = e.target as HTMLElement;
-              const scrollable = target.closest("[data-vscode-scroll]");
-              if (scrollable) {
-                const { scrollTop, scrollHeight, clientHeight } = scrollable;
-                const atTop = scrollTop === 0 && e.deltaY < 0;
-                const atBottom =
-                  scrollTop + clientHeight >= scrollHeight - 1 && e.deltaY > 0;
-                if (!atTop && !atBottom) {
-                  e.stopPropagation();
-                }
-              }
-            }}
+      {/* Full-height flex layout */}
+      <div
+        className="relative max-w-7xl mx-auto px-4 sm:px-6 flex flex-col"
+        style={{ minHeight: "100dvh" }}
+      >
+        {/* Header */}
+        <div className="pt-8 sm:pt-12 pb-4 sm:pb-6 shrink-0">
+          <SectionLabel>LIVE EXAMPLE</SectionLabel>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="text-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
           >
-            {/* Blur overlay before play */}
-            <AnimatePresence>
-              {!hasStarted && <BlurOverlay onPlay={handlePlay} />}
-            </AnimatePresence>
+            A Real Migration, Start to Finish
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{
+              duration: 0.6,
+              delay: 0.1,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="text-body text-sm sm:text-base text-fg-secondary mt-2 sm:mt-3 max-w-2xl"
+          >
+            An entire Framer website migrated into a custom Next.js codebase.
+            20 tasks, 4 waves, 39 files changed &mdash; all from a single plan
+            mode session.
+          </motion.p>
+        </div>
 
+        {/* Control bar */}
+        <ControlBar
+          progress={timeline.progress}
+          currentTime={timeline.currentTime}
+          isPlaying={timeline.isPlaying}
+          speed={timeline.speed}
+          hasStarted={hasStarted}
+          onSeek={handleChapterSeek}
+          onTogglePlay={handleTogglePlay}
+          onRestart={handleRestart}
+          onSetSpeed={timeline.setSpeed}
+          onChapterClick={handleChapterSeek}
+        />
+
+        {/* VS Code Emulator — fills remaining space */}
+        <div
+          className="relative flex-1 min-h-0 pb-6 sm:pb-8"
+          onWheel={(e) => {
+            const target = e.target as HTMLElement;
+            const scrollable = target.closest("[data-vscode-scroll]");
+            if (scrollable) {
+              e.stopPropagation();
+            }
+          }}
+        >
+          {/* Blur overlay before play */}
+          <AnimatePresence>
+            {!hasStarted && <BlurOverlay onPlay={handlePlay} />}
+          </AnimatePresence>
+
+          {/* Desktop emulator */}
+          <div className="hidden lg:block h-full">
             <VSCodeEmulator
               tree={FILE_TREE}
               activeFile={activeFile}
@@ -486,20 +487,26 @@ export function LiveExampleSection() {
               onTabSelect={handleTabSelect}
               onTabClose={handleTabClose}
             />
-
-            <ProgressWithChapters
-              progress={timeline.progress}
-              currentTime={timeline.currentTime}
-              isPlaying={timeline.isPlaying}
-              onSeek={handleChapterSeek}
-              onPause={handlePause}
-            />
           </div>
 
-          {/* Mobile fallback */}
-          <MobileFallback />
+          {/* Mobile/tablet emulator */}
+          <div className="lg:hidden h-full">
+            <VSCodeEmulator
+              tree={FILE_TREE}
+              activeFile={activeFile}
+              openTabs={openTabs}
+              visibleMessages={visibleMessages}
+              revealedPaths={revealedPaths}
+              currentTime={timeline.currentTime}
+              onFileSelect={handleFileSelect}
+              onTabSelect={handleTabSelect}
+              onTabClose={handleTabClose}
+              mobilePanel={mobilePanel}
+              onMobilePanelChange={setMobilePanel}
+            />
+          </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

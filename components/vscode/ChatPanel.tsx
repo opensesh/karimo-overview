@@ -67,24 +67,29 @@ function MessageBubble({
 interface ChatPanelProps {
   messages: ChatMessage[];
   currentTime: number;
+  fillHeight?: boolean;
 }
 
 export const ChatPanel = memo(function ChatPanel({
   messages,
   currentTime: _currentTime,
+  fillHeight,
 }: ChatPanelProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = scrollContainerRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [messages.length]);
 
   return (
     <div
-      className="row-start-2 flex flex-col overflow-hidden"
+      className={`flex flex-col overflow-hidden ${fillHeight ? "h-full" : "row-start-2"}`}
       style={{
         background: VSCODE.sidebarBg,
-        borderLeft: `1px solid ${VSCODE.border}`,
+        borderLeft: fillHeight ? undefined : `1px solid ${VSCODE.border}`,
       }}
     >
       {/* Header */}
@@ -105,7 +110,12 @@ export const ChatPanel = memo(function ChatPanel({
       </div>
 
       {/* Messages */}
-      <div data-vscode-scroll className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3">
+      <div
+        ref={scrollContainerRef}
+        data-vscode-scroll
+        className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3"
+        style={{ overscrollBehavior: "contain" }}
+      >
         {messages.map((msg, i) => (
           <MessageBubble
             key={i}
@@ -113,7 +123,6 @@ export const ChatPanel = memo(function ChatPanel({
             isLatest={i === messages.length - 1}
           />
         ))}
-        <div ref={bottomRef} />
       </div>
     </div>
   );

@@ -169,6 +169,7 @@ interface FileTreeProps {
   activeFile: string | null;
   onFileSelect: (contentKey: string) => void;
   revealedPaths: Set<string>;
+  fillHeight?: boolean;
 }
 
 export const FileTree = memo(function FileTree({
@@ -176,14 +177,16 @@ export const FileTree = memo(function FileTree({
   activeFile,
   onFileSelect,
   revealedPaths,
+  fillHeight,
 }: FileTreeProps) {
   return (
     <div
       data-vscode-scroll
-      className="row-start-2 overflow-y-auto overflow-x-hidden select-none"
+      className={`overflow-y-auto overflow-x-hidden select-none ${fillHeight ? "h-full" : "row-start-2"}`}
       style={{
         background: VSCODE.sidebarBg,
-        borderRight: `1px solid ${VSCODE.border}`,
+        borderRight: fillHeight ? undefined : `1px solid ${VSCODE.border}`,
+        overscrollBehavior: "contain",
       }}
     >
       {/* Explorer header */}

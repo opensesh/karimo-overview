@@ -171,6 +171,7 @@ interface EditorPanelProps {
   openTabs: string[];
   onTabSelect: (contentKey: string) => void;
   onTabClose: (contentKey: string) => void;
+  fillHeight?: boolean;
 }
 
 export const EditorPanel = memo(function EditorPanel({
@@ -178,10 +179,11 @@ export const EditorPanel = memo(function EditorPanel({
   openTabs,
   onTabSelect,
   onTabClose,
+  fillHeight,
 }: EditorPanelProps) {
   return (
     <div
-      className="row-start-2 flex flex-col min-w-0 overflow-hidden"
+      className={`flex flex-col min-w-0 overflow-hidden ${fillHeight ? "h-full" : "row-start-2"}`}
       style={{ background: VSCODE.bg }}
     >
       {/* Tab bar */}

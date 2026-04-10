@@ -12,11 +12,13 @@ interface UseTimelineReturn {
   currentTime: number;
   progress: number;
   isPlaying: boolean;
+  speed: number;
   play: () => void;
   pause: () => void;
   toggle: () => void;
   seek: (time: number) => void;
   restart: () => void;
+  setSpeed: (speed: number) => void;
 }
 
 export function useTimeline({
@@ -26,16 +28,18 @@ export function useTimeline({
 }: UseTimelineOptions): UseTimelineReturn {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
+  const [speed, setSpeedState] = useState(1);
 
   const timeRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const lastFrameRef = useRef<number | null>(null);
   const frameCountRef = useRef(0);
+  const speedRef = useRef(1);
 
   const tick = useCallback(
     (now: number) => {
       const last = lastFrameRef.current ?? now;
-      const delta = Math.min(now - last, 50); // cap at 50ms to avoid jumps
+      const delta = Math.min(now - last, 50) * speedRef.current;
       lastFrameRef.current = now;
 
       timeRef.current += delta;
@@ -103,14 +107,21 @@ export function useTimeline({
     setIsPlaying(true);
   }, []);
 
+  const setSpeed = useCallback((s: number) => {
+    speedRef.current = s;
+    setSpeedState(s);
+  }, []);
+
   return {
     currentTime,
     progress: duration > 0 ? currentTime / duration : 0,
     isPlaying,
+    speed,
     play,
     pause,
     toggle,
     seek,
     restart,
+    setSpeed,
   };
 }
