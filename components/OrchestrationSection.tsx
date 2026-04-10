@@ -12,8 +12,15 @@ const PHASE_ORDER: PhaseId[] = ["planning", "execution", "review"];
 
 export function OrchestrationSection() {
   const [activePhase, setActivePhase] = useState<PhaseId>("planning");
+  const [animatedPhases, setAnimatedPhases] = useState<Set<PhaseId>>(new Set());
+  const [resetKey, setResetKey] = useState(0);
 
   const currentIndex = PHASE_ORDER.indexOf(activePhase);
+  const shouldAnimate = !animatedPhases.has(activePhase);
+
+  const handleAnimationComplete = useCallback(() => {
+    setAnimatedPhases((prev) => new Set(prev).add(activePhase));
+  }, [activePhase]);
 
   const handleNavigate = useCallback(
     (direction: "prev" | "next") => {
@@ -25,6 +32,12 @@ export function OrchestrationSection() {
     },
     [currentIndex]
   );
+
+  const handleReset = useCallback(() => {
+    setAnimatedPhases(new Set());
+    setResetKey((prev) => prev + 1);
+    setActivePhase("planning");
+  }, []);
 
   return (
     <section id="orchestration" className="section-padding bg-bg-secondary">
@@ -48,6 +61,7 @@ export function OrchestrationSection() {
           activePhase={activePhase}
           onPhaseChange={setActivePhase}
           onNavigate={handleNavigate}
+          onReset={handleReset}
           canGoPrev={currentIndex > 0}
           canGoNext={currentIndex < PHASE_ORDER.length - 1}
         />
@@ -55,20 +69,36 @@ export function OrchestrationSection() {
 
       {/* Graph + Description — wider container */}
       <div className="max-w-6xl mx-auto px-6">
-        {/* Desktop git graph */}
-        <div className="hidden md:block">
-          <GitGraph data={orchestrationData} activePhase={activePhase} />
-        </div>
+        {/* Fixed-height wrapper to prevent layout shift */}
+        <div className="min-h-[480px] md:min-h-[380px]">
+          {/* Desktop git graph */}
+          <div className="hidden md:block">
+            <GitGraph
+              key={`desktop-${resetKey}`}
+              data={orchestrationData}
+              activePhase={activePhase}
+              shouldAnimate={shouldAnimate}
+              onAnimationComplete={handleAnimationComplete}
+            />
+          </div>
 
-        {/* Mobile card layout */}
-        <div className="md:hidden">
-          <GitGraphMobile data={orchestrationData} activePhase={activePhase} />
+          {/* Mobile card layout */}
+          <div className="md:hidden">
+            <GitGraphMobile
+              key={`mobile-${resetKey}`}
+              data={orchestrationData}
+              activePhase={activePhase}
+              shouldAnimate={shouldAnimate}
+              onAnimationComplete={handleAnimationComplete}
+            />
+          </div>
         </div>
 
         {/* Phase description panel */}
         <PhaseDescription
           activePhase={activePhase}
           descriptions={orchestrationData.phaseDescriptions}
+          shouldAnimate={shouldAnimate}
         />
       </div>
     </section>

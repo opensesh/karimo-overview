@@ -3,20 +3,23 @@
 import { motion, AnimatePresence } from "framer-motion";
 import type { OrchestrationData, PhaseId } from "@/lib/constants";
 import { Folder, FolderCode } from "@untitledui/icons";
+import { phaseStagger, drawLineX, drawLineY, fadeInUp, nodeAppear } from "@/lib/motion";
 
 interface GitGraphProps {
   data: OrchestrationData;
   activePhase: PhaseId;
+  shouldAnimate: boolean;
+  onAnimationComplete?: () => void;
 }
 
 // ─── Shared sub-components ───────────────────────────────────────────────────
 
 function BranchNode({ className = "" }: { className?: string }) {
   return (
-    <div className={`relative flex-shrink-0 w-7 h-7 ${className}`}>
+    <motion.div variants={nodeAppear} className={`relative flex-shrink-0 w-7 h-7 ${className}`}>
       <div className="absolute inset-0 rounded-full border-[3px] border-fg-brand bg-bg-secondary" />
       <div className="absolute inset-0 m-auto rounded-full bg-fg-brand w-3 h-3" />
-    </div>
+    </motion.div>
   );
 }
 
@@ -66,7 +69,7 @@ function WaveLifecycle({ data }: { data: OrchestrationData }) {
   const pendingWaves = data.execution.waves.filter(w => w.tasks.every(t => t.status === "pending"));
 
   return (
-    <div className="p-4 rounded-lg bg-bg-tertiary/50 border border-border-secondary space-y-3 self-start">
+    <motion.div variants={fadeInUp} className="p-4 rounded-lg bg-bg-tertiary/50 border border-border-secondary space-y-3 self-start">
       <p className="text-fg-primary text-[10px] font-semibold uppercase tracking-wider" style={{ fontFamily: "var(--font-accent, sans-serif)" }}>
         Feature Branch State
       </p>
@@ -142,7 +145,7 @@ function WaveLifecycle({ data }: { data: OrchestrationData }) {
           Worktrees close → atomic commits → merge to feature
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -150,7 +153,7 @@ function WaveLifecycle({ data }: { data: OrchestrationData }) {
 
 function PRCard({ data }: { data: OrchestrationData }) {
   return (
-    <div className="rounded-lg border border-border-secondary bg-bg-tertiary/50 overflow-hidden">
+    <motion.div variants={fadeInUp} className="rounded-lg border border-border-secondary bg-bg-tertiary/50 overflow-hidden">
       <div className="px-3 py-2.5 border-b border-border-secondary flex items-center gap-2">
         <div className="w-3.5 h-3.5 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center">
           <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
@@ -174,7 +177,7 @@ function PRCard({ data }: { data: OrchestrationData }) {
           PR merged to main — passed all tests
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -182,7 +185,7 @@ function PRCard({ data }: { data: OrchestrationData }) {
 
 function ReviewLoop() {
   return (
-    <div className="rounded-lg border border-border-secondary bg-bg-tertiary/50 p-3 space-y-2.5">
+    <motion.div variants={fadeInUp} className="rounded-lg border border-border-secondary bg-bg-tertiary/50 p-3 space-y-2.5">
       <p className="text-fg-primary text-[11px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
         Automated Review Loop
       </p>
@@ -219,7 +222,7 @@ function ReviewLoop() {
           Up to 3 loops • Sonnet → Opus escalation
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -231,17 +234,21 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
   return (
     <div className="relative">
       {/* MAIN label */}
-      <p className="text-fg-tertiary text-[11px] uppercase tracking-[0.1em] mb-3" style={{ fontFamily: "var(--font-accent, sans-serif)" }}>
+      <motion.p variants={fadeInUp} className="text-fg-tertiary text-[11px] uppercase tracking-[0.1em] mb-3" style={{ fontFamily: "var(--font-accent, sans-serif)" }}>
         Main
-      </p>
+      </motion.p>
 
       {/* Main branch line — spans across grid from first node center to last node center */}
       <div className="relative">
-        <div className="absolute left-[14px] right-[14px] h-[3px] bg-fg-brand" style={{ top: 14 }} />
+        <motion.div
+          variants={drawLineX}
+          className="absolute left-[14px] right-[14px] h-[3px] bg-fg-brand"
+          style={{ top: 14, transformOrigin: "left" }}
+        />
 
-        <div className="grid grid-cols-4 gap-8">
+        <div className="grid gap-8" style={{ gridTemplateColumns: '1.1fr 0.7fr 1.2fr 1fr' }}>
           {/* Research */}
-          <div>
+          <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Research" subtitle="/karimo:research" />
             <div className="mt-4 space-y-3">
@@ -268,10 +275,10 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Create PRD */}
-          <div>
+          <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Create PRD" subtitle="/karimo:plan" />
             <div className="mt-4">
@@ -279,10 +286,10 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
                 {data.prdName}
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Task Briefs */}
-          <div>
+          <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Task Briefs" subtitle="/karimo:run" />
             <div className="mt-4 grid grid-cols-2 gap-1">
@@ -290,10 +297,10 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
                 <TaskBriefPill key={brief.id} id={brief.id} color={waveColor(brief.wave)} />
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Dependency Graph */}
-          <div>
+          <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Dependency Graph" subtitle="/karimo:run" />
             <div className="mt-4 space-y-2">
@@ -308,7 +315,7 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
@@ -319,34 +326,42 @@ function ExecutionPhase({ data }: { data: OrchestrationData }) {
   return (
     <div className="relative">
       {/* MAIN label */}
-      <p className="text-fg-tertiary text-[11px] uppercase tracking-[0.1em] mb-3" style={{ fontFamily: "var(--font-accent, sans-serif)" }}>
+      <motion.p variants={fadeInUp} className="text-fg-tertiary text-[11px] uppercase tracking-[0.1em] mb-3" style={{ fontFamily: "var(--font-accent, sans-serif)" }}>
         Main
-      </p>
+      </motion.p>
 
-      {/* Main branch line — just the fork node area */}
+      {/* Main branch line */}
       <div className="relative">
-        <div className="absolute left-0 right-0 h-[3px] bg-fg-brand" style={{ top: 14 }} />
+        <motion.div
+          variants={drawLineX}
+          className="absolute left-[14px] right-[14px] h-[3px] bg-fg-brand"
+          style={{ top: 14, transformOrigin: "left" }}
+        />
 
-        {/* Two nodes: Execute (left) and Inspect (right) */}
-        <div className="flex items-start justify-between">
-          <div>
+        {/* Two nodes: Execute (left) and Inspect (right) — grid for consistent spacing */}
+        <div className="grid grid-cols-2 gap-8">
+          <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Execute" subtitle="/karimo:run" />
-          </div>
-          <div className="text-right">
+          </motion.div>
+          <motion.div variants={fadeInUp} className="text-right">
             <BranchNode className="relative z-10 ml-auto" />
             <StepLabel title="Inspect" subtitle="Code Review" />
-          </div>
+          </motion.div>
         </div>
       </div>
 
       {/* Content below: feature branch + wave lifecycle */}
-      <div className="grid grid-cols-[1.4fr_1fr] gap-8 mt-4">
+      <motion.div variants={fadeInUp} className="grid grid-cols-[1.4fr_1fr] gap-8 mt-4">
         {/* Left: feature branch + worktrees */}
-        <div className="min-w-0">
+        <motion.div variants={fadeInUp} className="min-w-0">
           <div className="relative ml-3.5">
             {/* Vertical line from fork to merge */}
-            <div className="absolute left-0 top-0 w-[3px] bg-fg-brand rounded-full" style={{ height: "100%" }} />
+            <motion.div
+              variants={drawLineY}
+              className="absolute left-0 top-0 w-[3px] bg-fg-brand rounded-full"
+              style={{ height: "100%", transformOrigin: "top" }}
+            />
 
             <div className="pl-7">
               {/* Feature Branch header */}
@@ -406,11 +421,11 @@ function ExecutionPhase({ data }: { data: OrchestrationData }) {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Right: wave lifecycle panel */}
         <WaveLifecycle data={data} />
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -419,41 +434,49 @@ function ReviewPhase({ data }: { data: OrchestrationData }) {
   return (
     <div className="relative">
       {/* MAIN label */}
-      <p className="text-fg-tertiary text-[11px] uppercase tracking-[0.1em] mb-3" style={{ fontFamily: "var(--font-accent, sans-serif)" }}>
+      <motion.p variants={fadeInUp} className="text-fg-tertiary text-[11px] uppercase tracking-[0.1em] mb-3" style={{ fontFamily: "var(--font-accent, sans-serif)" }}>
         Main
-      </p>
+      </motion.p>
 
       {/* Main branch line with 3 nodes */}
       <div className="relative">
-        <div className="absolute left-[14px] right-[14px] h-[3px] bg-fg-brand" style={{ top: 14 }} />
+        <motion.div
+          variants={drawLineX}
+          className="absolute left-[14px] right-[14px] h-[3px] bg-fg-brand"
+          style={{ top: 14, transformOrigin: "left" }}
+        />
 
         <div className="grid grid-cols-3 gap-8">
           {/* Inspect */}
-          <div>
+          <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Inspect" subtitle="Code Review" />
-          </div>
+          </motion.div>
 
           {/* Fix Errors */}
-          <div>
+          <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Fix Errors" subtitle="Auto or Manual" />
-          </div>
+          </motion.div>
 
           {/* Merge */}
-          <div>
+          <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Merge" subtitle="Pass tests to main" />
-          </div>
+          </motion.div>
         </div>
       </div>
 
       {/* Content aligned under each node */}
-      <div className="grid grid-cols-3 gap-8 mt-6">
+      <motion.div variants={fadeInUp} className="grid grid-cols-3 gap-8 mt-6">
         {/* Under Inspect: branch structure */}
-        <div>
+        <motion.div variants={fadeInUp}>
           <div className="relative ml-3.5">
-            <div className="absolute left-0 top-0 w-[3px] bg-fg-brand rounded-full" style={{ height: "100%" }} />
+            <motion.div
+              variants={drawLineY}
+              className="absolute left-0 top-0 w-[3px] bg-fg-brand rounded-full"
+              style={{ height: "100%", transformOrigin: "top" }}
+            />
 
             <div className="pl-7 pt-2">
               <div className="flex items-center gap-3 mb-4">
@@ -475,37 +498,30 @@ function ReviewPhase({ data }: { data: OrchestrationData }) {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Under Fix Errors: automated review loop */}
-        <div>
-          <ReviewLoop />
-        </div>
+        <ReviewLoop />
 
         {/* Under Merge: PR card */}
-        <div>
-          <PRCard data={data} />
-        </div>
-      </div>
+        <PRCard data={data} />
+      </motion.div>
     </div>
   );
 }
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
-const phaseTransition = {
-  initial: { opacity: 0, x: 16 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -16 },
-  transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] as const },
-};
-
-export function GitGraph({ data, activePhase }: GitGraphProps) {
+export function GitGraph({ data, activePhase, shouldAnimate, onAnimationComplete }: GitGraphProps) {
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={activePhase}
-        {...phaseTransition}
+        variants={phaseStagger}
+        initial={shouldAnimate ? "hidden" : false}
+        animate="visible"
+        exit="exit"
+        onAnimationComplete={onAnimationComplete}
       >
         {activePhase === "planning" && <PlanningPhase data={data} />}
         {activePhase === "execution" && <ExecutionPhase data={data} />}

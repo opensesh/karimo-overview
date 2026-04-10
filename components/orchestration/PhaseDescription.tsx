@@ -2,13 +2,15 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import type { PhaseId, PhaseDescription as PhaseDescriptionType } from "@/lib/constants";
+import { staggerContainerFast, fadeInUp } from "@/lib/motion";
 
 interface PhaseDescriptionProps {
   activePhase: PhaseId;
   descriptions: Record<PhaseId, PhaseDescriptionType>;
+  shouldAnimate?: boolean;
 }
 
-export function PhaseDescription({ activePhase, descriptions }: PhaseDescriptionProps) {
+export function PhaseDescription({ activePhase, descriptions, shouldAnimate = true }: PhaseDescriptionProps) {
   const desc = descriptions[activePhase];
 
   return (
@@ -16,7 +18,7 @@ export function PhaseDescription({ activePhase, descriptions }: PhaseDescription
       <AnimatePresence mode="wait">
         <motion.div
           key={activePhase}
-          initial={{ opacity: 0, y: 12 }}
+          initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
@@ -39,8 +41,12 @@ export function PhaseDescription({ activePhase, descriptions }: PhaseDescription
               </p>
             </div>
 
-            {/* Right: how it works */}
-            <div>
+            {/* Right: how it works — staggered list */}
+            <motion.div
+              variants={staggerContainerFast}
+              initial={shouldAnimate ? "hidden" : false}
+              animate="visible"
+            >
               <p
                 className="text-fg-tertiary text-[10px] font-semibold uppercase tracking-widest mb-2"
                 style={{ fontFamily: "var(--font-accent, sans-serif)" }}
@@ -49,7 +55,7 @@ export function PhaseDescription({ activePhase, descriptions }: PhaseDescription
               </p>
               <ul className="space-y-1.5">
                 {desc.howItWorks.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2">
+                  <motion.li key={i} variants={fadeInUp} className="flex items-start gap-2">
                     <span className="text-fg-brand text-[11px] mt-px flex-shrink-0">→</span>
                     <span
                       className="text-fg-secondary text-[12px] leading-relaxed"
@@ -57,10 +63,10 @@ export function PhaseDescription({ activePhase, descriptions }: PhaseDescription
                     >
                       {item}
                     </span>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           </div>
         </motion.div>
       </AnimatePresence>
