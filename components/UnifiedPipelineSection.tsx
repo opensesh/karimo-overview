@@ -369,7 +369,7 @@ function InlineTerminal({
   commandLabel: string;
 }) {
   return (
-    <div className="rounded-lg border border-border-secondary bg-bg-primary overflow-hidden min-h-[240px] flex flex-col">
+    <div className="rounded-lg border border-border-secondary bg-bg-primary overflow-hidden h-full flex flex-col">
       {/* Terminal chrome */}
       <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border-secondary shrink-0">
         <div className="w-2 h-2 rounded-full bg-fg-tertiary/30" />
@@ -486,10 +486,10 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
             </span>
           </div>
 
-          {/* 3-column grid — consistent height across columns */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-start">
+          {/* 3-column grid — fixed height to prevent jumping between loops */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:h-[420px] md:items-stretch">
             {/* LEFT: Explanation + Input/Output */}
-            <div className="order-1 flex flex-col gap-3">
+            <div className="order-1 flex flex-col gap-3 md:overflow-y-auto">
               <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-4">
                 <span
                   className="text-xs text-fg-brand uppercase tracking-widest"
@@ -537,8 +537,8 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
               </div>
             </div>
 
-            {/* CENTER: Terminal — stretches to match column height */}
-            <div className="order-2 min-w-0">
+            {/* CENTER: Terminal — fills full fixed height */}
+            <div className="order-2 min-w-0 md:h-full">
               <InlineTerminal
                 lines={
                   activeCommand?.terminalLines ??
@@ -550,8 +550,8 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
               />
             </div>
 
-            {/* RIGHT: Command dropdowns */}
-            <div className="order-3 space-y-2">
+            {/* RIGHT: Command dropdowns — scrolls if needed */}
+            <div className="order-3 space-y-2 md:overflow-y-auto">
               {phase.commands.map((cmd, i) => (
                 <CompactCommandDropdown
                   key={cmd.id}
