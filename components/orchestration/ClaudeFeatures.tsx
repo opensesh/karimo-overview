@@ -152,11 +152,7 @@ function FeatureCard({
                  transition-all duration-300 flex-shrink-0 select-none
                  cursor-pointer"
       style={{ width: cardWidth, minWidth: cardWidth }}
-      onClick={(e) => {
-        if (!e.defaultPrevented) {
-          window.open(feature.href, '_blank', 'noopener,noreferrer');
-        }
-      }}
+      data-href={feature.href}
     >
       {/* Image area */}
       <div
@@ -340,6 +336,16 @@ export function ClaudeFeatures() {
       if (!pointerDown.current) return;
       pointerDown.current = false;
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+
+      // If user didn't drag, treat as a click — find the card and navigate
+      if (!hasDragged.current) {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const card = el?.closest<HTMLElement>("[data-href]");
+        if (card?.dataset.href) {
+          window.open(card.dataset.href, "_blank", "noopener,noreferrer");
+          return;
+        }
+      }
 
       const current = x.get();
       const step = cardWidth + GAP;
