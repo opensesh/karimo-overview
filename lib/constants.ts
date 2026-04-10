@@ -245,16 +245,16 @@ export const adoptionPhases = [
   },
   {
     phase: 3,
-    title: "Monitor",
+    title: "Monitor and Merge",
     description:
-      "Full visibility into what KARIMO is doing and has done. A real-time dashboard, PR-based status tracking, GitHub labels for every state transition, and execution metrics you can actually use to improve your workflow.",
+      "Full visibility into what KARIMO is doing, plus a clean merge path to main. Real-time dashboard, PR-based status tracking, GitHub labels for every state transition, and a single consolidated PR with full audit trail.",
     features: [
       "/karimo:dashboard command",
       "PR-based status tracking",
       "GitHub labels for state",
-      "Execution metrics",
+      "Consolidated merge to main",
     ],
-    objective: "Know exactly where every task stands without checking",
+    objective: "Know exactly where every task stands and ship with one PR",
   },
 ] as const;
 

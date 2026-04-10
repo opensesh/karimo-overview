@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { pipelinePhases } from "@/lib/constants";
 import { smoothTransition } from "@/lib/motion";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { useParallax } from "@/components/ui/ParallaxSection";
 
 // ─── Types ─────────────────────────────────────────────────
 type PipelinePhase = (typeof pipelinePhases)[number];
@@ -610,7 +611,8 @@ function PlaybackControls({
 }
 
 // ─── Main Section ──────────────────────────────────────────
-export function UnifiedPipelineSection() {
+export function OverviewSection() {
+  const { ref: sectionRef, y } = useParallax(30);
   const [focusedPhase, setFocusedPhase] = useState<string>("loop1");
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -650,6 +652,7 @@ export function UnifiedPipelineSection() {
 
   return (
     <section
+      ref={sectionRef}
       id="pipeline"
       className="bg-bg-secondary relative overflow-hidden pt-8 pb-20 min-h-screen"
     >
@@ -662,7 +665,8 @@ export function UnifiedPipelineSection() {
         }}
       />
 
-      <div className="relative max-w-5xl mx-auto px-6">
+      <motion.div style={{ y }} className="relative">
+      <div className="max-w-5xl mx-auto px-6">
         {/* Header with playback controls */}
         <div className="mb-14">
           <SectionLabel>OVERVIEW</SectionLabel>
@@ -715,8 +719,9 @@ export function UnifiedPipelineSection() {
         {/* Detail panel */}
         <PhaseDetailPanel phaseId={focusedPhase} />
       </div>
+      </motion.div>
     </section>
   );
 }
 
-export default UnifiedPipelineSection;
+export default OverviewSection;

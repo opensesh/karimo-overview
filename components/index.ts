@@ -6,5 +6,5 @@ export { OrchestrationViz } from "./OrchestrationViz";
 export { AdoptionPhases } from "./AdoptionPhases";
 export { KarimoPipeline } from "./KarimoPipeline";
 export { ProcessSection } from "./ProcessSection";
-export { OrchestrationSection } from "./OrchestrationSection";
-export { AdoptionSection } from "./AdoptionSection";
+export { EncodingSection } from "./EncodingSection";
+export { OptionSection } from "./OptionSection";

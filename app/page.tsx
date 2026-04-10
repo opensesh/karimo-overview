@@ -1,26 +1,47 @@
 import { Navigation } from "@/components/Navigation";
+import { SideNav } from "@/components/SideNav";
 import { HeroSection } from "@/components/HeroSection";
-import { UnifiedPipelineSection } from "@/components/UnifiedPipelineSection";
-import { OrchestrationSection } from "@/components/OrchestrationSection";
-import { AdoptionSection } from "@/components/AdoptionSection";
+import { OverviewSection } from "@/components/OverviewSection";
+import { EncodingSection } from "@/components/EncodingSection";
+import { ContextSection } from "@/components/ContextSection";
+import { OptionSection } from "@/components/OptionSection";
+import { CTASection } from "@/components/CTASection";
+import { Footer } from "@/components/Footer";
 
-export default function Home() {
+async function getLatestVersion(): Promise<string | null> {
+  try {
+    const res = await fetch(
+      "https://api.github.com/repos/opensesh/KARIMO/releases/latest",
+      {
+        headers: { Accept: "application/vnd.github+json" },
+        next: { revalidate: 3600 },
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.tag_name ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function Home() {
+  const version = await getLatestVersion();
+
   return (
     <>
       <Navigation />
+      <SideNav />
       <main className="min-h-screen">
-        {/* Hero: ASCII title, badges, description */}
-        <HeroSection />
-
-        {/* Section 01: How It Works - Unified Pipeline */}
-        <UnifiedPipelineSection />
-
-        {/* Section 02: Orchestration - Wave-Based Execution */}
-        <OrchestrationSection />
-
-        {/* Section 03: Approach - Three-Phased Adoption */}
-        <AdoptionSection />
+        <HeroSection version={version} />
+        <OverviewSection />
+        <EncodingSection />
+        <OptionSection />
+        <ContextSection />
+        <CTASection />
       </main>
+
+      <Footer />
     </>
   );
 }

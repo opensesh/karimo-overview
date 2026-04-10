@@ -4,13 +4,15 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { orchestrationData, type PhaseId } from "@/lib/constants";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { useParallax } from "@/components/ui/ParallaxSection";
 import { PhaseToggle } from "@/components/orchestration/PhaseToggle";
 import { GitGraph } from "@/components/orchestration/GitGraph";
 import { GitGraphMobile } from "@/components/orchestration/GitGraphMobile";
 import { PhaseDescription } from "@/components/orchestration/PhaseDescription";
 const PHASE_ORDER: PhaseId[] = ["planning", "execution", "review"];
 
-export function OrchestrationSection() {
+export function EncodingSection() {
+  const { ref: sectionRef, y } = useParallax(30);
   const [activePhase, setActivePhase] = useState<PhaseId>("planning");
   const [animatedPhases, setAnimatedPhases] = useState<Set<PhaseId>>(new Set());
   const [resetKey, setResetKey] = useState(0);
@@ -59,7 +61,8 @@ export function OrchestrationSection() {
   }, []);
 
   return (
-    <section id="orchestration" className="section-padding bg-bg-secondary">
+    <section ref={sectionRef} id="orchestration" className="section-padding min-h-screen bg-bg-secondary overflow-hidden">
+      <motion.div style={{ y }}>
       {/* Header + Phase toggle — narrower container */}
       <div className="max-w-5xl mx-auto px-6">
         <div className="mb-8">
@@ -71,7 +74,7 @@ export function OrchestrationSection() {
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
           >
-            Git Encoding Timeline
+            Git Timeline
           </motion.h2>
         </div>
 
@@ -120,6 +123,7 @@ export function OrchestrationSection() {
           shouldAnimate={shouldAnimate}
         />
       </div>
+      </motion.div>
     </section>
   );
 }
