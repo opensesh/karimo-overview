@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { orchestrationData, type PhaseId } from "@/lib/constants";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -14,8 +14,25 @@ export function OrchestrationSection() {
   const [activePhase, setActivePhase] = useState<PhaseId>("planning");
   const [animatedPhases, setAnimatedPhases] = useState<Set<PhaseId>>(new Set());
   const [resetKey, setResetKey] = useState(0);
+  const graphRef = useRef<HTMLDivElement>(null);
+  const maxHeightRef = useRef(0);
 
   const currentIndex = PHASE_ORDER.indexOf(activePhase);
+
+  // Track the tallest phase and lock the container to that height
+  useEffect(() => {
+    const el = graphRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const h = entry.contentRect.height;
+      if (h > maxHeightRef.current) {
+        maxHeightRef.current = h;
+        el.style.minHeight = `${h}px`;
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [resetKey]);
   const shouldAnimate = !animatedPhases.has(activePhase);
 
   const handleAnimationComplete = useCallback(() => {
@@ -37,6 +54,8 @@ export function OrchestrationSection() {
     setAnimatedPhases(new Set());
     setResetKey((prev) => prev + 1);
     setActivePhase("planning");
+    maxHeightRef.current = 0;
+    if (graphRef.current) graphRef.current.style.minHeight = "";
   }, []);
 
   return (
@@ -44,7 +63,7 @@ export function OrchestrationSection() {
       {/* Header + Phase toggle — narrower container */}
       <div className="max-w-5xl mx-auto px-6">
         <div className="mb-8">
-          <SectionLabel>OVERVIEW</SectionLabel>
+          <SectionLabel>ENCODING</SectionLabel>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -52,7 +71,7 @@ export function OrchestrationSection() {
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
           >
-            Workflow Overview
+            Git Encoding Timeline
           </motion.h2>
         </div>
 
@@ -69,8 +88,8 @@ export function OrchestrationSection() {
 
       {/* Graph + Description — wider container */}
       <div className="max-w-6xl mx-auto px-6">
-        {/* Fixed-height wrapper to prevent layout shift */}
-        <div className="min-h-[480px] md:min-h-[380px]">
+        {/* Height-locked wrapper — grows to tallest phase, never shrinks */}
+        <div ref={graphRef}>
           {/* Desktop git graph */}
           <div className="hidden md:block">
             <GitGraph
