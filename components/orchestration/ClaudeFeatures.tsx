@@ -469,10 +469,8 @@ export function ClaudeFeatures() {
         {/* Card track viewport */}
         <div
           ref={containerRef}
-          className="flex-1 touch-pan-y py-2"
+          className="overflow-hidden flex-1 touch-pan-y"
           style={{
-            overflowX: 'clip',
-            overflowY: 'visible',
             maskImage: 'linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent)',
             WebkitMaskImage: 'linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent)',
           }}
@@ -481,7 +479,7 @@ export function ClaudeFeatures() {
         >
           <motion.div
             ref={trackRef}
-            className="flex cursor-grab active:cursor-grabbing"
+            className="flex cursor-grab active:cursor-grabbing py-1"
             style={{ x, gap: GAP }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
@@ -493,12 +491,31 @@ export function ClaudeFeatures() {
               const dataIndex = i % TOTAL;
               const feature = claudeFeatures[dataIndex];
               return (
-                <FeatureCard
+                <motion.a
                   key={`c-${i}`}
-                  feature={feature}
-                  iconSrc={getIconForFeature(dataIndex)}
-                  cardWidth={cardWidth}
-                />
+                  href={feature.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  draggable={false}
+                  className="contents"
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={
+                    showCards
+                      ? { opacity: 1, y: 0, scale: 1 }
+                      : {}
+                  }
+                  transition={{
+                    duration: 0.5,
+                    delay: Math.min(i, 4) * 0.08,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                >
+                  <FeatureCard
+                    feature={feature}
+                    iconSrc={getIconForFeature(dataIndex)}
+                    cardWidth={cardWidth}
+                  />
+                </motion.a>
               );
             })}
           </motion.div>
