@@ -184,11 +184,11 @@ function PhaseCard({
       >
         {/* Label */}
         <div className="flex flex-col items-center mb-3">
-          <span className="text-heading text-xl tracking-wide text-fg-primary">
-            {phase.label}
-          </span>
           <span className="text-body text-sm tracking-normal text-fg-tertiary">
             {phase.sublabel}
+          </span>
+          <span className="text-heading text-xl tracking-wide text-fg-primary">
+            {phase.label}
           </span>
         </div>
 
@@ -251,11 +251,11 @@ function MobileExpandedCard({ phase }: { phase: PipelinePhase }) {
   return (
     <div className="rounded-lg border border-border-primary bg-bg-secondary/50 px-5 py-6">
       <div className="flex flex-col items-center mb-4">
-        <span className="text-heading text-xl tracking-wide text-fg-primary">
-          {phase.label}
-        </span>
         <span className="text-body text-sm tracking-normal text-fg-secondary">
           {phase.sublabel}
+        </span>
+        <span className="text-heading text-xl tracking-wide text-fg-primary">
+          {phase.label}
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-2 justify-center">
@@ -470,19 +470,6 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
           transition={smoothTransition}
           className="w-full max-w-5xl mx-auto mt-10"
         >
-          {/* Phase title */}
-          <div className="flex items-center gap-3 mb-4">
-            <span
-              className="text-xs text-fg-brand uppercase tracking-widest"
-              style={{ fontFamily: "var(--font-accent)", fontWeight: 700 }}
-            >
-              {phase.label}
-            </span>
-            <span className="text-body text-sm text-fg-tertiary">
-              {phase.sublabel}
-            </span>
-          </div>
-
           {/* 3-column grid — fixed height to prevent jumping between loops */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:h-[420px] md:items-stretch">
             {/* LEFT: Explanation + Input/Output */}
