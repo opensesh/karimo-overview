@@ -173,16 +173,6 @@ function PhaseCard({
           "transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease",
       }}
     >
-      {/* Loop tab */}
-      <span
-        className={`
-          text-accent text-xs font-bold px-2 py-0.5 rounded mb-1 transition-colors duration-200
-          ${focused ? "bg-bg-brand-solid text-fg-primary" : "bg-bg-secondary text-fg-tertiary"}
-        `}
-      >
-        L{loopNum}
-      </span>
-
       <div
         className={`
           rounded-lg p-4 pb-3 transition-all duration-300
@@ -193,13 +183,18 @@ function PhaseCard({
           }
         `}
       >
-        {/* Label */}
-        <div className="flex flex-col items-center mb-3">
+        {/* Tag + Title */}
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span
+            className={`
+              text-accent text-xs font-bold px-2 py-0.5 rounded transition-colors duration-200
+              ${focused ? "bg-bg-brand-solid text-fg-primary" : "bg-bg-secondary text-fg-tertiary"}
+            `}
+          >
+            L{loopNum}
+          </span>
           <span className="text-heading text-xl tracking-wide text-fg-primary">
             {phase.label}
-          </span>
-          <span className="text-body text-sm tracking-normal text-fg-tertiary">
-            {phase.sublabel}
           </span>
         </div>
 
@@ -266,12 +261,12 @@ function MobileExpandedCard({ phase }: { phase: PipelinePhase }) {
 
   return (
     <div className="rounded-lg border border-border-primary bg-bg-secondary/50 px-5 py-6">
-      <div className="flex flex-col items-center mb-4">
+      <div className="flex items-center justify-center gap-2 mb-4">
+        <span className="text-accent text-xs font-bold px-2 py-0.5 rounded bg-bg-brand-solid text-fg-primary">
+          L{phase.id.replace("loop", "")}
+        </span>
         <span className="text-heading text-xl tracking-wide text-fg-primary">
           {phase.label}
-        </span>
-        <span className="text-body text-sm tracking-normal text-fg-secondary">
-          {phase.sublabel}
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-2 justify-center">
