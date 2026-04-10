@@ -16,7 +16,7 @@ interface ClaudeFeature {
   date: string;
 }
 
-const DOCS_BASE = "https://docs.anthropic.com/en/docs/claude-code";
+const DOCS_BASE = "https://code.claude.com/docs/en";
 
 const claudeFeatures: ClaudeFeature[] = [
   {
@@ -40,7 +40,7 @@ const claudeFeatures: ClaudeFeature[] = [
     title: "Agent Teams",
     description:
       "Coordinate multiple agents working on related tasks simultaneously.",
-    href: `${DOCS_BASE}/sub-agents`,
+    href: `${DOCS_BASE}/agent-teams`,
     date: "Sep 2025",
   },
   {
@@ -48,7 +48,7 @@ const claudeFeatures: ClaudeFeature[] = [
     title: "Skills",
     description:
       "Reusable capability modules that extend agent knowledge and behavior.",
-    href: `${DOCS_BASE}/slash-commands`,
+    href: `${DOCS_BASE}/skills`,
     date: "Jan 2026",
   },
   {
@@ -64,7 +64,7 @@ const claudeFeatures: ClaudeFeature[] = [
     title: "Model Routing",
     description:
       "Route tasks to optimal models based on complexity and cost constraints.",
-    href: `${DOCS_BASE}/model-configuration`,
+    href: `${DOCS_BASE}/model-config`,
     date: "Jul 2025",
   },
   {
