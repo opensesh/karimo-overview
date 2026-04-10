@@ -139,25 +139,17 @@ function FeatureCard({
   feature,
   iconSrc,
   cardWidth,
-  showCards,
-  animDelay,
 }: {
   feature: ClaudeFeature;
   iconSrc: string;
   cardWidth: number;
-  showCards: boolean;
-  animDelay: number;
 }) {
   return (
-    <motion.div
-      draggable={false}
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={showCards ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{ duration: 0.5, delay: animDelay, ease: [0.16, 1, 0.3, 1] }}
+    <div
       className="group block rounded-xl overflow-hidden
                  bg-bg-tertiary border border-border-secondary
                  hover:border-border-brand hover:-translate-y-1
-                 transition-[border-color,transform] duration-300 flex-shrink-0 select-none
+                 transition-all duration-300 flex-shrink-0 select-none
                  cursor-pointer"
       style={{ width: cardWidth, minWidth: cardWidth }}
       onClick={(e) => {
@@ -199,7 +191,7 @@ function FeatureCard({
           {feature.date}
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -506,8 +498,6 @@ export function ClaudeFeatures() {
                   feature={feature}
                   iconSrc={getIconForFeature(dataIndex)}
                   cardWidth={cardWidth}
-                  showCards={showCards}
-                  animDelay={Math.min(i, 4) * 0.08}
                 />
               );
             })}
