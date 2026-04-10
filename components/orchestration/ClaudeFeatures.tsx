@@ -157,7 +157,7 @@ function FeatureCard({
       className="group block rounded-xl overflow-hidden
                  bg-bg-tertiary border border-border-secondary
                  hover:border-border-brand hover:-translate-y-1
-                 transition-all duration-300 flex-shrink-0 select-none
+                 transition-[border-color,transform] duration-300 flex-shrink-0 select-none
                  cursor-pointer"
       style={{ width: cardWidth, minWidth: cardWidth }}
       onClick={(e) => {
