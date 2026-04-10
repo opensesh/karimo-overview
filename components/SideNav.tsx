@@ -6,10 +6,11 @@ import { motion } from "framer-motion";
 const sections = [
   { id: "home", number: "00", label: "Home" },
   { id: "pipeline", number: "01", label: "Overview" },
-  { id: "orchestration", number: "02", label: "Encoding" },
-  { id: "adoption", number: "03", label: "Option" },
-  { id: "context", number: "04", label: "Context" },
-  { id: "quickstart", number: "05", label: "Start" },
+  { id: "live-example", number: "02", label: "Example" },
+  { id: "orchestration", number: "03", label: "Encoding" },
+  { id: "adoption", number: "04", label: "Adoption" },
+  { id: "context", number: "05", label: "Context" },
+  { id: "quickstart", number: "06", label: "Start" },
 ];
 
 export function SideNav() {

@@ -2,9 +2,10 @@ import { Navigation } from "@/components/Navigation";
 import { SideNav } from "@/components/SideNav";
 import { HeroSection } from "@/components/HeroSection";
 import { OverviewSection } from "@/components/OverviewSection";
+import { LiveExampleSection } from "@/components/LiveExampleSection";
 import { EncodingSection } from "@/components/EncodingSection";
 import { ContextSection } from "@/components/ContextSection";
-import { OptionSection } from "@/components/OptionSection";
+import { AdoptionSection } from "@/components/AdoptionSection";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 
@@ -35,8 +36,9 @@ export default async function Home() {
       <main className="min-h-screen">
         <HeroSection version={version} />
         <OverviewSection />
+        <LiveExampleSection />
         <EncodingSection />
-        <OptionSection />
+        <AdoptionSection />
         <ContextSection />
         <CTASection />
       </main>
