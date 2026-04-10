@@ -253,9 +253,9 @@ function TerminalPreview({
       </div>
 
       {/* Terminal body */}
-      <div className="bg-[#0a0a0a] p-5 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto flex-1">
+      <div className="bg-[#0a0a0a] p-4 sm:p-5 font-mono text-[11px] sm:text-xs leading-relaxed overflow-hidden flex-1">
         {/* Command prompt */}
-        <div className="mb-3">
+        <div className="mb-3 break-all">
           <span className="text-fg-brand">$</span>{" "}
           <span className="text-fg-primary">{command}</span>
         </div>
@@ -275,7 +275,7 @@ function TerminalPreview({
                 initial={{ opacity: 0, x: -4 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.2, delay: i * 0.03 }}
-                className={`whitespace-pre ${getLineColor(line)}`}
+                className={`whitespace-pre-wrap ${getLineColor(line)}`}
               >
                 {line || "\u00A0"}
               </motion.div>
