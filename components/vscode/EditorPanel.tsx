@@ -43,6 +43,7 @@ const CONTENT_KEY_TO_FILENAME: Record<string, string> = {
   "external-findings": "findings.md",
   "internal-findings": "findings.md",
   "assets-json": "assets.json",
+  "status-complete": "status.json",
 };
 
 export function getFileName(contentKey: string): string {
@@ -113,33 +114,35 @@ function CodeView({ contentKey }: { contentKey: string }) {
   const prismLang = PRISM_LANG_MAP[file.language] ?? "markdown";
 
   return (
-    <Highlight theme={themes.vsDark} code={file.content.trimEnd()} language={prismLang}>
-      {({ tokens, getLineProps, getTokenProps }) => (
-        <pre
-          className="flex-1 overflow-auto text-[13px] leading-5 py-2"
-          style={{ background: "transparent", margin: 0, fontFamily: "var(--font-mono, monospace)", whiteSpace: "pre" }}
-        >
-          {tokens.map((line, i) => {
-            const lineProps = getLineProps({ line });
-            return (
-              <div key={i} {...lineProps} className="flex">
-                <span
-                  className="w-12 text-right pr-4 shrink-0 select-none"
-                  style={{ color: VSCODE.textDim }}
-                >
-                  {i + 1}
-                </span>
-                <span className="flex-1 min-w-0">
-                  {line.map((token, key) => (
-                    <span key={key} {...getTokenProps({ token })} />
-                  ))}
-                </span>
-              </div>
-            );
-          })}
-        </pre>
-      )}
-    </Highlight>
+    <div className="flex-1 overflow-auto" data-vscode-scroll>
+      <Highlight theme={themes.vsDark} code={file.content.trimEnd()} language={prismLang}>
+        {({ tokens, getLineProps, getTokenProps }) => (
+          <pre
+            className="text-[13px] leading-5 py-2"
+            style={{ background: "transparent", margin: 0, fontFamily: "var(--font-mono, monospace)", whiteSpace: "pre", width: "fit-content", minWidth: "100%" }}
+          >
+            {tokens.map((line, i) => {
+              const lineProps = getLineProps({ line });
+              return (
+                <div key={i} {...lineProps} style={{ display: "flex" }}>
+                  <span
+                    className="w-12 text-right pr-4 shrink-0 select-none"
+                    style={{ color: VSCODE.textDim }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span>
+                    {line.map((token, key) => (
+                      <span key={key} {...getTokenProps({ token })} />
+                    ))}
+                  </span>
+                </div>
+              );
+            })}
+          </pre>
+        )}
+      </Highlight>
+    </div>
   );
 }
 
