@@ -1,3 +1,4 @@
+import { ViewportProvider } from "@/components/ViewportProvider";
 import { Navigation } from "@/components/Navigation";
 import { SideNav } from "@/components/SideNav";
 import { HeroSection } from "@/components/HeroSection";
@@ -31,19 +32,21 @@ export default async function Home() {
 
   return (
     <>
-      <Navigation />
-      <SideNav />
-      <main className="min-h-screen">
-        <HeroSection version={version} />
-        <OverviewSection />
-        <LiveExampleSection />
-        <EncodingSection />
-        <AdoptionSection />
-        <ContextSection />
-        <CTASection />
-      </main>
+      <ViewportProvider>
+        <Navigation />
+        <SideNav />
+        <main className="min-h-screen">
+          <HeroSection version={version} />
+          <OverviewSection />
+          <LiveExampleSection />
+          <EncodingSection />
+          <ContextSection />
+          <AdoptionSection />
+          <CTASection />
+        </main>
 
-      <Footer />
+        <Footer />
+      </ViewportProvider>
     </>
   );
 }

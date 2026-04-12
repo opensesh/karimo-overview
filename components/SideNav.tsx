@@ -2,18 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useViewport } from "./ViewportProvider";
 
 const sections = [
   { id: "home", number: "00", label: "Home" },
   { id: "pipeline", number: "01", label: "Overview" },
   { id: "live-example", number: "02", label: "Example" },
   { id: "orchestration", number: "03", label: "Encoding" },
-  { id: "adoption", number: "04", label: "Adoption" },
-  { id: "context", number: "05", label: "Context" },
+  { id: "context", number: "04", label: "Context" },
+  { id: "adoption", number: "05", label: "Adoption" },
   { id: "quickstart", number: "06", label: "Start" },
 ];
 
+const HEADER_HEIGHT = 56;
+const SCROLL_BREATHING = 16;
+
 export function SideNav() {
+  const { headerVisible } = useViewport();
   const [activeSection, setActiveSection] = useState("overview");
 
   useEffect(() => {
@@ -43,13 +48,19 @@ export function SideNav() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top =
+      el.getBoundingClientRect().top +
+      window.scrollY -
+      (HEADER_HEIGHT + SCROLL_BREATHING);
+    window.scrollTo({ top, behavior: "smooth" });
   };
 
   return (
     <motion.nav
       initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
+      animate={{ opacity: 1, x: 0, y: headerVisible ? 4 : 0 }}
       transition={{ duration: 0.5, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
       aria-label="Page sections"
       className="group/nav fixed left-4 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col rounded-lg border border-border-secondary bg-bg-secondary/80 backdrop-blur-md py-2 px-1.5 overflow-hidden"
