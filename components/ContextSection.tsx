@@ -64,6 +64,7 @@ interface ChartPoint {
     title: string;
     subtitle: string;
     description: string;
+    context?: { label: string; formula: string; percent: number; color: string };
   };
 }
 
@@ -81,6 +82,12 @@ const chartPoints: ChartPoint[] = [
       subtitle: "Plan Mode",
       description:
         "A single session with a flat 1M context window. Each new session starts from scratch — no memory, no compounding. Limited to simple, short-duration tasks.",
+      context: {
+        label: "1M tokens",
+        formula: "1M per session (flat, no compounding)",
+        percent: 15,
+        color: "#78716c",
+      },
     },
   },
   {
@@ -96,6 +103,12 @@ const chartPoints: ChartPoint[] = [
       subtitle: "KARIMO",
       description:
         "Context compounds across sessions. Research seeds PRDs, PRDs seed briefs, briefs seed parallel worktrees. Each stage multiplies the effective context window.",
+      context: {
+        label: "10–100M effective",
+        formula: "1M × tasks × research depth",
+        percent: 70,
+        color: "#fe5102",
+      },
     },
   },
   {
@@ -637,8 +650,8 @@ function ComplexityDurationChart() {
           >
             <defs>
               <linearGradient id="grad-plan" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#57534e" stopOpacity="0.5" />
-                <stop offset="100%" stopColor="#44403a" stopOpacity="0.08" />
+                <stop offset="0%" stopColor="#78716c" stopOpacity="0.7" />
+                <stop offset="100%" stopColor="#57534e" stopOpacity="0.15" />
               </linearGradient>
               <linearGradient id="grad-karimo" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#fe5102" stopOpacity="0.5" />
@@ -760,10 +773,10 @@ function ComplexityDurationChart() {
                   key={`tri-${point.id}`}
                   points={`${dotX},${dotY} ${leftX},${baseY} ${rightX},${baseY}`}
                   fill={`url(#${point.gradientId})`}
-                  opacity={isActive ? 1 : 0.25}
+                  opacity={isActive ? 1 : 0.4}
                   style={{ transition: "opacity 0.3s" }}
                   initial={{ opacity: 0 }}
-                  whileInView={{ opacity: isActive ? 1 : 0.25 }}
+                  whileInView={{ opacity: isActive ? 1 : 0.4 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: 0.3 + i * 0.3, ease: springEase }}
                 />
@@ -841,7 +854,7 @@ function ComplexityDurationChart() {
         </motion.div>
 
         {/* Detail panel — fixed height for consistency */}
-        <div className="h-[220px] md:h-[200px]">
+        <div className="h-[280px] md:h-[260px]">
           <AnimatePresence mode="wait">
             <ChartDetailPanel key={activePoint.id} point={activePoint} />
           </AnimatePresence>
@@ -875,6 +888,31 @@ function ChartDetailPanel({ point }: { point: ChartPoint }) {
       <p className="text-body text-sm text-fg-secondary mt-3 leading-relaxed flex-1">
         {detail.description}
       </p>
+
+      {detail.context && (
+        <div className="mt-4 pt-4 border-t border-border-secondary">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-body text-[10px] text-fg-tertiary uppercase tracking-wider">
+              Effective context
+            </span>
+            <span className="font-mono text-xs text-fg-primary">
+              {detail.context.label}
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full bg-bg-primary overflow-hidden relative">
+            <motion.div
+              className="absolute left-0 top-0 h-full rounded-full"
+              style={{ backgroundColor: detail.context.color }}
+              initial={{ width: 0 }}
+              animate={{ width: `${detail.context.percent}%` }}
+              transition={{ duration: 0.6, delay: 0.15, ease: springEase }}
+            />
+          </div>
+          <p className="font-mono text-[10px] text-fg-tertiary mt-1.5">
+            {detail.context.formula}
+          </p>
+        </div>
+      )}
     </motion.div>
   );
 }
