@@ -387,7 +387,7 @@ export function ContextSection() {
         </motion.div>
 
         {/* Divider */}
-        <div className="flex items-center gap-4 mb-16 md:mb-20">
+        <div className="flex items-center gap-4 mb-24 md:mb-32">
           <div className="flex-1 h-px bg-border-secondary" />
         </div>
 
@@ -421,7 +421,7 @@ export function ContextSection() {
         </motion.div>
 
         {/* Layer explorer — terminal LEFT, accordion RIGHT */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch mb-16 md:mb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch mb-24 md:mb-32">
           {/* Left: Terminal preview */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -525,7 +525,7 @@ export function ContextSection() {
         </div>
 
         {/* Divider */}
-        <div className="flex items-center gap-4 mb-16 md:mb-20">
+        <div className="flex items-center gap-4 mb-24 md:mb-32">
           <div className="flex-1 h-px bg-border-secondary" />
         </div>
 
@@ -554,12 +554,12 @@ export function ContextSection() {
         <ContextMultiplicationViz />
 
         {/* Divider */}
-        <div className="flex items-center gap-4 mt-16 md:mt-20">
+        <div className="flex items-center gap-4 mt-24 md:mt-32">
           <div className="flex-1 h-px bg-border-secondary" />
         </div>
 
         {/* ── PART 3: Compound Learning ── */}
-        <div className="mt-16 md:mt-20">
+        <div className="mt-24 md:mt-32">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
