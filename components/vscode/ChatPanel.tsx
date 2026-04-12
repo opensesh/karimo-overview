@@ -176,7 +176,11 @@ export const ChatPanel = memo(function ChatPanel({
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (el) {
+      const savedY = window.scrollY;
       el.scrollTop = el.scrollHeight;
+      if (window.scrollY !== savedY) {
+        window.scrollTo({ top: savedY });
+      }
     }
   }, [messages.length]);
 

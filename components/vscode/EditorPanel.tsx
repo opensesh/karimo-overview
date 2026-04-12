@@ -3,12 +3,16 @@
 import { memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Highlight, themes } from "prism-react-renderer";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   VSCODE,
   FILE_CONTENTS,
+  BROWSER_PREVIEWS,
   getFileExtension,
   getExtColor,
 } from "@/lib/vscode-data";
+import { BrowserPreview } from "./BrowserPreview";
 
 // ─── File name lookup ─────────────────────────────────────
 
@@ -44,6 +48,8 @@ const CONTENT_KEY_TO_FILENAME: Record<string, string> = {
   "internal-findings": "findings.md",
   "assets-json": "assets.json",
   "status-complete": "status.json",
+  "browser-before": "Simple Browser",
+  "browser-after": "Simple Browser",
 };
 
 export function getFileName(contentKey: string): string {
@@ -65,6 +71,7 @@ function Tab({
 }) {
   const filename = getFileName(contentKey);
   const color = getExtColor(filename);
+  const isBrowser = contentKey.startsWith("browser-");
 
   return (
     <button
@@ -77,7 +84,25 @@ function Tab({
       }}
       onClick={onSelect}
     >
-      <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: color }} />
+      {isBrowser ? (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={active ? VSCODE.accent : VSCODE.textDim}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="shrink-0"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+        </svg>
+      ) : (
+        <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: color }} />
+      )}
       <span className="truncate max-w-[120px]">{filename}</span>
       <span
         className="w-4 h-4 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity"
@@ -159,6 +184,61 @@ function CodeView({ contentKey }: { contentKey: string }) {
       </Highlight>
     </div>
   );
+}
+
+// ─── Markdown View ───────────────────────────────────────
+
+function MarkdownView({ contentKey }: { contentKey: string }) {
+  const file = FILE_CONTENTS[contentKey];
+  if (!file) return null;
+
+  return (
+    <div
+      className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-4"
+      data-vscode-scroll
+      style={{ overscrollBehavior: "contain" }}
+    >
+      <div className="vscode-markdown">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            table: ({ children, ...props }) => (
+              <div style={{ overflowX: "auto" }}>
+                <table {...props}>{children}</table>
+              </div>
+            ),
+            a: ({ children }) => (
+              <span
+                style={{
+                  color: VSCODE.accent,
+                  textDecoration: "underline",
+                  cursor: "default",
+                }}
+              >
+                {children}
+              </span>
+            ),
+          }}
+        >
+          {file.content}
+        </ReactMarkdown>
+      </div>
+    </div>
+  );
+}
+
+// ─── Content Dispatcher ──────────────────────────────────
+
+function FileContentView({ contentKey }: { contentKey: string }) {
+  const file = FILE_CONTENTS[contentKey];
+  if (!file) return null;
+  if (file.language === "browser") {
+    const preview = BROWSER_PREVIEWS[contentKey];
+    if (!preview) return null;
+    return <BrowserPreview url={preview.url} imageSrc={preview.imageSrc} />;
+  }
+  if (file.language === "markdown") return <MarkdownView contentKey={contentKey} />;
+  return <CodeView contentKey={contentKey} />;
 }
 
 // ─── Empty State ──────────────────────────────────────────
@@ -250,7 +330,7 @@ export const EditorPanel = memo(function EditorPanel({
               transition={{ duration: 0.15 }}
               className="flex-1 min-h-0 flex flex-col"
             >
-              <CodeView contentKey={activeFile} />
+              <FileContentView contentKey={activeFile} />
             </motion.div>
           ) : (
             <motion.div
