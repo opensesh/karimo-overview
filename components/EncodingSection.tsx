@@ -15,8 +15,6 @@ const PHASE_ORDER: PhaseId[] = ["planning", "execution", "review"];
 export function EncodingSection() {
   const { ref: sectionRef, y } = useParallax(30);
   const [activePhase, setActivePhase] = useState<PhaseId>("planning");
-  const [animatedPhases, setAnimatedPhases] = useState<Set<PhaseId>>(new Set());
-  const [resetKey, setResetKey] = useState(0);
   const graphRef = useRef<HTMLDivElement>(null);
   const maxHeightRef = useRef(0);
 
@@ -35,12 +33,7 @@ export function EncodingSection() {
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [resetKey]);
-  const shouldAnimate = !animatedPhases.has(activePhase);
-
-  const handleAnimationComplete = useCallback(() => {
-    setAnimatedPhases((prev) => new Set(prev).add(activePhase));
-  }, [activePhase]);
+  }, []);
 
   const handleNavigate = useCallback(
     (direction: "prev" | "next") => {
@@ -53,16 +46,8 @@ export function EncodingSection() {
     [currentIndex]
   );
 
-  const handleReset = useCallback(() => {
-    setAnimatedPhases(new Set());
-    setResetKey((prev) => prev + 1);
-    setActivePhase("planning");
-    maxHeightRef.current = 0;
-    if (graphRef.current) graphRef.current.style.minHeight = "";
-  }, []);
-
   return (
-    <section ref={sectionRef} id="orchestration" className="section-padding min-h-screen bg-bg-secondary overflow-hidden">
+    <section ref={sectionRef} id="orchestration" className="section-padding min-h-screen bg-bg-primary overflow-hidden">
       <motion.div style={{ y }}>
       {/* Header + Phase toggle — narrower container */}
       <div className="max-w-5xl mx-auto px-6">
@@ -84,7 +69,6 @@ export function EncodingSection() {
           activePhase={activePhase}
           onPhaseChange={setActivePhase}
           onNavigate={handleNavigate}
-          onReset={handleReset}
           canGoPrev={currentIndex > 0}
           canGoNext={currentIndex < PHASE_ORDER.length - 1}
         >
@@ -99,22 +83,20 @@ export function EncodingSection() {
           {/* Desktop git graph */}
           <div className="hidden md:block">
             <GitGraph
-              key={`desktop-${resetKey}`}
+              key={`desktop-${activePhase}`}
               data={orchestrationData}
               activePhase={activePhase}
-              shouldAnimate={shouldAnimate}
-              onAnimationComplete={handleAnimationComplete}
+              shouldAnimate={true}
             />
           </div>
 
           {/* Mobile card layout */}
           <div className="md:hidden">
             <GitGraphMobile
-              key={`mobile-${resetKey}`}
+              key={`mobile-${activePhase}`}
               data={orchestrationData}
               activePhase={activePhase}
-              shouldAnimate={shouldAnimate}
-              onAnimationComplete={handleAnimationComplete}
+              shouldAnimate={true}
             />
           </div>
         </div>
@@ -123,7 +105,7 @@ export function EncodingSection() {
         <PhaseDescription
           activePhase={activePhase}
           descriptions={orchestrationData.phaseDescriptions}
-          shouldAnimate={shouldAnimate}
+          shouldAnimate={true}
         />
       </div>
       </motion.div>

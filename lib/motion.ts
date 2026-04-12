@@ -276,6 +276,25 @@ export const phaseStagger: Variants = {
   exit: { opacity: 0, transition: { duration: 0.15 } },
 };
 
+// Inner content stagger — faster cascade for pills, tags, items within a step
+export const contentStagger: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.02 },
+  },
+};
+
+export const itemPop: Variants = {
+  hidden: { opacity: 0, scale: 0.85, y: 6 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
 export const drawLineX: Variants = {
   hidden: { scaleX: 0, opacity: 0 },
   visible: {

@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import type { OrchestrationData, PhaseId } from "@/lib/constants";
 import { Folder, FolderCode } from "@untitledui/icons";
-import { phaseStagger, drawLineX, drawLineY, fadeInUp, nodeAppear } from "@/lib/motion";
+import { phaseStagger, drawLineX, drawLineY, fadeInUp, nodeAppear, contentStagger, itemPop } from "@/lib/motion";
 import { AgentRow } from "./AgentRow";
 
 interface GitGraphProps {
@@ -272,30 +272,30 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
             <BranchNode className="relative z-10" />
             <StepLabel title="Research" subtitle="/karimo:research" />
             <AgentSection phaseStep="planning:research" />
-            <div className="mt-4 space-y-3">
-              <div className="space-y-1.5">
+            <motion.div variants={contentStagger} className="mt-4 space-y-3">
+              <motion.div variants={itemPop} className="space-y-1.5">
                 <div className="flex items-center gap-1.5">
                   <Folder width={14} height={14} className="text-fg-secondary" />
                   <span className="text-fg-primary text-[11px] font-medium">External</span>
                 </div>
-                <div className="flex flex-wrap gap-1 pl-5">
+                <motion.div variants={contentStagger} className="flex flex-wrap gap-1 pl-5">
                   {data.research.external.map((item, i) => (
-                    <span key={i} className="px-2 py-0.5 rounded text-[10px] bg-bg-brand-subtle border border-border-brand/30 text-fg-brand" style={{ fontFamily: "var(--font-mono, monospace)" }}>{item.label}</span>
+                    <motion.span variants={itemPop} key={i} className="px-2 py-0.5 rounded text-[10px] bg-bg-brand-subtle border border-border-brand/30 text-fg-brand" style={{ fontFamily: "var(--font-mono, monospace)" }}>{item.label}</motion.span>
                   ))}
-                </div>
-              </div>
-              <div className="space-y-1.5">
+                </motion.div>
+              </motion.div>
+              <motion.div variants={itemPop} className="space-y-1.5">
                 <div className="flex items-center gap-1.5">
                   <FolderCode width={14} height={14} className="text-fg-secondary" />
                   <span className="text-fg-primary text-[11px] font-medium">Internal</span>
                 </div>
-                <div className="flex flex-wrap gap-1 pl-5">
+                <motion.div variants={contentStagger} className="flex flex-wrap gap-1 pl-5">
                   {data.research.internal.map((item, i) => (
-                    <span key={i} className="px-2 py-0.5 rounded text-[10px] bg-bg-brand-subtle border border-border-brand/30 text-fg-brand" style={{ fontFamily: "var(--font-mono, monospace)" }}>{item.label}</span>
+                    <motion.span variants={itemPop} key={i} className="px-2 py-0.5 rounded text-[10px] bg-bg-brand-subtle border border-border-brand/30 text-fg-brand" style={{ fontFamily: "var(--font-mono, monospace)" }}>{item.label}</motion.span>
                   ))}
-                </div>
-              </div>
-            </div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
           </motion.div>
 
           {/* Create PRD */}
@@ -303,11 +303,11 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
             <BranchNode className="relative z-10" />
             <StepLabel title="Create PRD" subtitle="/karimo:plan" />
             <AgentSection phaseStep="planning:create-prd" />
-            <div className="mt-4">
-              <div className="inline-flex px-3 py-1.5 rounded-md bg-bg-brand-solid text-fg-primary text-[11px] font-semibold">
+            <motion.div variants={contentStagger} className="mt-4">
+              <motion.div variants={itemPop} className="inline-flex px-3 py-1.5 rounded-md bg-bg-brand-solid text-fg-primary text-[11px] font-semibold">
                 {data.prdName}
-              </div>
-              <div className="mt-2 px-2 py-1 rounded border border-border-secondary bg-bg-tertiary/30 inline-flex items-center gap-1.5">
+              </motion.div>
+              <motion.div variants={itemPop} className="mt-2 px-2 py-1 rounded border border-border-secondary bg-bg-tertiary/30 inline-flex items-center gap-1.5">
                 <span className="text-fg-tertiary text-[9px]" style={{ fontFamily: "var(--font-mono, monospace)" }}>
                   Interview Protocol
                 </span>
@@ -315,8 +315,8 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
                 <span className="text-fg-tertiary/60 text-[9px]" style={{ fontFamily: "var(--font-mono, monospace)" }}>
                   customizable
                 </span>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </motion.div>
 
           {/* Task Briefs */}
@@ -324,11 +324,13 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
             <BranchNode className="relative z-10" />
             <StepLabel title="Task Briefs" subtitle="/karimo:run" />
             <AgentSection phaseStep="planning:task-briefs" />
-            <div className="mt-4 grid grid-cols-2 gap-1">
+            <motion.div variants={contentStagger} className="mt-4 grid grid-cols-2 gap-1">
               {data.taskBriefs.map((brief) => (
-                <TaskBriefPill key={brief.id} id={brief.id} color={waveColor(brief.wave)} />
+                <motion.div variants={itemPop} key={brief.id}>
+                  <TaskBriefPill id={brief.id} color={waveColor(brief.wave)} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* Dependency Graph */}
@@ -336,18 +338,18 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
             <BranchNode className="relative z-10" />
             <StepLabel title="Dependency Graph" subtitle="/karimo:run" />
             <AgentSection phaseStep="planning:dependency" />
-            <div className="mt-4 space-y-2">
+            <motion.div variants={contentStagger} className="mt-4 space-y-2">
               {data.waveMappings.map((mapping) => (
-                <div key={mapping.wave} className="flex items-center gap-3">
+                <motion.div variants={itemPop} key={mapping.wave} className="flex items-center gap-3">
                   <span className="text-fg-secondary text-[11px] w-12 flex-shrink-0" style={{ fontFamily: "var(--font-body)" }}>Wave {mapping.wave}</span>
                   <div className="flex gap-0.5">
                     {mapping.taskIds.map((taskId) => (
                       <div key={taskId} className="h-3.5 w-10 rounded-sm" style={{ backgroundColor: `${mapping.color}40`, border: `1px solid ${mapping.color}60` }} />
                     ))}
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
@@ -372,7 +374,7 @@ function ExecutionPhase({ data }: { data: OrchestrationData }) {
         />
 
         {/* Two nodes: Execute (left) and Inspect (right) */}
-        <div className="grid gap-6" style={{ gridTemplateColumns: "3fr 2fr" }}>
+        <div className="grid gap-4" style={{ gridTemplateColumns: "2fr 1fr" }}>
           <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Execute" subtitle="/karimo:run" />
@@ -387,7 +389,7 @@ function ExecutionPhase({ data }: { data: OrchestrationData }) {
       </div>
 
       {/* Content below: feature branch + wave lifecycle */}
-      <motion.div variants={fadeInUp} className="grid grid-cols-[1.4fr_1fr] gap-5 mt-4">
+      <motion.div variants={fadeInUp} className="grid grid-cols-[1.6fr_1fr] gap-4 mt-4">
         {/* Left: feature branch + worktrees */}
         <motion.div variants={fadeInUp} className="min-w-0">
           <div className="relative ml-3.5">
@@ -481,7 +483,7 @@ function ReviewPhase({ data }: { data: OrchestrationData }) {
           style={{ top: 14, transformOrigin: "left" }}
         />
 
-        <div className="grid gap-5" style={{ gridTemplateColumns: "1.2fr 1fr 1fr" }}>
+        <div className="grid gap-5" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
           {/* Inspect */}
           <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
@@ -506,7 +508,7 @@ function ReviewPhase({ data }: { data: OrchestrationData }) {
       </div>
 
       {/* Content aligned under each node */}
-      <motion.div variants={fadeInUp} className="grid gap-5 mt-6" style={{ gridTemplateColumns: "1.2fr 1fr 1fr" }}>
+      <motion.div variants={fadeInUp} className="grid gap-5 mt-6" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
         {/* Under Inspect: branch structure */}
         <motion.div variants={fadeInUp}>
           <div className="relative ml-3.5">

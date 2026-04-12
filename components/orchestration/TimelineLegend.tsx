@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen01, XClose } from "@untitledui/icons";
 import { agentAssignments, type AgentRole } from "@/lib/constants";
@@ -160,27 +161,28 @@ export function TimelineLegend() {
         <BookOpen01 width={14} height={14} />
       </button>
 
-      {/* Modal */}
-      <AnimatePresence>
-        {open && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-50 bg-bg-primary/70 backdrop-blur-sm"
-              onClick={handleClose}
-            />
+      {/* Modal — portaled to body to escape transform ancestors */}
+      {typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {open && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-50 bg-bg-primary/70 backdrop-blur-sm"
+                onClick={handleClose}
+              />
 
-            <motion.div
-              initial={{ opacity: 0, y: 24, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.97 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pointer-events-none"
-            >
-              <div className="pointer-events-auto w-full max-w-md max-h-[80vh] overflow-y-auto rounded-xl bg-bg-secondary border border-border-secondary shadow-xl">
+              <motion.div
+                initial={{ opacity: 0, y: 24, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 16, scale: 0.97 }}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pointer-events-none"
+              >
+              <div className="pointer-events-auto w-full max-w-xs sm:max-w-sm max-h-[80vh] overflow-y-auto rounded-xl bg-bg-secondary border border-border-secondary shadow-xl">
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border-secondary sticky top-0 bg-bg-secondary z-10">
                   <div>
@@ -233,7 +235,7 @@ export function TimelineLegend() {
                       description="Activity on an isolated feature branch forked from main"
                     />
                     <LegendItem
-                      visual={<div className="w-8 h-full min-h-[20px] border-l-[3px] border-fg-brand/50" />}
+                      visual={<div className="w-8 h-5 border-l-[3px] border-fg-brand/50 ml-[9px]" />}
                       label="Branch Activity"
                       description="Vertical line indicating worktree scope or branch depth"
                     />
@@ -393,7 +395,8 @@ export function TimelineLegend() {
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body)}
     </>
   );
 }
