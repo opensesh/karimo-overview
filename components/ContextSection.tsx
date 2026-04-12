@@ -53,11 +53,13 @@ const contextLayers = [
 interface ChartPoint {
   id: "plan-mode" | "karimo" | "mythos";
   label: string;
+  modelLabel: string;
   /** The dot position (complexity = y, duration midpoint = x) */
   position: { x: number; y: number };
   /** Duration range for the triangle base on the X-axis */
   durationRange: [number, number];
   shape: "triangle" | "dot";
+  disabled?: boolean;
   dotColor: string;
   gradientId: string;
   detail: {
@@ -72,6 +74,7 @@ const chartPoints: ChartPoint[] = [
   {
     id: "plan-mode",
     label: "Plan Mode",
+    modelLabel: "Opus 4.6",
     position: { x: 2, y: 3 },
     durationRange: [1, 3],
     shape: "triangle",
@@ -93,6 +96,7 @@ const chartPoints: ChartPoint[] = [
   {
     id: "karimo",
     label: "KARIMO",
+    modelLabel: "Opus 4.6",
     position: { x: 4, y: 6 },
     durationRange: [2, 6],
     shape: "triangle",
@@ -113,17 +117,19 @@ const chartPoints: ChartPoint[] = [
   },
   {
     id: "mythos",
-    label: "Mythos",
+    label: "KARIMO",
+    modelLabel: "Mythos",
     position: { x: 8, y: 9 },
     durationRange: [8, 8],
     shape: "dot",
+    disabled: true,
     dotColor: "#ff7a38",
     gradientId: "grad-mythos",
     detail: {
-      title: "Frontier Intelligence",
-      subtitle: "Mythos",
+      title: "Better Models, Better Results",
+      subtitle: "KARIMO + Mythos",
       description:
-        "KARIMO\u2019s context architecture creates a stable layer for feature development. As models improve, that layer amplifies — increasing the complexity and duration the framework can handle without any structural changes.",
+        "KARIMO gets better as models get better. The context architecture is already in place — when a more capable model arrives, complexity and duration scale automatically. No structural changes needed.",
     },
   },
 ];
@@ -674,13 +680,7 @@ function ComplexityDurationChart() {
                 <stop offset="0%" stopColor="#ff7a38" stopOpacity="0.8" />
                 <stop offset="100%" stopColor="#fe5102" stopOpacity="0.2" />
               </radialGradient>
-              <filter id="glow-mythos">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
+              {/* Mythos uses disabled dashed state, no glow needed */}
             </defs>
 
             {/* Grid lines */}
@@ -824,28 +824,18 @@ function ComplexityDurationChart() {
                     stroke={point.dotColor}
                     strokeWidth={isActive ? "1.5" : "0"}
                     opacity={isActive ? 0.6 : 0}
-                    strokeDasharray={isActive ? "none" : "3 3"}
+                    strokeDasharray={point.disabled ? "3 3" : "none"}
                     style={{ transition: "stroke-width 0.3s, opacity 0.3s" }}
                   />
-
-                  {/* Mythos glow */}
-                  {point.shape === "dot" && (
-                    <circle
-                      cx={cx} cy={cy} r={OUTLINE_R + 2}
-                      fill="none"
-                      stroke={point.dotColor}
-                      strokeWidth="0.5"
-                      opacity={isActive ? 0.3 : 0}
-                      filter="url(#glow-mythos)"
-                      style={{ transition: "opacity 0.3s" }}
-                    />
-                  )}
 
                   {/* Main dot */}
                   <circle
                     cx={cx} cy={cy} r={DOT_R}
-                    fill={point.dotColor}
-                    opacity={isActive ? 1 : 0.5}
+                    fill={point.disabled ? "none" : point.dotColor}
+                    stroke={point.disabled ? point.dotColor : "none"}
+                    strokeWidth={point.disabled ? "1.5" : "0"}
+                    strokeDasharray={point.disabled ? "3 2" : "none"}
+                    opacity={point.disabled ? 0.4 : (isActive ? 1 : 0.5)}
                     style={{ transition: "opacity 0.3s" }}
                   />
 
@@ -854,11 +844,22 @@ function ComplexityDurationChart() {
                     x={cx}
                     y={cy + DOT_R + 14}
                     textAnchor="middle"
-                    fill={isActive ? "#fffaee" : "#78716c"}
+                    fill={point.disabled ? "#57534e" : (isActive ? "#fffaee" : "#78716c")}
                     fontSize="10"
                     style={{ fontFamily: "var(--font-accent)", transition: "fill 0.3s" }}
                   >
                     {point.label}
+                  </text>
+                  {/* Model label below */}
+                  <text
+                    x={cx}
+                    y={cy + DOT_R + 25}
+                    textAnchor="middle"
+                    fill={point.disabled ? "#44403a" : "#57534e"}
+                    fontSize="8"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {point.modelLabel}
                   </text>
                 </motion.g>
               );
