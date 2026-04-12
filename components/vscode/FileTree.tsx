@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileNode, VSCODE, getFileExtension, getExtColor } from "@/lib/vscode-data";
 
@@ -76,6 +76,7 @@ interface FileTreeNodeProps {
   onFileSelect: (contentKey: string) => void;
   revealedPaths: Set<string>;
   parentPath: string;
+  activeChapter: number;
 }
 
 const FileTreeNode = memo(function FileTreeNode({
@@ -85,11 +86,25 @@ const FileTreeNode = memo(function FileTreeNode({
   onFileSelect,
   revealedPaths,
   parentPath,
+  activeChapter,
 }: FileTreeNodeProps) {
   const [expanded, setExpanded] = useState(depth === 0);
   const path = parentPath ? `${parentPath}/${node.name}` : node.name;
   const isDir = node.type === "directory";
   const isActive = !isDir && node.contentKey === activeFile;
+
+  // Reset on chapter change — collapse everything except root
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    setExpanded(depth === 0);
+  }, [activeChapter]);
+
+  // Auto-expand when timeline reveals this folder
+  useEffect(() => {
+    if (isDir && revealedPaths.has(path)) {
+      setExpanded(true);
+    }
+  }, [revealedPaths, path, isDir]);
 
   const handleClick = () => {
     if (isDir) {
@@ -152,6 +167,7 @@ const FileTreeNode = memo(function FileTreeNode({
                   onFileSelect={onFileSelect}
                   revealedPaths={revealedPaths}
                   parentPath={path}
+                  activeChapter={activeChapter}
                 />
               ))}
             </motion.ul>
@@ -169,6 +185,7 @@ interface FileTreeProps {
   activeFile: string | null;
   onFileSelect: (contentKey: string) => void;
   revealedPaths: Set<string>;
+  activeChapter: number;
   fillHeight?: boolean;
 }
 
@@ -177,6 +194,7 @@ export const FileTree = memo(function FileTree({
   activeFile,
   onFileSelect,
   revealedPaths,
+  activeChapter,
   fillHeight,
 }: FileTreeProps) {
   return (
@@ -207,6 +225,7 @@ export const FileTree = memo(function FileTree({
             onFileSelect={onFileSelect}
             revealedPaths={revealedPaths}
             parentPath={tree.name}
+            activeChapter={activeChapter}
           />
         ))}
       </ul>

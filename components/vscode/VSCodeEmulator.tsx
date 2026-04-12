@@ -18,6 +18,7 @@ interface VSCodeEmulatorProps {
   visibleMessages: ChatMessage[];
   revealedPaths: Set<string>;
   currentTime: number;
+  activeChapter: number;
   onFileSelect: (contentKey: string) => void;
   onTabSelect: (contentKey: string) => void;
   onTabClose: (contentKey: string) => void;
@@ -75,6 +76,7 @@ function DesktopLayout({
   visibleMessages,
   revealedPaths,
   currentTime,
+  activeChapter,
   onFileSelect,
   onTabSelect,
   onTabClose,
@@ -98,6 +100,7 @@ function DesktopLayout({
         activeFile={activeFile}
         onFileSelect={onFileSelect}
         revealedPaths={revealedPaths}
+        activeChapter={activeChapter}
       />
       <EditorPanel
         activeFile={activeFile}
@@ -120,6 +123,7 @@ function MobileLayout({
   visibleMessages,
   revealedPaths,
   currentTime,
+  activeChapter,
   onFileSelect,
   onTabSelect,
   onTabClose,
@@ -150,6 +154,7 @@ function MobileLayout({
             activeFile={activeFile}
             onFileSelect={onFileSelect}
             revealedPaths={revealedPaths}
+            activeChapter={activeChapter}
             fillHeight
           />
         )}

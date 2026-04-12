@@ -16,10 +16,10 @@ import {
 
 const CHAPTERS = [
   { label: "Research", time: 0 },
-  { label: "Planning", time: 10000 },
-  { label: "Wave 1", time: 15000 },
-  { label: "Wave 2\u20113", time: 21000 },
-  { label: "Wave 4", time: 29000 },
+  { label: "Plan", time: 8000 },
+  { label: "Review", time: 14000 },
+  { label: "Run", time: 18000 },
+  { label: "Merge", time: 32000 },
   { label: "Complete", time: 36000 },
 ];
 
@@ -105,27 +105,30 @@ function ControlBar({
 
   return (
     <div
-      className="rounded-xl border border-border-secondary bg-bg-secondary/50 px-3 py-2.5 sm:px-4 sm:py-3 mb-4"
+      className="rounded-xl border border-border-secondary bg-bg-secondary/50 px-3 py-2 sm:px-4 sm:py-3 mb-3 sm:mb-4 shrink-0"
       style={{ backdropFilter: "blur(8px)" }}
     >
-      {/* Row: chapters left, controls right */}
-      <div className="flex items-center justify-between gap-3">
-        {/* Chapters */}
-        <div className="flex gap-1 sm:gap-1.5 overflow-x-auto shrink min-w-0">
+      {/* Mobile: two-row layout / Desktop: single row */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+        {/* Chapters — horizontal scroll, no scrollbar */}
+        <div
+          className="flex gap-1 sm:gap-1.5 overflow-x-auto min-w-0 pb-0.5 sm:pb-0"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+        >
           {CHAPTERS.map((ch, i) => {
             const isActive = hasStarted && i === activeChapter;
             return (
               <button
                 key={ch.label}
                 onClick={() => onChapterClick(ch.time)}
-                className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-md text-[11px] sm:text-xs transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0"
+                className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md text-[11px] sm:text-xs transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0"
                 style={{
                   background: isActive
-                    ? "rgba(0, 122, 204, 0.15)"
+                    ? "rgba(254, 81, 2, 0.15)"
                     : "transparent",
-                  color: isActive ? "#4da6ff" : "#78716c",
+                  color: isActive ? "#ff7a38" : "#78716c",
                   border: `1px solid ${
-                    isActive ? "rgba(0, 122, 204, 0.3)" : "transparent"
+                    isActive ? "rgba(254, 81, 2, 0.3)" : "transparent"
                   }`,
                 }}
               >
@@ -135,8 +138,8 @@ function ControlBar({
           })}
         </div>
 
-        {/* Playback controls */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        {/* Playback controls — centered on mobile, right-aligned on desktop */}
+        <div className="flex items-center justify-center sm:justify-end gap-1.5 sm:gap-2 shrink-0">
           {/* Speed buttons */}
           <div className="flex items-center rounded-md overflow-hidden border border-border-secondary">
             {SPEEDS.map((s) => (
@@ -146,8 +149,8 @@ function ControlBar({
                 className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-[11px] font-medium transition-colors cursor-pointer"
                 style={{
                   background:
-                    speed === s ? "rgba(0, 122, 204, 0.2)" : "transparent",
-                  color: speed === s ? "#4da6ff" : "#78716c",
+                    speed === s ? "rgba(254, 81, 2, 0.2)" : "transparent",
+                  color: speed === s ? "#ff7a38" : "#78716c",
                 }}
               >
                 {s}x
@@ -209,19 +212,19 @@ function ControlBar({
 
       {/* Progress bar */}
       <div
-        className="relative w-full h-1 rounded-full cursor-pointer group mt-2.5"
+        className="relative w-full h-1 rounded-full cursor-pointer group mt-2"
         style={{ background: "#333" }}
         onClick={handleBarClick}
       >
         <div
           className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-100"
-          style={{ width: `${progress * 100}%`, background: "#007acc" }}
+          style={{ width: `${progress * 100}%`, background: "#fe5102" }}
         />
         <div
           className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
           style={{
             left: `calc(${progress * 100}% - 5px)`,
-            background: "#007acc",
+            background: "#fe5102",
           }}
         />
         {/* Chapter tick marks */}
@@ -264,8 +267,8 @@ function BlurOverlay({ onPlay }: { onPlay: () => void }) {
         <div
           className="w-16 h-16 rounded-full flex items-center justify-center transition-transform hover:scale-110"
           style={{
-            background: "rgba(0, 122, 204, 0.9)",
-            boxShadow: "0 0 40px rgba(0, 122, 204, 0.3)",
+            background: "rgba(254, 81, 2, 0.9)",
+            boxShadow: "0 0 40px rgba(254, 81, 2, 0.3)",
           }}
         >
           <svg
@@ -318,6 +321,10 @@ export function LiveExampleSection() {
   );
   const timelineTabs = useMemo(
     () => deriveTimelineTabs(timeline.currentTime),
+    [timeline.currentTime]
+  );
+  const activeChapter = useMemo(
+    () => getActiveChapter(timeline.currentTime),
     [timeline.currentTime]
   );
 
@@ -390,6 +397,7 @@ export function LiveExampleSection() {
       setHasStarted(true);
       setUserInteracted(false);
       setUserActiveFile(null);
+      setUserTabs([]);
       timeline.seek(time);
     },
     [timeline]
@@ -399,7 +407,7 @@ export function LiveExampleSection() {
     <section
       id="live-example"
       className="bg-bg-primary relative overflow-hidden"
-      style={{ minHeight: "100dvh" }}
+      style={{ minHeight: "100dvh", scrollMarginTop: "56px" }}
     >
       {/* Noise texture */}
       <div
@@ -413,10 +421,10 @@ export function LiveExampleSection() {
       {/* Full-height flex layout */}
       <div
         className="relative max-w-7xl mx-auto px-4 sm:px-6 flex flex-col"
-        style={{ minHeight: "100dvh" }}
+        style={{ height: "100dvh" }}
       >
         {/* Header */}
-        <div className="pt-8 sm:pt-12 pb-4 sm:pb-6 shrink-0">
+        <div className="pt-20 sm:pt-24 pb-4 sm:pb-8 shrink-0">
           <SectionLabel>LIVE EXAMPLE</SectionLabel>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
@@ -458,9 +466,14 @@ export function LiveExampleSection() {
           onChapterClick={handleChapterSeek}
         />
 
+        {/* Mobile navigation hint */}
+        <p className="sm:hidden text-[10px] text-fg-tertiary text-center -mt-1 mb-2 shrink-0">
+          Tap chapters to navigate &middot; Swipe Files, Editor, Chat below
+        </p>
+
         {/* VS Code Emulator — fills remaining space */}
         <div
-          className="relative flex-1 min-h-0 pb-6 sm:pb-8"
+          className="relative flex-1 min-h-0 overflow-hidden pb-4 sm:pb-10 lg:max-h-[60vh]"
           onWheel={(e) => {
             const target = e.target as HTMLElement;
             const scrollable = target.closest("[data-vscode-scroll]");
@@ -483,6 +496,7 @@ export function LiveExampleSection() {
               visibleMessages={visibleMessages}
               revealedPaths={revealedPaths}
               currentTime={timeline.currentTime}
+              activeChapter={activeChapter}
               onFileSelect={handleFileSelect}
               onTabSelect={handleTabSelect}
               onTabClose={handleTabClose}
@@ -498,6 +512,7 @@ export function LiveExampleSection() {
               visibleMessages={visibleMessages}
               revealedPaths={revealedPaths}
               currentTime={timeline.currentTime}
+              activeChapter={activeChapter}
               onFileSelect={handleFileSelect}
               onTabSelect={handleTabSelect}
               onTabClose={handleTabClose}

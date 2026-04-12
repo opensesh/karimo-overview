@@ -909,6 +909,7 @@ function ContextMultiplicationViz() {
                 activeFile={activeModalFile}
                 onFileSelect={handleModalFileSelect}
                 revealedPaths={revealedPaths}
+                activeChapter={0}
                 fillHeight
               />
             </div>
