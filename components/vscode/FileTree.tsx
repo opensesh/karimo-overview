@@ -186,6 +186,7 @@ interface FileTreeProps {
   onFileSelect: (contentKey: string) => void;
   revealedPaths: Set<string>;
   activeChapter: number;
+  panelWidth?: number;
   fillHeight?: boolean;
 }
 
@@ -196,14 +197,18 @@ export const FileTree = memo(function FileTree({
   revealedPaths,
   activeChapter,
   fillHeight,
+  panelWidth,
 }: FileTreeProps) {
   return (
     <div
       data-vscode-scroll
       className={`overflow-y-auto overflow-x-hidden select-none ${fillHeight ? "h-full" : "row-start-2"}`}
       style={{
+        width: panelWidth,
+        flexShrink: panelWidth ? 0 : undefined,
+        contain: panelWidth ? "layout style" as const : undefined,
         background: VSCODE.sidebarBg,
-        borderRight: fillHeight ? undefined : `1px solid ${VSCODE.border}`,
+        borderRight: `1px solid ${VSCODE.border}`,
         overscrollBehavior: "contain",
       }}
     >

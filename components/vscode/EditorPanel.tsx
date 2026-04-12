@@ -114,28 +114,42 @@ function CodeView({ contentKey }: { contentKey: string }) {
   const prismLang = PRISM_LANG_MAP[file.language] ?? "markdown";
 
   return (
-    <div className="flex-1 overflow-auto" data-vscode-scroll>
+    <div
+      className="flex-1 overflow-x-auto overflow-y-auto"
+      data-vscode-scroll
+      style={{ overscrollBehavior: "contain" }}
+    >
       <Highlight theme={themes.vsDark} code={file.content.trimEnd()} language={prismLang}>
         {({ tokens, getLineProps, getTokenProps }) => (
           <pre
             className="text-[13px] leading-5 py-2"
-            style={{ background: "transparent", margin: 0, fontFamily: "var(--font-mono, monospace)", whiteSpace: "pre", width: "fit-content", minWidth: "100%" }}
+            style={{
+              background: "transparent",
+              margin: 0,
+              fontFamily: "var(--font-mono, monospace)",
+              whiteSpace: "pre",
+            }}
           >
             {tokens.map((line, i) => {
               const lineProps = getLineProps({ line });
               return (
-                <div key={i} {...lineProps} style={{ display: "flex" }}>
+                <div key={i} {...lineProps}>
                   <span
-                    className="w-12 text-right pr-4 shrink-0 select-none"
-                    style={{ color: VSCODE.textDim }}
+                    className="select-none"
+                    style={{
+                      display: "inline-block",
+                      width: "48px",
+                      textAlign: "right",
+                      paddingRight: "16px",
+                      color: VSCODE.textDim,
+                      userSelect: "none",
+                    }}
                   >
                     {i + 1}
                   </span>
-                  <span>
-                    {line.map((token, key) => (
-                      <span key={key} {...getTokenProps({ token })} />
-                    ))}
-                  </span>
+                  {line.map((token, key) => (
+                    <span key={key} {...getTokenProps({ token })} />
+                  ))}
                 </div>
               );
             })}
@@ -178,6 +192,8 @@ interface EditorPanelProps {
   onTabSelect: (contentKey: string) => void;
   onTabClose: (contentKey: string) => void;
   fillHeight?: boolean;
+  flexGrow?: boolean;
+  isDragging?: boolean;
 }
 
 export const EditorPanel = memo(function EditorPanel({
@@ -186,11 +202,19 @@ export const EditorPanel = memo(function EditorPanel({
   onTabSelect,
   onTabClose,
   fillHeight,
+  flexGrow,
+  isDragging,
 }: EditorPanelProps) {
   return (
     <div
       className={`flex flex-col min-w-0 overflow-hidden ${fillHeight ? "h-full" : "row-start-2"}`}
-      style={{ background: VSCODE.bg }}
+      style={{
+        background: VSCODE.bg,
+        flex: flexGrow ? "1 1 0%" : undefined,
+        minWidth: flexGrow ? 200 : undefined,
+        contain: flexGrow ? ("layout style" as const) : undefined,
+        pointerEvents: isDragging ? "none" : undefined,
+      }}
     >
       {/* Tab bar — always rendered to prevent layout jump */}
       <div
@@ -214,7 +238,7 @@ export const EditorPanel = memo(function EditorPanel({
       </div>
 
       {/* Content area */}
-      <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-0 flex flex-col">
         <AnimatePresence mode="wait">
           {activeFile && FILE_CONTENTS[activeFile] ? (
             <motion.div
@@ -223,8 +247,7 @@ export const EditorPanel = memo(function EditorPanel({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              data-vscode-scroll
-              className="flex-1 overflow-auto"
+              className="flex-1 min-h-0 flex flex-col"
             >
               <CodeView contentKey={activeFile} />
             </motion.div>

@@ -1,8 +1,9 @@
 "use client";
 
-import { memo, useRef, useEffect } from "react";
+import { memo, useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ChatMessage, VSCODE } from "@/lib/vscode-data";
+import { usePretextHeights } from "@/hooks/usePretextLayout";
 
 // ─── Claude Logo (from hero section) ─────────────────────
 
@@ -148,15 +149,29 @@ interface ChatPanelProps {
   messages: ChatMessage[];
   currentTime: number;
   fillHeight?: boolean;
+  panelWidth?: number;
+  isDragging?: boolean;
 }
 
 export const ChatPanel = memo(function ChatPanel({
   messages,
   currentTime,
   fillHeight,
+  panelWidth,
+  isDragging,
 }: ChatPanelProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activePhase = getActivePhase(currentTime);
+
+  // Pretext: pre-compute message heights during drag to avoid DOM reflows
+  const messageTexts = useMemo(() => messages.map((m) => m.content), [messages]);
+  const contentWidth = panelWidth ? panelWidth - 24 : 0; // px-3 = 12px each side
+  const pretextHeights = usePretextHeights(
+    messageTexts,
+    "12px monospace",
+    contentWidth,
+    18 // leading-relaxed ~1.625 * 12px
+  );
 
   useEffect(() => {
     const el = scrollContainerRef.current;
@@ -169,8 +184,11 @@ export const ChatPanel = memo(function ChatPanel({
     <div
       className={`flex flex-col overflow-hidden ${fillHeight ? "h-full" : "row-start-2"}`}
       style={{
+        width: panelWidth,
+        flexShrink: panelWidth ? 0 : undefined,
+        contain: panelWidth ? ("layout style" as const) : undefined,
         background: VSCODE.sidebarBg,
-        borderLeft: fillHeight ? undefined : `1px solid ${VSCODE.border}`,
+        borderLeft: `1px solid ${VSCODE.border}`,
       }}
     >
       {/* Header */}
@@ -181,7 +199,7 @@ export const ChatPanel = memo(function ChatPanel({
         <span style={{ color: "#D4A574" }}>
           <ClaudeLogo size={14} />
         </span>
-        <span className="text-xs font-medium" style={{ color: VSCODE.text }}>
+        <span className="text-xs font-medium truncate" style={{ color: VSCODE.text }}>
           Claude Code
         </span>
       </div>
@@ -196,13 +214,19 @@ export const ChatPanel = memo(function ChatPanel({
         className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3"
         style={{ overscrollBehavior: "contain" }}
       >
-        {messages.map((msg, i) => (
-          <MessageBubble
-            key={i}
-            message={msg}
-            isLatest={i === messages.length - 1}
-          />
-        ))}
+        {messages.map((msg, i) => {
+          const heightStyle = isDragging && pretextHeights[i]
+            ? { height: pretextHeights[i] }
+            : undefined;
+          return (
+            <div key={i} style={heightStyle}>
+              <MessageBubble
+                message={msg}
+                isLatest={i === messages.length - 1}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
