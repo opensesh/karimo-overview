@@ -508,66 +508,58 @@ function WorktreeRow({
 
   if (progress < 0.01) return null;
 
-  // Position each worktree pill evenly across the row
+  // Fixed X positions for each worktree label, centered over the boxes
   const totalWidth = BOX_SIZE * 3 + BOX_GAP * 2;
-  const startX = -totalWidth / 2;
+  const waveX = -totalWidth / 2 - 0.6;
+  // Space 3 worktrees evenly across the box area
+  const wtPositions = [
+    -totalWidth / 2 + totalWidth * 0.2,
+    -totalWidth / 2 + totalWidth * 0.5,
+    -totalWidth / 2 + totalWidth * 0.8,
+  ];
+
+  const labelStyle = {
+    fontFamily: "var(--font-mono, monospace)",
+    fontSize: "11px",
+    color: "#a8a29e",
+    letterSpacing: "0.01em",
+    whiteSpace: "nowrap" as const,
+  };
 
   return (
     <group>
-      {/* Single HTML row for Wave label + worktree items */}
-      <Html position={[0, WT_ROW_Y, 0]} center style={{ pointerEvents: "none" }}>
-        <div
-          style={{
-            opacity: progress,
-            display: "flex",
-            alignItems: "center",
-            gap: "24px",
-            justifyContent: "center",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {/* Wave 1 pill */}
-          <div style={{
-            padding: "4px 12px",
-            border: "1px solid #44403a",
-            borderRadius: "5px",
-            fontSize: "11px",
-            color: "#a8a29e",
-            fontFamily: "var(--font-mono, monospace)",
-            background: "rgba(13, 13, 13, 0.9)",
-            letterSpacing: "0.03em",
-            flexShrink: 0,
-          }}>
-            Wave 1
-          </div>
-
-          {/* Worktree items — evenly spaced */}
-          {WORKTREE_DEFS.map((wt) => (
-            <div key={wt.id} style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              flexShrink: 0,
-            }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={GIT_ICON} alt="" width={13} height={13} style={{ opacity: 0.6 }} />
-              <span style={{
-                fontFamily: "var(--font-mono, monospace)",
-                fontSize: "11px",
-                color: "#a8a29e",
-                letterSpacing: "0.01em",
-              }}>
-                {wt.label}
-              </span>
-            </div>
-          ))}
+      {/* Wave 1 pill — positioned at left */}
+      <Html position={[waveX, WT_ROW_Y, 0]} center style={{ pointerEvents: "none" }}>
+        <div style={{
+          opacity: progress,
+          padding: "4px 12px",
+          border: "1px solid #44403a",
+          borderRadius: "5px",
+          fontSize: "11px",
+          color: "#a8a29e",
+          fontFamily: "var(--font-mono, monospace)",
+          background: "rgba(13, 13, 13, 0.9)",
+          letterSpacing: "0.03em",
+          whiteSpace: "nowrap",
+        }}>
+          Wave 1
         </div>
       </Html>
 
-      {/* Curved connection lines — each worktree has multiple targets */}
+      {/* Each worktree label at a known X position */}
+      {WORKTREE_DEFS.map((wt, i) => (
+        <Html key={wt.id} position={[wtPositions[i], WT_ROW_Y, 0]} center style={{ pointerEvents: "none" }}>
+          <div style={{ opacity: progress, display: "flex", alignItems: "center", gap: "5px" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={GIT_ICON} alt="" width={13} height={13} style={{ opacity: 0.6 }} />
+            <span style={labelStyle}>{wt.label}</span>
+          </div>
+        </Html>
+      ))}
+
+      {/* Arrows from each worktree label to its target boxes */}
       {WORKTREE_DEFS.map((wt, i) => {
-        // Pill X position — evenly spaced across the row (3 items now)
-        const pillX = startX + 1.0 + i * (totalWidth - 2.0) / Math.max(WORKTREE_DEFS.length - 1, 1);
+        const fromX = wtPositions[i];
         const topY = WT_ROW_Y - 0.22;
 
         return wt.targets.map((target, j) => {
@@ -579,7 +571,7 @@ function WorktreeRow({
           return (
             <WorktreeArrow
               key={`${wt.id}-${j}`}
-              fromX={pillX}
+              fromX={fromX}
               fromY={topY}
               toX={targetX}
               toY={bottomY}
@@ -594,6 +586,7 @@ function WorktreeRow({
 }
 
 // Bracket-style arrow: straight down, then curve to target box
+// Uses stable refs to avoid recreating Three objects every frame
 function WorktreeArrow({
   fromX, fromY, toX, toY, progress, delay,
 }: {
@@ -604,63 +597,34 @@ function WorktreeArrow({
   progress: number;
   delay: number;
 }) {
-  const [localProgress, setLocalProgress] = useState(0);
-  const startTime = useRef<number | null>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const progressRef = useRef(0);
+  const startTimeRef = useRef<number | null>(null);
+  const wasVisible = useRef(false);
 
-  useEffect(() => {
-    if (progress > 0) { startTime.current = null; setLocalProgress(0); }
-    else { setLocalProgress(0); startTime.current = null; }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progress > 0]);
-
-  useFrame((state) => {
-    if (progress < 0.01) return;
-    const t = state.clock.elapsedTime;
-    if (startTime.current === null) startTime.current = t;
-    const elapsed = t - startTime.current;
-    if (elapsed > delay) {
-      const p = Math.min((elapsed - delay) * 2.5, 1);
-      setLocalProgress(1 - Math.pow(1 - p, 3));
-    }
-  });
-
-  // Bracket path: vertical down from label, then curve out to target
-  const curve = useMemo(() => {
+  // Pre-compute the full curve once
+  const allPoints = useMemo(() => {
     const dx = toX - fromX;
-    const verticalDrop = (fromY - toY) * 0.4; // go 40% straight down first
+    const verticalDrop = (fromY - toY) * 0.4;
     const bendY = fromY - verticalDrop;
 
-    // Cubic bezier: straight down, curve at the bend, arrive at target
-    return new THREE.CubicBezierCurve3(
-      new THREE.Vector3(fromX, fromY, 0),            // start: under label
-      new THREE.Vector3(fromX, bendY, 0),             // control 1: straight down
-      new THREE.Vector3(toX, bendY + dx * 0.15, 0),   // control 2: curve toward target
-      new THREE.Vector3(toX, toY, 0)                  // end: top of box
+    const curve = new THREE.CubicBezierCurve3(
+      new THREE.Vector3(fromX, fromY, 0),
+      new THREE.Vector3(fromX, bendY, 0),
+      new THREE.Vector3(toX, bendY + dx * 0.15, 0),
+      new THREE.Vector3(toX, toY, 0)
     );
+    return curve.getPoints(40);
   }, [fromX, fromY, toX, toY]);
 
-  const allPoints = useMemo(() => curve.getPoints(40), [curve]);
-
-  const visiblePoints = useMemo(() => {
-    const count = Math.max(2, Math.floor(allPoints.length * localProgress));
-    return allPoints.slice(0, count);
-  }, [allPoints, localProgress]);
-
+  // Create stable line and arrow objects once
   const lineObj = useMemo(() => {
-    const geo = new THREE.BufferGeometry().setFromPoints(visiblePoints);
+    const geo = new THREE.BufferGeometry().setFromPoints(allPoints);
     const mat = new THREE.LineBasicMaterial({ color: C.brand, transparent: true, opacity: 0 });
     return new THREE.Line(geo, mat);
-  }, [visiblePoints]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromX, fromY, toX, toY]);
 
-  useFrame(() => {
-    if (lineObj.material instanceof THREE.LineBasicMaterial) {
-      lineObj.material.opacity = localProgress * 0.65;
-    }
-  });
-
-  if (localProgress < 0.01) return null;
-
-  // Stroke-only arrow chevron at the end
   const arrowObj = useMemo(() => {
     const size = 0.08;
     const pts = [
@@ -673,14 +637,62 @@ function WorktreeArrow({
     return new THREE.Line(geo, mat);
   }, [toX, toY]);
 
-  useFrame(() => {
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      lineObj.geometry.dispose();
+      (lineObj.material as THREE.Material).dispose();
+      arrowObj.geometry.dispose();
+      (arrowObj.material as THREE.Material).dispose();
+    };
+  }, [lineObj, arrowObj]);
+
+  useFrame((state) => {
+    const isVisible = progress > 0.01;
+
+    // Reset timer when becoming visible
+    if (isVisible && !wasVisible.current) {
+      startTimeRef.current = null;
+      progressRef.current = 0;
+    }
+    wasVisible.current = isVisible;
+
+    if (!isVisible) {
+      progressRef.current = 0;
+    } else {
+      const t = state.clock.elapsedTime;
+      if (startTimeRef.current === null) startTimeRef.current = t;
+      const elapsed = t - startTimeRef.current;
+      if (elapsed > delay) {
+        const p = Math.min((elapsed - delay) * 2.5, 1);
+        progressRef.current = 1 - Math.pow(1 - p, 3);
+      }
+    }
+
+    const lp = progressRef.current;
+
+    // Update line geometry to show partial curve
+    const count = Math.max(2, Math.floor(allPoints.length * lp));
+    const visible = allPoints.slice(0, count);
+    lineObj.geometry.dispose();
+    lineObj.geometry = new THREE.BufferGeometry().setFromPoints(visible);
+    if (lineObj.material instanceof THREE.LineBasicMaterial) {
+      lineObj.material.opacity = lp * 0.65;
+    }
+
+    // Arrow chevron opacity
     if (arrowObj.material instanceof THREE.LineBasicMaterial) {
-      arrowObj.material.opacity = localProgress > 0.4 ? localProgress * 0.65 : 0;
+      arrowObj.material.opacity = lp > 0.4 ? lp * 0.65 : 0;
+    }
+
+    // Hide group when not animating
+    if (groupRef.current) {
+      groupRef.current.visible = lp > 0.01;
     }
   });
 
   return (
-    <group>
+    <group ref={groupRef}>
       <primitive object={lineObj} />
       <primitive object={arrowObj} />
     </group>
