@@ -1,6 +1,6 @@
 @import "tailwindcss";
-@source not "../../.claude";
-@source not "../../.karimo";
+@source not "../.claude";
+@source not "../.karimo";
 @import "../styles/theme.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -145,8 +145,13 @@
    Base Styles
    ============================================================================= */
 
+:root {
+  --header-offset: 56px;
+}
+
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--header-offset, 56px);
 }
 
 body {
@@ -155,6 +160,15 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+[id] {
+  scroll-margin-top: var(--header-offset, 56px);
 }
 
 /* =============================================================================
@@ -175,27 +189,7 @@ body {
   color: white;
 }
 
-/* =============================================================================
-   Scrollbar
-   ============================================================================= */
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-primary);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--fg-tertiary);
-}
+/* Scrollbar hidden globally — SideNav provides scroll context */
 
 /* =============================================================================
    Typography Classes
@@ -498,6 +492,15 @@ body {
 @keyframes vscode-dot-pulse {
   0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
   40% { opacity: 1; transform: scale(1); }
+}
+
+/* Hide scrollbars in VS Code emulator */
+[data-vscode-scroll] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+[data-vscode-scroll]::-webkit-scrollbar {
+  display: none;
 }
 
 /* =============================================================================

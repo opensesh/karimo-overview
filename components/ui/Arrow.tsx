@@ -28,7 +28,7 @@ export function FlowArrow({ className = "" }: { className?: string }) {
   return (
     <div className={`relative h-6 overflow-hidden ${className}`}>
       <svg
-        className="w-full h-6 text-[var(--color-black50)]"
+        className="w-full h-6 text-(--color-black50)"
         viewBox="0 0 100 24"
         preserveAspectRatio="none"
       >
@@ -44,7 +44,7 @@ export function FlowArrow({ className = "" }: { className?: string }) {
         <polygon points="90,6 100,12 90,18" fill="currentColor" />
       </svg>
       <div className="absolute inset-0 animate-flow">
-        <div className="h-full w-8 bg-gradient-to-r from-transparent via-[var(--color-aperol)] to-transparent opacity-50" />
+        <div className="h-full w-8 bg-gradient-to-r from-transparent via-(--color-aperol) to-transparent opacity-50" />
       </div>
     </div>
   );

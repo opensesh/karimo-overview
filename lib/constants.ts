@@ -83,17 +83,19 @@ export const processSteps = [
     number: "02",
     title: "Plan",
     command: "/karimo:plan",
-    description: "A 4-round PRD interview that produces a structured plan with tasks, waves, and dependencies.",
+    description: "A 5-round PRD interview that produces a structured plan with tasks, waves, and dependencies. Rounds are template-driven — edit the interview skill to reshape the process.",
     details: [
-      "4-round interview: scope, requirements, dependencies, retro",
+      "5-round interview: research, vision, scope, tasks, review",
       "Automatic task breakdown with wave ordering",
       "Reviewer validates PRD before approval",
     ],
     terminalLines: [
       { type: "command" as const, text: "claude /karimo:plan --prd auth-system" },
       { type: "output" as const, text: "→ Loading research context..." },
-      { type: "output" as const, text: "→ Round 1: Framing scope and success criteria" },
-      { type: "output" as const, text: "→ Round 2: Breaking into prioritized requirements" },
+      { type: "output" as const, text: "→ Round 1/5: Vision — what and why" },
+      { type: "output" as const, text: "→ Round 2/5: Scope — setting boundaries" },
+      { type: "output" as const, text: "→ Round 3/5: Tasks — breaking down work" },
+      { type: "output" as const, text: "→ Round 4/5: Review — validating the plan" },
       { type: "output" as const, text: "→ PRD generated: 12 tasks across 4 waves" },
       { type: "output" as const, text: "→ Saved to .karimo/prds/001_auth-system/" },
     ],
@@ -121,13 +123,13 @@ export const processSteps = [
   {
     id: "review",
     number: "04",
-    title: "Brief Review",
-    command: "Claude Brief-Reviewer",
-    description: "Claude reviews every task brief before execution, flagging critical risks, warnings, and observations so you can fix issues before agents start writing code.",
+    title: "Review",
+    command: "Claude + User",
+    description: "Claude auto-reviews every task brief before execution, flagging critical risks, warnings, and observations. You can also manually review and adjust the recommendations before any code is written.",
     details: [
       "Claude challenges task order, dependencies, and scope",
       "Produces recommendations.md: Critical, Warning, Observation",
-      "You approve, apply fixes, or loop back for changes",
+      "You review findings and approve, apply fixes, or loop back",
     ],
     terminalLines: [
       { type: "command" as const, text: "→ Brief-Reviewer analyzing 12 briefs..." },
@@ -219,42 +221,42 @@ export const processSteps = [
 export const adoptionPhases = [
   {
     phase: 1,
-    title: "Execute PRD",
+    title: "Kickoff Feature",
     description:
-      "Kick off your first PRD — pick something just a little too big for plan mode. KARIMO interviews you, breaks the work into tasks, and runs an agent team across isolated worktrees. You watch PRs land while you do other things.",
+      "Set up your environment so AI can quickly work as a cheat sheet. Run your first research — 8 documents generated for internal and external resources. Then kick off an interview to create a PRD that gets decomposed into tasks.",
     features: [
-      "PRD interviews with AI",
-      "Agent team execution",
-      "Wave-based parallel work",
-      "PRs target main directly",
+      "Auto-detect project config",
+      "Internal + external research",
+      "8 generated documents",
+      "PRD interview → task decomposition",
     ],
     objective: "Feel the difference between prompting and orchestrating",
   },
   {
     phase: 2,
-    title: "Automate Review",
+    title: "Choose Review Path",
     description:
-      "Turn on quality gates. Every PR gets reviewed by Greptile or Claude before it merges — with automated revision loops that fix findings without you lifting a finger. When Sonnet can't resolve it, Opus steps in.",
+      "Two review gates protect quality. Brief review catches gaps and errors before code is written — loop the model or inject feedback manually. PR review lets you choose manual, Greptile, or Claude before merge.",
     features: [
-      "Greptile or Claude code review",
+      "Brief review gate (critical/warning)",
+      "Feedback injection + model loop",
+      "Manual / Greptile / Claude PR review",
       "Automated revision loops",
-      "Model escalation (Sonnet → Opus)",
-      "Hard gate after 3 failures",
     ],
-    objective: "Ship with confidence you didn't have to earn manually",
+    objective: "Find your boundaries with your codebase",
   },
   {
     phase: 3,
     title: "Monitor and Merge",
     description:
-      "Full visibility into what KARIMO is doing, plus a clean merge path to main. Real-time dashboard, PR-based status tracking, GitHub labels for every state transition, and a single consolidated PR with full audit trail.",
+      "Full visibility into past and present tasks. Track task rate, model selection, and review feedback from a single dashboard. When everything looks good, merge with a consolidated PR to main.",
     features: [
-      "/karimo:dashboard command",
-      "PR-based status tracking",
-      "GitHub labels for state",
+      "Task history + task rate",
+      "Loop model selection",
+      "KARIMO feedback dashboard",
       "Consolidated merge to main",
     ],
-    objective: "Know exactly where every task stands and ship with one PR",
+    objective: "Understand the past and present of all features",
   },
 ] as const;
 
@@ -273,8 +275,9 @@ export const pipelinePhases = [
     id: "loop1",
     label: "Foundation",
     sublabel: "Human-Led",
-    steps: ["CONFIGURE", "RESEARCH", "PLAN"],
-    stepTimes: [pipelineTimeline.configure, pipelineTimeline.research, pipelineTimeline.plan],
+    steps: ["RESEARCH", "PLAN"],
+    loopCount: 2,
+    stepTimes: [pipelineTimeline.research, pipelineTimeline.plan],
     loopStart: pipelineTimeline.loop1In,
     loopEnd: pipelineTimeline.loop1End,
     commands: [processSteps[0], processSteps[1], processSteps[2]],
@@ -284,7 +287,7 @@ export const pipelinePhases = [
     },
     explanation: {
       title: "Human-Led",
-      description: "You drive this loop. KARIMO auto-detects your project config, scans your codebase for patterns, then interviews you across 4 rounds to produce a structured PRD. You decide when the plan is ready to execute.",
+      description: "You drive this loop. KARIMO auto-detects your project config, scans your codebase for patterns, then interviews you across 5 rounds to produce a structured PRD. You decide when the plan is ready to execute.",
       bullets: [
         "Configure detects your stack and sets up .karimo/config.yaml",
         "Research scans code + web for patterns and best practices",
@@ -297,6 +300,7 @@ export const pipelinePhases = [
     label: "Decomposition",
     sublabel: "Claude-Led",
     steps: ["TASKS", "REVIEW"],
+    loopCount: 2,
     stepTimes: [pipelineTimeline.tasks, pipelineTimeline.autoReview],
     loopStart: pipelineTimeline.loop2In,
     loopEnd: pipelineTimeline.loop2End,
@@ -315,8 +319,9 @@ export const pipelinePhases = [
     id: "loop3",
     label: "Orchestration",
     sublabel: "Auto or Manual",
-    steps: ["ORCHESTRATE", "INSPECT", "MERGE"],
-    stepTimes: [pipelineTimeline.orchestrate, pipelineTimeline.inspect, pipelineTimeline.merge],
+    steps: ["ORCHESTRATE", "INSPECT"],
+    loopCount: 2,
+    stepTimes: [pipelineTimeline.orchestrate, pipelineTimeline.inspect],
     loopStart: pipelineTimeline.loop3In,
     loopEnd: pipelineTimeline.loop3End,
     commands: [processSteps[5], processSteps[6], processSteps[7], processSteps[8]],
@@ -414,6 +419,26 @@ export interface OrchestrationData {
   reviewSteps: { id: string; label: string; sublabel: string }[];
   phaseDescriptions: Record<PhaseId, PhaseDescription>;
 }
+
+// Agent role types for timeline visualization
+export type AgentRole = "coordinator" | "sub-agent" | "team";
+
+export interface AgentDefinition {
+  name: string;
+  role: AgentRole;
+}
+
+export const agentAssignments: Record<string, AgentDefinition[]> = {
+  "planning:research":    [{ name: "Investigator", role: "sub-agent" }],
+  "planning:create-prd":  [{ name: "Interviewer", role: "sub-agent" }],
+  "planning:task-briefs": [{ name: "Brief Writer", role: "sub-agent" }, { name: "PM", role: "coordinator" }],
+  "planning:dependency":  [{ name: "PM", role: "coordinator" }, { name: "Reviewer", role: "sub-agent" }],
+  "execution:execute":    [{ name: "PM", role: "coordinator" }, { name: "Implementer", role: "sub-agent" }, { name: "Tester", role: "sub-agent" }],
+  "execution:inspect":    [{ name: "PM Reviewer", role: "team" }],
+  "review:inspect":       [{ name: "Review Architect", role: "team" }],
+  "review:fix-errors":    [{ name: "Greptile Remediator", role: "sub-agent" }, { name: "Implementer", role: "sub-agent" }],
+  "review:merge":         [{ name: "PM", role: "coordinator" }],
+};
 
 // Wave colors for visual coding
 const WAVE_COLORS = {

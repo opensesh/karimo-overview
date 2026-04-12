@@ -8,9 +8,9 @@ interface ChipProps {
 
 export function Chip({ children, variant = "default", size = "md" }: ChipProps) {
   const variants = {
-    default: "bg-[var(--color-black80)] text-[var(--color-vanilla)]",
-    accent: "bg-[var(--color-aperol)] text-[var(--color-vanilla)]",
-    muted: "bg-[var(--color-black70)] text-[var(--color-black30)]",
+    default: "bg-(--color-black80) text-(--color-vanilla)",
+    accent: "bg-(--color-aperol) text-(--color-vanilla)",
+    muted: "bg-(--color-black70) text-(--color-black30)",
   };
 
   const sizes = {
