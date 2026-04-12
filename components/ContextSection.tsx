@@ -639,6 +639,7 @@ const OUTLINE_R = 12;
 
 function ComplexityDurationChart() {
   const [activeId, setActiveId] = useState<string>("karimo");
+  const [isOpen, setIsOpen] = useState(true);
   const activePoint = chartPoints.find((p) => p.id === activeId) ?? chartPoints[1];
 
   const gridLines = [2, 4, 6, 8];
@@ -648,12 +649,42 @@ function ComplexityDurationChart() {
   const mythosPos = chartPoints[2];
 
   return (
-    <div className="rounded-xl border border-border-secondary bg-bg-primary p-5 md:p-6 overflow-hidden">
-      <p className="text-accent text-[10px] text-fg-tertiary mb-4 uppercase tracking-wider">
-        Capability comparison
-      </p>
+    <div className="rounded-xl border border-border-secondary bg-bg-primary overflow-hidden">
+      {/* Collapsible header */}
+      <button
+        onClick={() => setIsOpen((o) => !o)}
+        className="w-full flex items-center justify-between px-6 py-6 md:px-8 md:py-7 text-left cursor-pointer"
+        aria-expanded={isOpen}
+      >
+        <h3 className="text-display text-lg md:text-xl text-fg-primary">
+          Capability Comparison
+        </h3>
+        <div
+          className={`
+            flex-shrink-0 w-8 h-8 flex items-center justify-center
+            rounded-lg transition-colors duration-200
+            ${isOpen
+              ? "bg-bg-brand-solid border border-transparent"
+              : "border border-border-secondary"
+            }
+          `}
+        >
+          <span className="text-fg-primary text-sm leading-none select-none">
+            {isOpen ? "−" : "+"}
+          </span>
+        </div>
+      </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px] gap-6 items-start">
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: springEase }}
+            className="overflow-hidden"
+          >
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px] gap-6 items-center px-6 pb-6 md:px-8 md:pb-8">
         {/* SVG Chart */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -701,12 +732,7 @@ function ComplexityDurationChart() {
               ))}
             </g>
 
-            {/* Axes */}
-            <line
-              x1={CHART_AREA.x0} y1={CHART_AREA.y1}
-              x2={CHART_AREA.x1} y2={CHART_AREA.y1}
-              stroke="#363230" strokeWidth="1"
-            />
+            {/* Y-axis only — no bottom stroke */}
             <line
               x1={CHART_AREA.x0} y1={CHART_AREA.y0}
               x2={CHART_AREA.x0} y2={CHART_AREA.y1}
@@ -827,43 +853,48 @@ function ComplexityDurationChart() {
                   <circle
                     cx={cx} cy={cy} r={OUTLINE_R}
                     fill="none"
-                    stroke={point.dotColor}
+                    stroke={point.disabled ? "#57534e" : point.dotColor}
                     strokeWidth={isActive ? "1.5" : "0"}
                     opacity={isActive ? 0.6 : 0}
                     strokeDasharray={point.disabled ? "3 3" : "none"}
                     style={{ transition: "stroke-width 0.3s, opacity 0.3s" }}
                   />
 
-                  {/* Main dot */}
+                  {/* Main dot — disabled uses a muted brand fill, no dashed stroke */}
                   <circle
                     cx={cx} cy={cy} r={DOT_R}
-                    fill={point.disabled ? "none" : point.dotColor}
-                    stroke={point.disabled ? point.dotColor : "none"}
-                    strokeWidth={point.disabled ? "1.5" : "0"}
-                    strokeDasharray={point.disabled ? "3 2" : "none"}
-                    opacity={point.disabled ? 0.4 : (isActive ? 1 : 0.5)}
+                    fill={point.disabled ? "#44403a" : point.dotColor}
+                    opacity={point.disabled ? 0.6 : (isActive ? 1 : 0.5)}
                     style={{ transition: "opacity 0.3s" }}
                   />
 
-                  {/* Label below dot */}
+                  {/* Label background for readability over pyramids */}
+                  <rect
+                    x={cx - 36} y={cy + DOT_R + 4}
+                    width="72" height="24"
+                    rx="4"
+                    fill="#000000"
+                    opacity={isActive ? 0.7 : 0.5}
+                  />
+                  {/* Label */}
                   <text
                     x={cx}
-                    y={cy + DOT_R + 14}
+                    y={cy + DOT_R + 15}
                     textAnchor="middle"
-                    fill={point.disabled ? "#57534e" : (isActive ? "#fffaee" : "#78716c")}
+                    fill={point.disabled ? (isActive ? "#a8a29e" : "#57534e") : (isActive ? "#fffaee" : "#78716c")}
                     fontSize="10"
                     style={{ fontFamily: "var(--font-accent)", transition: "fill 0.3s" }}
                   >
                     {point.label}
                   </text>
-                  {/* Model label below */}
+                  {/* Model label */}
                   <text
                     x={cx}
                     y={cy + DOT_R + 25}
                     textAnchor="middle"
-                    fill={point.disabled ? "#44403a" : "#57534e"}
+                    fill={point.disabled ? (isActive ? "#78716c" : "#44403a") : "#57534e"}
                     fontSize="8"
-                    style={{ fontFamily: "var(--font-mono)" }}
+                    style={{ fontFamily: "var(--font-mono)", transition: "fill 0.3s" }}
                   >
                     {point.modelLabel}
                   </text>
@@ -880,6 +911,9 @@ function ComplexityDurationChart() {
           </AnimatePresence>
         </div>
       </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
