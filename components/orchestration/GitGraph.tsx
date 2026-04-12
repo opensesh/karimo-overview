@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { OrchestrationData, PhaseId } from "@/lib/constants";
 import { Folder, FolderCode } from "@untitledui/icons";
 import { phaseStagger, drawLineX, drawLineY, fadeInUp, nodeAppear } from "@/lib/motion";
+import { AgentRow } from "./AgentRow";
 
 interface GitGraphProps {
   data: OrchestrationData;
@@ -57,6 +58,25 @@ function TaskBriefPill({ id, color }: { id: string; color: string }) {
       }}
     >
       {id}
+    </div>
+  );
+}
+
+// ─── Agent section with divider label ────────────────────────────────────────
+
+function AgentSection({ phaseStep }: { phaseStep: string }) {
+  return (
+    <div className="mt-3 mb-2">
+      <div className="flex items-center gap-2 mb-1.5">
+        <span
+          className="text-fg-tertiary text-[9px] uppercase tracking-[0.15em] flex-shrink-0"
+          style={{ fontFamily: "var(--font-accent, sans-serif)" }}
+        >
+          Agents
+        </span>
+        <div className="flex-1 h-px bg-border-secondary/50" />
+      </div>
+      <AgentRow phaseStep={phaseStep} />
     </div>
   );
 }
@@ -251,6 +271,7 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
           <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Research" subtitle="/karimo:research" />
+            <AgentSection phaseStep="planning:research" />
             <div className="mt-4 space-y-3">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-1.5">
@@ -281,9 +302,19 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
           <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Create PRD" subtitle="/karimo:plan" />
+            <AgentSection phaseStep="planning:create-prd" />
             <div className="mt-4">
               <div className="inline-flex px-3 py-1.5 rounded-md bg-bg-brand-solid text-fg-primary text-[11px] font-semibold">
                 {data.prdName}
+              </div>
+              <div className="mt-2 px-2 py-1 rounded border border-border-secondary bg-bg-tertiary/30 inline-flex items-center gap-1.5">
+                <span className="text-fg-tertiary text-[9px]" style={{ fontFamily: "var(--font-mono, monospace)" }}>
+                  Interview Protocol
+                </span>
+                <span className="text-fg-tertiary/30 text-[9px]">|</span>
+                <span className="text-fg-tertiary/60 text-[9px]" style={{ fontFamily: "var(--font-mono, monospace)" }}>
+                  customizable
+                </span>
               </div>
             </div>
           </motion.div>
@@ -292,6 +323,7 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
           <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Task Briefs" subtitle="/karimo:run" />
+            <AgentSection phaseStep="planning:task-briefs" />
             <div className="mt-4 grid grid-cols-2 gap-1">
               {data.taskBriefs.map((brief) => (
                 <TaskBriefPill key={brief.id} id={brief.id} color={waveColor(brief.wave)} />
@@ -303,6 +335,7 @@ function PlanningPhase({ data }: { data: OrchestrationData }) {
           <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Dependency Graph" subtitle="/karimo:run" />
+            <AgentSection phaseStep="planning:dependency" />
             <div className="mt-4 space-y-2">
               {data.waveMappings.map((mapping) => (
                 <div key={mapping.wave} className="flex items-center gap-3">
@@ -338,21 +371,23 @@ function ExecutionPhase({ data }: { data: OrchestrationData }) {
           style={{ top: 14, transformOrigin: "left" }}
         />
 
-        {/* Two nodes: Execute (left) and Inspect (right) — grid for consistent spacing */}
-        <div className="grid grid-cols-2 gap-8">
+        {/* Two nodes: Execute (left) and Inspect (right) */}
+        <div className="grid gap-6" style={{ gridTemplateColumns: "3fr 2fr" }}>
           <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Execute" subtitle="/karimo:run" />
+            <AgentSection phaseStep="execution:execute" />
           </motion.div>
           <motion.div variants={fadeInUp} className="text-right">
             <BranchNode className="relative z-10 ml-auto" />
             <StepLabel title="Inspect" subtitle="Code Review" />
+            <AgentSection phaseStep="execution:inspect" />
           </motion.div>
         </div>
       </div>
 
       {/* Content below: feature branch + wave lifecycle */}
-      <motion.div variants={fadeInUp} className="grid grid-cols-[1.4fr_1fr] gap-8 mt-4">
+      <motion.div variants={fadeInUp} className="grid grid-cols-[1.4fr_1fr] gap-5 mt-4">
         {/* Left: feature branch + worktrees */}
         <motion.div variants={fadeInUp} className="min-w-0">
           <div className="relative ml-3.5">
@@ -446,29 +481,32 @@ function ReviewPhase({ data }: { data: OrchestrationData }) {
           style={{ top: 14, transformOrigin: "left" }}
         />
 
-        <div className="grid grid-cols-3 gap-8">
+        <div className="grid gap-5" style={{ gridTemplateColumns: "1.2fr 1fr 1fr" }}>
           {/* Inspect */}
           <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Inspect" subtitle="Code Review" />
+            <AgentSection phaseStep="review:inspect" />
           </motion.div>
 
           {/* Fix Errors */}
           <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Fix Errors" subtitle="Auto or Manual" />
+            <AgentSection phaseStep="review:fix-errors" />
           </motion.div>
 
           {/* Merge */}
           <motion.div variants={fadeInUp}>
             <BranchNode className="relative z-10" />
             <StepLabel title="Merge" subtitle="Pass tests to main" />
+            <AgentSection phaseStep="review:merge" />
           </motion.div>
         </div>
       </div>
 
       {/* Content aligned under each node */}
-      <motion.div variants={fadeInUp} className="grid grid-cols-3 gap-8 mt-6">
+      <motion.div variants={fadeInUp} className="grid gap-5 mt-6" style={{ gridTemplateColumns: "1.2fr 1fr 1fr" }}>
         {/* Under Inspect: branch structure */}
         <motion.div variants={fadeInUp}>
           <div className="relative ml-3.5">

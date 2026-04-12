@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { OrchestrationData, PhaseId } from "@/lib/constants";
 import { GitBranch02, GitCommit, GitMerge, GitPullRequest } from "@untitledui/icons";
 import { phaseStagger, fadeInUp } from "@/lib/motion";
+import { AgentRow } from "./AgentRow";
 
 interface GitGraphMobileProps {
   data: OrchestrationData;
@@ -19,6 +20,7 @@ function MobileCard({
   children,
   isLast = false,
   branchType = "main",
+  phaseStep,
 }: {
   label: string;
   sublabel: string;
@@ -26,6 +28,7 @@ function MobileCard({
   children?: React.ReactNode;
   isLast?: boolean;
   branchType?: "main" | "feature";
+  phaseStep?: string;
 }) {
   return (
     <motion.div
@@ -51,6 +54,7 @@ function MobileCard({
         <p className="text-fg-tertiary text-xs mt-0.5" style={{ fontFamily: "var(--font-mono, monospace)" }}>
           {sublabel}
         </p>
+        {phaseStep && <AgentRow phaseStep={phaseStep} compact />}
         {children && <div className="mt-3">{children}</div>}
       </div>
     </motion.div>
@@ -88,7 +92,7 @@ export function GitGraphMobile({ data, activePhase, shouldAnimate, onAnimationCo
         {activePhase === "planning" && (
           <>
             <MainBranchIndicator />
-            <MobileCard label="Research" sublabel="/karimo:research" icon={GitCommit}>
+            <MobileCard label="Research" sublabel="/karimo:research" icon={GitCommit} phaseStep="planning:research">
               <div className="flex flex-wrap gap-1.5">
                 {data.research.external.map((item, i) => (
                   <span key={i} className="px-2 py-0.5 rounded text-[10px] bg-bg-brand-subtle border border-border-brand/30 text-fg-brand" style={{ fontFamily: "var(--font-mono, monospace)" }}>
@@ -102,12 +106,23 @@ export function GitGraphMobile({ data, activePhase, shouldAnimate, onAnimationCo
                 ))}
               </div>
             </MobileCard>
-            <MobileCard label="Create PRD" sublabel="/karimo:plan" icon={GitCommit}>
-              <span className="inline-flex px-3 py-1 rounded bg-bg-brand-solid text-fg-primary text-[11px] font-semibold">
-                {data.prdName}
-              </span>
+            <MobileCard label="Create PRD" sublabel="/karimo:plan" icon={GitCommit} phaseStep="planning:create-prd">
+              <div>
+                <span className="inline-flex px-3 py-1 rounded bg-bg-brand-solid text-fg-primary text-[11px] font-semibold">
+                  {data.prdName}
+                </span>
+                <div className="mt-1.5 px-1.5 py-0.5 rounded border border-border-secondary bg-bg-tertiary/30 inline-flex items-center gap-1">
+                  <span className="text-fg-tertiary text-[8px]" style={{ fontFamily: "var(--font-mono, monospace)" }}>
+                    Interview Protocol
+                  </span>
+                  <span className="text-fg-tertiary/30 text-[8px]">|</span>
+                  <span className="text-fg-tertiary/60 text-[8px]" style={{ fontFamily: "var(--font-mono, monospace)" }}>
+                    customizable
+                  </span>
+                </div>
+              </div>
             </MobileCard>
-            <MobileCard label="Task Briefs" sublabel="/karimo:run" icon={GitCommit}>
+            <MobileCard label="Task Briefs" sublabel="/karimo:run" icon={GitCommit} phaseStep="planning:task-briefs">
               <div className="flex flex-wrap gap-1">
                 {data.taskBriefs.map((brief) => (
                   <span
@@ -125,7 +140,7 @@ export function GitGraphMobile({ data, activePhase, shouldAnimate, onAnimationCo
                 ))}
               </div>
             </MobileCard>
-            <MobileCard label="Dependency Graph" sublabel="tasks.yaml" icon={GitCommit} isLast>
+            <MobileCard label="Dependency Graph" sublabel="tasks.yaml" icon={GitCommit} isLast phaseStep="planning:dependency">
               <div className="space-y-1.5">
                 {data.waveMappings.map((mapping) => (
                   <div key={mapping.wave} className="flex items-center gap-2">
@@ -155,7 +170,7 @@ export function GitGraphMobile({ data, activePhase, shouldAnimate, onAnimationCo
               </span>
             </motion.div>
 
-            <MobileCard label="Feature Branch" sublabel={data.prdName} icon={GitBranch02} branchType="feature">
+            <MobileCard label="Feature Branch" sublabel={data.prdName} icon={GitBranch02} branchType="feature" phaseStep="execution:execute">
               <p className="text-fg-tertiary text-[10px]" style={{ fontFamily: "var(--font-mono, monospace)" }}>
                 Forked from main
               </p>
@@ -208,15 +223,19 @@ export function GitGraphMobile({ data, activePhase, shouldAnimate, onAnimationCo
           <>
             <MainBranchIndicator />
             <MobileCard label="PR Created" sublabel="feature > main" icon={GitPullRequest} />
-            {data.reviewSteps.map((step, i) => (
+            {data.reviewSteps.map((step, i) => {
+              const stepKey = step.id === "clean" ? "fix-errors" : step.id;
+              return (
               <MobileCard
                 key={step.id}
                 label={step.label}
                 sublabel={step.sublabel}
                 icon={step.id === "merge" ? GitMerge : GitCommit}
                 isLast={i === data.reviewSteps.length - 1}
+                phaseStep={`review:${stepKey}`}
               />
-            ))}
+              );
+            })}
           </>
         )}
       </motion.div>
