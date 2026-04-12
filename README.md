@@ -1,8 +1,4 @@
-```
-╦╔═  ╔═╗  ╦═╗  ╦  ╔╦╗  ╔═╗
-╠╩╗  ╠═╣  ╠╦╝  ║  ║║║  ║ ║
-╩ ╩  ╩ ╩  ╩╚═  ╩  ╩ ╩  ╚═╝  overview
-```
+# KARIMO Overview
 
 Interactive visual explainer for [KARIMO](https://github.com/opensesh/KARIMO) — the autonomous development framework for Claude Code.
 
