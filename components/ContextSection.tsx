@@ -46,27 +46,74 @@ const contextLayers = [
   },
 ];
 
-// Comparison data: basic plan mode vs KARIMO (framework context overhead)
-const comparisonData = {
-  planMode: {
-    label: "Basic Plan Mode",
-    totalConsumed: 48000,
-    breakdown: [
-      { label: "22 agent definitions", tokens: "~30k" },
-      { label: "11 command files", tokens: "~10k" },
-      { label: "9 skill files", tokens: "~8k" },
-    ],
+// ---------------------------------------------------------------------------
+// Data: Complexity vs Duration chart
+// ---------------------------------------------------------------------------
+
+interface ChartPoint {
+  id: "plan-mode" | "karimo" | "mythos";
+  label: string;
+  /** The dot position (complexity = y, duration midpoint = x) */
+  position: { x: number; y: number };
+  /** Duration range for the triangle base on the X-axis */
+  durationRange: [number, number];
+  shape: "triangle" | "dot";
+  dotColor: string;
+  gradientId: string;
+  detail: {
+    title: string;
+    subtitle: string;
+    description: string;
+  };
+}
+
+const chartPoints: ChartPoint[] = [
+  {
+    id: "plan-mode",
+    label: "Plan Mode",
+    position: { x: 2, y: 3 },
+    durationRange: [1, 3],
+    shape: "triangle",
+    dotColor: "#78716c",
+    gradientId: "grad-plan",
+    detail: {
+      title: "Static Planning",
+      subtitle: "Plan Mode",
+      description:
+        "A single session with a flat 1M context window. Each new session starts from scratch — no memory, no compounding. Limited to simple, short-duration tasks.",
+    },
   },
-  karimo: {
-    label: "KARIMO Progressive",
-    totalConsumed: 7500,
-    breakdown: [
-      { label: "Abstracts (L0)", tokens: "~100" },
-      { label: "Overviews (L1)", tokens: "~2k" },
-      { label: "On-demand (L2)", tokens: "~5.5k" },
-    ],
+  {
+    id: "karimo",
+    label: "KARIMO",
+    position: { x: 4, y: 6 },
+    durationRange: [2, 6],
+    shape: "triangle",
+    dotColor: "#fe5102",
+    gradientId: "grad-karimo",
+    detail: {
+      title: "Progressive Planning",
+      subtitle: "KARIMO",
+      description:
+        "Context compounds across sessions. Research seeds PRDs, PRDs seed briefs, briefs seed parallel worktrees. Each stage multiplies the effective context window.",
+    },
   },
-};
+  {
+    id: "mythos",
+    label: "Mythos",
+    position: { x: 8, y: 9 },
+    durationRange: [8, 8],
+    shape: "dot",
+    dotColor: "#ff7a38",
+    gradientId: "grad-mythos",
+    detail: {
+      title: "Frontier Intelligence",
+      subtitle: "Mythos",
+      description:
+        "KARIMO\u2019s context architecture creates a stable layer for feature development. As models improve, that layer amplifies — increasing the complexity and duration the framework can handle without any structural changes.",
+    },
+  },
+];
 
 // Terminal preview content per layer
 const terminalContent: Record<string, { filename: string; lines: string[] }> = {
@@ -306,7 +353,9 @@ export function ContextSection() {
             transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-body text-fg-secondary mt-4 max-w-2xl text-lg"
           >
-            KARIMO is built around context optimization. There are three ways we achieve this:
+            In plan mode, you get a single 1M-token session — static, flat, and isolated.
+            KARIMO expands that single window into progressive, compounding context that
+            grows across every session. There are three ways we achieve this:
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -316,7 +365,7 @@ export function ContextSection() {
             className="mt-4 space-y-2.5 max-w-2xl"
           >
             {[
-              { name: "Progressive Disclosure", desc: "load abstracts before overviews, overviews before full definitions" },
+              { name: "Progressive Disclosure", desc: "load only what's needed, when it's needed" },
               { name: "Context Multiplication", desc: "structure workflows so every session builds on the last" },
               { name: "Compound Learning", desc: "capture feedback that persists across every future PRD" },
             ].map((item, i) => (
@@ -332,6 +381,17 @@ export function ContextSection() {
             ))}
           </motion.div>
         </div>
+
+        {/* Complexity vs Duration chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-16 md:mb-20"
+        >
+          <ComplexityDurationChart />
+        </motion.div>
 
         {/* ── PART 1: Progressive Disclosure ── */}
         <motion.div
@@ -360,17 +420,6 @@ export function ContextSection() {
             protocol — agents load abstracts first, overviews second, and full
             definitions only when executing. No wasted tokens.
           </p>
-        </motion.div>
-
-        {/* Framework overhead comparison — side by side on desktop */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-12"
-        >
-          <TokenComparison />
         </motion.div>
 
         {/* Layer explorer — terminal LEFT, accordion RIGHT */}
@@ -534,85 +583,299 @@ export function ContextSection() {
 }
 
 // ---------------------------------------------------------------------------
-// Token comparison: unified single card
+// Complexity vs Duration chart
 // ---------------------------------------------------------------------------
 
-function TokenComparison() {
-  const { planMode, karimo } = comparisonData;
-  const maxTokens = planMode.totalConsumed;
-  const karimoPercent = (karimo.totalConsumed / maxTokens) * 100;
-  const ratio = Math.round(planMode.totalConsumed / karimo.totalConsumed);
+const CHART = { w: 500, h: 220, pad: { top: 16, right: 20, bottom: 40, left: 48 } } as const;
+const CHART_AREA = {
+  x0: CHART.pad.left,
+  x1: CHART.w - CHART.pad.right,
+  y0: CHART.pad.top,
+  y1: CHART.h - CHART.pad.bottom,
+};
+
+function toChartX(val: number) {
+  return CHART_AREA.x0 + (val / 10) * (CHART_AREA.x1 - CHART_AREA.x0);
+}
+function toChartY(val: number) {
+  return CHART_AREA.y1 - (val / 10) * (CHART_AREA.y1 - CHART_AREA.y0);
+}
+
+const springEase = [0.16, 1, 0.3, 1] as const;
+const DOT_R = 6;
+const OUTLINE_R = 12;
+
+function ComplexityDurationChart() {
+  const [activeId, setActiveId] = useState<string>("karimo");
+  const activePoint = chartPoints.find((p) => p.id === activeId) ?? chartPoints[1];
+
+  const gridLines = [2, 4, 6, 8];
+
+  // KARIMO and Mythos dot positions for the dashed connector
+  const karimoPos = chartPoints[1];
+  const mythosPos = chartPoints[2];
 
   return (
-    <div className="rounded-xl p-5 md:p-6 bg-bg-primary border border-border-secondary">
-      <p className="text-body text-[10px] text-fg-tertiary mb-5 uppercase tracking-wider">
-        Framework overhead
+    <div className="rounded-xl border border-border-secondary bg-bg-primary p-5 md:p-6 overflow-hidden">
+      <p className="text-accent text-[10px] text-fg-tertiary mb-4 uppercase tracking-wider">
+        Capability comparison
       </p>
 
-      {/* Basic Plan Mode */}
-      <div className="mb-5">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-display text-sm text-fg-primary">{planMode.label}</span>
-          <span className="font-mono text-xs text-[#ff5f56]">
-            {(planMode.totalConsumed / 1000).toFixed(0)}k tokens
-          </span>
-        </div>
-        <div className="h-3 rounded-full bg-bg-tertiary overflow-hidden mb-3 relative">
-          <motion.div
-            className="absolute left-0 top-0 h-full rounded-full bg-[#ff5f56]"
-            initial={{ width: 0 }}
-            whileInView={{ width: "100%" }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          />
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {planMode.breakdown.map((seg) => (
-            <span
-              key={seg.label}
-              className="text-body text-xs px-2 py-0.5 rounded bg-[#ff5f56]/10 text-[#ff5f56]"
-            >
-              {seg.label} {seg.tokens}
-            </span>
-          ))}
-        </div>
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px] gap-6 items-start">
+        {/* SVG Chart */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, ease: springEase }}
+        >
+          <svg
+            viewBox={`0 0 ${CHART.w} ${CHART.h}`}
+            className="w-full h-auto"
+            role="img"
+            aria-label="Complexity vs Duration chart comparing Plan Mode, KARIMO, and Mythos"
+          >
+            <defs>
+              <linearGradient id="grad-plan" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#57534e" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#44403a" stopOpacity="0.08" />
+              </linearGradient>
+              <linearGradient id="grad-karimo" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#fe5102" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#ff7a38" stopOpacity="0.06" />
+              </linearGradient>
+              <radialGradient id="grad-mythos" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#ff7a38" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#fe5102" stopOpacity="0.2" />
+              </radialGradient>
+              <filter id="glow-mythos">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
-      {/* Divider */}
-      <div className="h-px bg-border-secondary my-5" />
+            {/* Grid lines */}
+            <g opacity="0.06">
+              {gridLines.map((v) => (
+                <g key={v}>
+                  <line
+                    x1={toChartX(v)} y1={CHART_AREA.y0}
+                    x2={toChartX(v)} y2={CHART_AREA.y1}
+                    stroke="#a8a29e" strokeWidth="1"
+                  />
+                  <line
+                    x1={CHART_AREA.x0} y1={toChartY(v)}
+                    x2={CHART_AREA.x1} y2={toChartY(v)}
+                    stroke="#a8a29e" strokeWidth="1"
+                  />
+                </g>
+              ))}
+            </g>
 
-      {/* KARIMO */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-display text-sm text-fg-primary">{karimo.label}</span>
-          <span className="font-mono text-xs text-[#27c93f]">
-            {(karimo.totalConsumed / 1000).toFixed(1)}k tokens
-          </span>
-        </div>
-        <div className="h-3 rounded-full bg-bg-tertiary overflow-hidden mb-3 relative">
-          <motion.div
-            className="absolute left-0 top-0 h-full rounded-full bg-[#27c93f]"
-            initial={{ width: 0 }}
-            whileInView={{ width: `${karimoPercent}%` }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          />
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {karimo.breakdown.map((seg) => (
-            <span
-              key={seg.label}
-              className="text-body text-xs px-2 py-0.5 rounded bg-[#27c93f]/10 text-[#27c93f]"
+            {/* Axes */}
+            <line
+              x1={CHART_AREA.x0} y1={CHART_AREA.y1}
+              x2={CHART_AREA.x1} y2={CHART_AREA.y1}
+              stroke="#363230" strokeWidth="1"
+            />
+            <line
+              x1={CHART_AREA.x0} y1={CHART_AREA.y0}
+              x2={CHART_AREA.x0} y2={CHART_AREA.y1}
+              stroke="#363230" strokeWidth="1"
+            />
+
+            {/* Axis labels */}
+            <text
+              x={CHART_AREA.x0 + (CHART_AREA.x1 - CHART_AREA.x0) / 2}
+              y={CHART.h - 4}
+              textAnchor="middle"
+              fill="#78716c"
+              fontSize="10"
+              style={{ fontFamily: "var(--font-accent)" }}
             >
-              {seg.label} {seg.tokens}
-            </span>
-          ))}
-          <span className="text-body text-xs text-fg-tertiary ml-1">
-            ~{ratio}x less
-          </span>
+              DURATION
+            </text>
+            <text
+              x={12}
+              y={CHART_AREA.y0 + (CHART_AREA.y1 - CHART_AREA.y0) / 2}
+              textAnchor="middle"
+              fill="#78716c"
+              fontSize="10"
+              style={{ fontFamily: "var(--font-accent)" }}
+              transform={`rotate(-90, 12, ${CHART_AREA.y0 + (CHART_AREA.y1 - CHART_AREA.y0) / 2})`}
+            >
+              COMPLEXITY
+            </text>
+
+            {/* Tick labels */}
+            {gridLines.map((v) => (
+              <g key={`tick-${v}`}>
+                <text
+                  x={toChartX(v)} y={CHART_AREA.y1 + 16}
+                  textAnchor="middle" fill="#78716c" fontSize="9"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  {v}
+                </text>
+                <text
+                  x={CHART_AREA.x0 - 10} y={toChartY(v) + 3}
+                  textAnchor="end" fill="#78716c" fontSize="9"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  {v}
+                </text>
+              </g>
+            ))}
+
+            {/* Dashed connector line: KARIMO → Mythos */}
+            <motion.line
+              x1={toChartX(karimoPos.position.x)}
+              y1={toChartY(karimoPos.position.y)}
+              x2={toChartX(mythosPos.position.x)}
+              y2={toChartY(mythosPos.position.y)}
+              stroke="#ff7a38"
+              strokeWidth="1"
+              strokeDasharray="4 4"
+              opacity="0.3"
+              initial={{ pathLength: 0, opacity: 0 }}
+              whileInView={{ pathLength: 1, opacity: 0.3 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.8, ease: springEase }}
+            />
+
+            {/* Surface-area triangles (rendered first, behind dots) */}
+            {chartPoints.filter((p) => p.shape === "triangle").map((point, i) => {
+              const dotX = toChartX(point.position.x);
+              const dotY = toChartY(point.position.y);
+              const leftX = toChartX(point.durationRange[0]);
+              const rightX = toChartX(point.durationRange[1]);
+              const baseY = CHART_AREA.y1;
+              const isActive = point.id === activeId;
+
+              return (
+                <motion.polygon
+                  key={`tri-${point.id}`}
+                  points={`${dotX},${dotY} ${leftX},${baseY} ${rightX},${baseY}`}
+                  fill={`url(#${point.gradientId})`}
+                  opacity={isActive ? 1 : 0.25}
+                  style={{ transition: "opacity 0.3s" }}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: isActive ? 1 : 0.25 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.3 + i * 0.3, ease: springEase }}
+                />
+              );
+            })}
+
+            {/* Data point dots + labels */}
+            {chartPoints.map((point, i) => {
+              const cx = toChartX(point.position.x);
+              const cy = toChartY(point.position.y);
+              const isActive = point.id === activeId;
+              const delay = 0.2 + i * 0.3;
+
+              return (
+                <motion.g
+                  key={point.id}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay, ease: springEase }}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setActiveId(point.id)}
+                  onMouseEnter={() => setActiveId(point.id)}
+                >
+                  {/* Hit area */}
+                  <circle cx={cx} cy={cy} r="24" fill="transparent" />
+
+                  {/* Hover outline ring */}
+                  <circle
+                    cx={cx} cy={cy} r={OUTLINE_R}
+                    fill="none"
+                    stroke={point.dotColor}
+                    strokeWidth={isActive ? "1.5" : "0"}
+                    opacity={isActive ? 0.6 : 0}
+                    strokeDasharray={isActive ? "none" : "3 3"}
+                    style={{ transition: "stroke-width 0.3s, opacity 0.3s" }}
+                  />
+
+                  {/* Mythos glow */}
+                  {point.shape === "dot" && (
+                    <circle
+                      cx={cx} cy={cy} r={OUTLINE_R + 2}
+                      fill="none"
+                      stroke={point.dotColor}
+                      strokeWidth="0.5"
+                      opacity={isActive ? 0.3 : 0}
+                      filter="url(#glow-mythos)"
+                      style={{ transition: "opacity 0.3s" }}
+                    />
+                  )}
+
+                  {/* Main dot */}
+                  <circle
+                    cx={cx} cy={cy} r={DOT_R}
+                    fill={point.dotColor}
+                    opacity={isActive ? 1 : 0.5}
+                    style={{ transition: "opacity 0.3s" }}
+                  />
+
+                  {/* Label below dot */}
+                  <text
+                    x={cx}
+                    y={cy + DOT_R + 14}
+                    textAnchor="middle"
+                    fill={isActive ? "#fffaee" : "#78716c"}
+                    fontSize="10"
+                    style={{ fontFamily: "var(--font-accent)", transition: "fill 0.3s" }}
+                  >
+                    {point.label}
+                  </text>
+                </motion.g>
+              );
+            })}
+          </svg>
+        </motion.div>
+
+        {/* Detail panel — fixed height for consistency */}
+        <div className="h-[220px] md:h-[200px]">
+          <AnimatePresence mode="wait">
+            <ChartDetailPanel key={activePoint.id} point={activePoint} />
+          </AnimatePresence>
         </div>
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Chart detail panel
+// ---------------------------------------------------------------------------
+
+function ChartDetailPanel({ point }: { point: ChartPoint }) {
+  const { detail } = point;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 8 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -8 }}
+      transition={{ duration: 0.3, ease: springEase }}
+      className="rounded-lg border border-border-secondary bg-bg-secondary p-5 h-full flex flex-col"
+    >
+      <span className="text-accent text-[10px] text-fg-tertiary uppercase tracking-wider">
+        {detail.subtitle}
+      </span>
+      <h4 className="text-display text-lg text-fg-primary mt-1">
+        {detail.title}
+      </h4>
+      <p className="text-body text-sm text-fg-secondary mt-3 leading-relaxed flex-1">
+        {detail.description}
+      </p>
+    </motion.div>
   );
 }
 
