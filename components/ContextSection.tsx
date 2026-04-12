@@ -570,7 +570,6 @@ export function ContextSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-10"
           >
             <span className="text-accent text-xs font-bold text-fg-tertiary uppercase tracking-wider">
               Part 3
@@ -578,16 +577,35 @@ export function ContextSection() {
             <h3 className="text-display text-xl md:text-2xl text-fg-primary mt-2">
               Compound Learning
             </h3>
-            <p className="text-body text-fg-secondary mt-2 max-w-xl">
-              At any point, run {" "}
+            <p className="text-body text-fg-secondary mt-3 max-w-2xl leading-relaxed">
+              At any point, run{" "}
               <span className="font-mono text-fg-primary text-sm">/karimo:feedback</span>{" "}
-              to capture what you&apos;ve learned. Simple rules get saved instantly;
-              complex problems trigger an investigation. Learnings persist
-              across every future PRD — agents get smarter over time.
+              to capture issues or potential improvements. Observations move through a
+              capture stage, then get stored as summarized learnings in the KARIMO
+              learnings folder — patterns that work, anti-patterns to avoid, execution
+              rules, and product-specific notes. These compound over time: every future
+              PRD and task brief loads in relevant learnings for that specific task.
+              Agents never repeat the same mistake twice.
             </p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="text-body text-sm text-fg-tertiary mt-6"
+            >
+              Open source — {" "}
+              <a
+                href="https://github.com/opensesh/KARIMO"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-fg-brand hover:underline"
+              >
+                contribute on GitHub
+              </a>
+              {" "} to help improve KARIMO as models evolve.
+            </motion.p>
           </motion.div>
-
-          <CompoundLearningViz />
         </div>
       </div>
       </motion.div>
@@ -1315,132 +1333,6 @@ function ContextTerminalPreview({ activeLayer }: { activeLayer: string }) {
 // Compound learning visualization
 // ---------------------------------------------------------------------------
 
-const learningSteps = [
-  {
-    id: "capture",
-    label: "Capture",
-    description:
-      "Run /karimo:feedback with an observation. The system auto-detects whether it needs a quick rule or a deeper investigation.",
-    chips: ["instant rules", "adaptive interview"],
-  },
-  {
-    id: "store",
-    label: "Store",
-    description:
-      "Learnings are saved to .karimo/learnings/ organized by category — patterns that work, anti-patterns to avoid, hard execution rules, and project-specific notes.",
-    chips: ["patterns", "anti-patterns", "execution-rules"],
-  },
-  {
-    id: "compound",
-    label: "Compound",
-    description:
-      "Every future PRD and task brief loads relevant learnings automatically. Agents never repeat the same mistake — the project gets smarter with every cycle.",
-    chips: ["informs PRDs", "seeds briefs", "prevents regressions"],
-  },
-];
-
-function CompoundLearningViz() {
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-
-  const toggle = (id: string) =>
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="space-y-4"
-    >
-      {/* Accordion cards — all viewports */}
-      {learningSteps.map((step, i) => {
-        const isOpen = !!expanded[step.id];
-
-        return (
-          <div
-            key={step.id}
-            className={`
-              rounded-lg overflow-hidden transition-colors duration-200
-              border bg-bg-primary
-              ${isOpen ? "border-border-primary" : "border-border-secondary"}
-            `}
-          >
-            <button
-              onClick={() => toggle(step.id)}
-              className="w-full flex items-center justify-between px-6 py-5 md:px-8 md:py-6 text-left cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-accent text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full bg-fg-tertiary/10 text-fg-tertiary">
-                  {i + 1}
-                </span>
-                <h4 className="text-display text-lg md:text-xl text-fg-primary">
-                  {step.label}
-                </h4>
-              </div>
-              <div
-                className={`
-                  flex-shrink-0 w-8 h-8 flex items-center justify-center
-                  rounded-lg transition-colors duration-200
-                  ${isOpen
-                    ? "bg-bg-brand-solid border border-transparent"
-                    : "border border-border-secondary"
-                  }
-                `}
-              >
-                <span className="text-fg-primary text-sm leading-none select-none">
-                  {isOpen ? "−" : "+"}
-                </span>
-              </div>
-            </button>
-
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="overflow-hidden"
-                >
-                  <div className="px-6 pb-6 md:px-8 md:pb-8">
-                    <p className="text-body text-sm text-fg-secondary leading-relaxed mb-4">
-                      {step.description}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {step.chips.map((chip) => (
-                        <span
-                          key={chip}
-                          className="text-body text-xs px-2 py-1 rounded bg-bg-secondary text-fg-primary"
-                        >
-                          {chip}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
-
-      {/* CTA */}
-      <p className="text-body text-sm text-fg-tertiary text-center pt-4">
-        Open source — {" "}
-        <a
-          href="https://github.com/opensesh/KARIMO"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-fg-brand hover:underline"
-        >
-          contribute on GitHub
-        </a>
-        {" "} to help improve KARIMO as models evolve.
-      </p>
-    </motion.div>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Helpers
