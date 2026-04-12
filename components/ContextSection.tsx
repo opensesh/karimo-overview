@@ -980,24 +980,31 @@ function ContextMultiplicationViz() {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [activeModalFile, setActiveModalFile] = useState<string | null>(null);
   const [modalTabs, setModalTabs] = useState<string[]>([]);
-  const hasInteracted = useRef(false);
+  const [playing, setPlaying] = useState(true);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Auto-advance through stages until user interacts
+  // Auto-advance timer
   useEffect(() => {
-    if (hasInteracted.current) return;
-    const interval = setInterval(() => {
-      if (hasInteracted.current) {
-        clearInterval(interval);
-        return;
-      }
+    if (!playing) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = null;
+      return;
+    }
+    timerRef.current = setInterval(() => {
       setExpandedStage((prev) => (prev + 1) % 4);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
+    }, 3000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [playing]);
 
   const handleStageSelect = useCallback((i: number) => {
-    hasInteracted.current = true;
+    setPlaying(false);
     setExpandedStage(i);
+  }, []);
+
+  const handleTogglePlay = useCallback(() => {
+    setPlaying((p) => !p);
   }, []);
 
   const openStageModal = useCallback((stageId: string) => {
@@ -1034,16 +1041,13 @@ function ContextMultiplicationViz() {
       transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className="rounded-xl border border-border-secondary bg-bg-primary overflow-hidden"
     >
-      {/* Effective Context label */}
-      <div className="flex items-center gap-4 px-5 pt-5 md:px-6 md:pt-6 pb-0">
-        <span className="text-body text-xs text-fg-tertiary uppercase tracking-wider">
-          Effective context
-        </span>
-        <div className="flex-1 h-px bg-border-secondary" />
-      </div>
-
-      {/* Three.js visualization */}
-      <ContextMultiplicationCanvas activeStage={expandedStage} />
+      {/* Three.js visualization with progress bar */}
+      <ContextMultiplicationCanvas
+        activeStage={expandedStage}
+        onStageChange={handleStageSelect}
+        playing={playing}
+        onTogglePlay={handleTogglePlay}
+      />
 
       {/* Desktop: 4-column grid */}
       <div className="hidden lg:grid lg:grid-cols-4">

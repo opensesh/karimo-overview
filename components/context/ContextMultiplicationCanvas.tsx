@@ -1,8 +1,14 @@
 "use client";
 
-import { useRef, useState, useMemo, useEffect, useCallback } from "react";
+import {
+  useRef,
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+} from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html, Line } from "@react-three/drei";
+import { Html, QuadraticBezierLine } from "@react-three/drei";
 import * as THREE from "three";
 
 // ---------------------------------------------------------------------------
@@ -45,68 +51,59 @@ interface WorktreeDef {
 }
 
 // ---------------------------------------------------------------------------
-// Constants
+// Layout constants
 // ---------------------------------------------------------------------------
 
-const BOX_HEIGHT = 1.8;
-const BOX_Y = -0.4;
-const BOX_GAP = 0.15;
-const WORKTREE_Y = 2.2;
-const WAVE_GAP = 0.7;
+const BOX_SIZE = 2.0; // square boxes
+const BOX_Y = -0.6;
+const BOX_GAP = 0.12;
+const WORKTREE_Y = 2.0;
 
 const COLORS = {
-  boxBorder: "#363230",
+  boxBorder: "#44403a",
   boxFill: "#1c1a17",
-  nodeMuted: "#57534e",
-  nodeResearch: "#a8a29e",
-  nodeBrief: "#78716c",
+  nodeMuted: "#a8a29e",
+  nodeResearch: "#d6d3d1",
   brandOrange: "#fe5102",
   brandGlow: "#ff7a38",
-  fg: "#fffaee",
-  fgSecondary: "#a8a29e",
-  fgTertiary: "#78716c",
-  bgPrimary: "#000000",
-  bgSecondary: "#191919",
-  borderSecondary: "#363230",
-  worktreeWave1: "#fe5102",
-  worktreeWave2: "#ff7a38",
+  taskNode: "#ff7a38",
 };
 
 // ---------------------------------------------------------------------------
-// Node data generators
+// Stable node data (generated once via useMemo in Scene)
 // ---------------------------------------------------------------------------
 
 function makeResearchNodes(): NodeDef[] {
   const types = [
     "findings.md",
     "summary.md",
-    "internal/structure",
-    "internal/patterns",
-    "external/best-practices",
-    "external/libraries",
-    "internal/dependencies",
-    "external/references",
-    "conventions",
-    "internal/errors",
+    "patterns.md",
+    "anti-patterns.md",
+    "architecture.md",
+    "conventions.md",
+    "external/APIs",
+    "external/docs",
+    "internal/deps",
   ];
-
+  // Deterministic "random" using index
   return types.map((label, i) => {
-    const col = i % 4;
-    const row = Math.floor(i / 4);
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const seed = i * 137.5;
     return {
-      id: `research-${i}`,
+      id: `r-${i}`,
       label,
-      baseX: -3.2 + col * 0.55,
-      baseY: BOX_Y + 0.45 - row * 0.55,
-      radius: 0.12 + Math.random() * 0.06,
-      color: i < 2 ? COLORS.nodeResearch : COLORS.nodeMuted,
-      phaseX: Math.random() * Math.PI * 2,
-      phaseY: Math.random() * Math.PI * 2,
-      speedX: 0.3 + Math.random() * 0.4,
-      speedY: 0.4 + Math.random() * 0.3,
-      ampX: 0.04 + Math.random() * 0.06,
-      ampY: 0.04 + Math.random() * 0.06,
-      delay: i * 0.08,
+      baseX: -0.55 + col * 0.55,
+      baseY: 0.5 - row * 0.5,
+      radius: 0.11 + (seed % 7) * 0.01,
+      color: i < 3 ? COLORS.nodeResearch : COLORS.nodeMuted,
+      phaseX: (seed % 6.28),
+      phaseY: ((seed * 1.3) % 6.28),
+      speedX: 0.4 + (seed % 3) * 0.1,
+      speedY: 0.5 + (seed % 4) * 0.08,
+      ampX: 0.06 + (seed % 5) * 0.008,
+      ampY: 0.06 + (seed % 3) * 0.01,
+      delay: i * 0.07,
     };
   });
 }
@@ -115,119 +112,105 @@ function makePRDNode(): NodeDef {
   return {
     id: "prd-0",
     label: "PRD",
-    baseX: -0.9,
-    baseY: BOX_Y,
-    radius: 0.28,
+    baseX: 0,
+    baseY: 0,
+    radius: 0.38,
     color: COLORS.brandOrange,
     emissive: COLORS.brandOrange,
-    emissiveIntensity: 0.6,
+    emissiveIntensity: 0.8,
     phaseX: 1.2,
     phaseY: 0.8,
-    speedX: 0.25,
-    speedY: 0.3,
-    ampX: 0.03,
-    ampY: 0.03,
+    speedX: 0.2,
+    speedY: 0.25,
+    ampX: 0.02,
+    ampY: 0.02,
     delay: 0,
   };
 }
 
-function makeBriefNodes(): NodeDef[] {
+function makeTaskNodes(): NodeDef[] {
   const tasks = [
-    "T001",
-    "T002",
-    "T005",
-    "T006",
-    "T010",
-    "T011",
-    "T016",
-    "T020",
-    "T003",
-    "T007",
+    "T001", "T002", "T005", "T006",
+    "T010", "T011", "T016", "T020",
+    "T003", "T007", "T012", "T015",
   ];
-
   return tasks.map((label, i) => {
-    const col = i % 5;
-    const row = Math.floor(i / 5);
+    const col = i % 4;
+    const row = Math.floor(i / 4);
+    const seed = (i + 10) * 97.3;
     return {
-      id: `brief-${i}`,
+      id: `t-${i}`,
       label,
-      baseX: 0.3 + col * 0.55,
-      baseY: BOX_Y + 0.35 - row * 0.55,
-      radius: 0.1 + Math.random() * 0.04,
-      color: COLORS.nodeBrief,
-      phaseX: Math.random() * Math.PI * 2,
-      phaseY: Math.random() * Math.PI * 2,
-      speedX: 0.35 + Math.random() * 0.35,
-      speedY: 0.35 + Math.random() * 0.35,
-      ampX: 0.03 + Math.random() * 0.05,
-      ampY: 0.03 + Math.random() * 0.05,
-      delay: i * 0.06,
+      baseX: -0.7 + col * 0.47,
+      baseY: 0.45 - row * 0.45,
+      radius: 0.09 + (seed % 5) * 0.008,
+      color: COLORS.taskNode,
+      emissive: COLORS.brandOrange,
+      emissiveIntensity: 0.25,
+      phaseX: (seed % 6.28),
+      phaseY: ((seed * 1.7) % 6.28),
+      speedX: 0.45 + (seed % 3) * 0.12,
+      speedY: 0.35 + (seed % 4) * 0.1,
+      ampX: 0.05 + (seed % 4) * 0.008,
+      ampY: 0.05 + (seed % 3) * 0.01,
+      delay: i * 0.05,
     };
   });
 }
 
-const RESEARCH_NODES = makeResearchNodes();
-const PRD_NODE = makePRDNode();
-const BRIEF_NODES = makeBriefNodes();
+// ---------------------------------------------------------------------------
+// Box layout calculator — centers all boxes in the scene
+// ---------------------------------------------------------------------------
 
-// Box definitions per stage
-const BOXES: BoxDef[][] = [
-  // Stage 0: Research only
-  [{ x: -3.5, y: BOX_Y, width: 2.6, height: BOX_HEIGHT, label: "Research" }],
-  // Stage 1: Research + PRD
-  [
-    { x: -3.5, y: BOX_Y, width: 2.6, height: BOX_HEIGHT, label: "Research" },
-    { x: -3.5 + 2.6 + BOX_GAP, y: BOX_Y, width: 1.2, height: BOX_HEIGHT, label: "PRD" },
-  ],
-  // Stage 2: Research + PRD + Briefs
-  [
-    { x: -3.5, y: BOX_Y, width: 2.6, height: BOX_HEIGHT, label: "Research" },
-    { x: -3.5 + 2.6 + BOX_GAP, y: BOX_Y, width: 1.2, height: BOX_HEIGHT, label: "PRD" },
-    {
-      x: -3.5 + 2.6 + BOX_GAP + 1.2 + BOX_GAP,
-      y: BOX_Y,
-      width: 3.0,
-      height: BOX_HEIGHT,
-      label: "Task Briefs",
-    },
-  ],
-  // Stage 3: Same boxes + worktrees above
-  [
-    { x: -3.5, y: BOX_Y, width: 2.6, height: BOX_HEIGHT, label: "Research" },
-    { x: -3.5 + 2.6 + BOX_GAP, y: BOX_Y, width: 1.2, height: BOX_HEIGHT, label: "PRD" },
-    {
-      x: -3.5 + 2.6 + BOX_GAP + 1.2 + BOX_GAP,
-      y: BOX_Y,
-      width: 3.0,
-      height: BOX_HEIGHT,
-      label: "Task Briefs",
-    },
-  ],
-];
+function getBoxLayout(stage: number): BoxDef[] {
+  if (stage === 0) {
+    return [
+      { x: -BOX_SIZE / 2, y: BOX_Y, width: BOX_SIZE, height: BOX_SIZE, label: "RESEARCH" },
+    ];
+  }
+  if (stage === 1) {
+    const total = BOX_SIZE * 2 + BOX_GAP;
+    const startX = -total / 2;
+    return [
+      { x: startX, y: BOX_Y, width: BOX_SIZE, height: BOX_SIZE, label: "RESEARCH" },
+      { x: startX + BOX_SIZE + BOX_GAP, y: BOX_Y, width: BOX_SIZE, height: BOX_SIZE, label: "PRD" },
+    ];
+  }
+  // stages 2 and 3
+  const total = BOX_SIZE * 3 + BOX_GAP * 2;
+  const startX = -total / 2;
+  return [
+    { x: startX, y: BOX_Y, width: BOX_SIZE, height: BOX_SIZE, label: "RESEARCH" },
+    { x: startX + BOX_SIZE + BOX_GAP, y: BOX_Y, width: BOX_SIZE, height: BOX_SIZE, label: "PRD" },
+    { x: startX + (BOX_SIZE + BOX_GAP) * 2, y: BOX_Y, width: BOX_SIZE, height: BOX_SIZE, label: "PRD TASKS" },
+  ];
+}
 
+// Worktree definitions
 const WORKTREES: WorktreeDef[] = [
-  { id: "wt-t001", label: "T001", x: -2.8, wave: 1, targetX: -3.2, targetBoxIndex: 0 },
-  { id: "wt-t002", label: "T002", x: -1.8, wave: 1, targetX: -2.5, targetBoxIndex: 0 },
-  { id: "wt-t005", label: "T005", x: -0.8, wave: 1, targetX: -0.9, targetBoxIndex: 1 },
-  { id: "wt-t006", label: "T006", x: 0.6, wave: 2, targetX: 0.5, targetBoxIndex: 2 },
-  { id: "wt-t010", label: "T010", x: 1.6, wave: 2, targetX: 1.6, targetBoxIndex: 2 },
-  { id: "wt-t011", label: "T011", x: 2.6, wave: 2, targetX: 2.7, targetBoxIndex: 2 },
+  { id: "wt-1a", label: "worktree 1a", x: -2.2, wave: 1, targetX: -2.2, targetBoxIndex: 0 },
+  { id: "wt-1b", label: "worktree 1b", x: -0.7, wave: 1, targetX: -0.7, targetBoxIndex: 0 },
+  { id: "wt-1c", label: "worktree 1c", x: 0.7, wave: 1, targetX: 0, targetBoxIndex: 1 },
+  { id: "wt-1d", label: "worktree 1d", x: 2.2, wave: 1, targetX: 2.2, targetBoxIndex: 2 },
 ];
 
 // ---------------------------------------------------------------------------
-// Floating Node component
+// Floating Node
 // ---------------------------------------------------------------------------
 
 function FloatingNode({
   node,
   visible,
   stageDelay,
+  containerCenter,
 }: {
   node: NodeDef;
   visible: boolean;
   stageDelay: number;
+  containerCenter: [number, number];
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const [hovered, setHovered] = useState(false);
   const [appeared, setAppeared] = useState(false);
   const scaleRef = useRef(0);
@@ -254,29 +237,32 @@ function FloatingNode({
       const totalDelay = stageDelay + node.delay;
 
       if (elapsed > totalDelay) {
-        // Spring-in scale
         const springT = Math.min((elapsed - totalDelay) * 3, 1);
-        const spring = 1 - Math.pow(1 - springT, 3);
-        scaleRef.current = spring;
-
+        scaleRef.current = 1 - Math.pow(1 - springT, 3);
         if (springT >= 1 && !appeared) setAppeared(true);
 
-        // Float
         const ft = elapsed - totalDelay;
         meshRef.current.position.x =
-          node.baseX + Math.sin(ft * node.speedX + node.phaseX) * node.ampX;
+          containerCenter[0] + node.baseX + Math.sin(ft * node.speedX + node.phaseX) * node.ampX;
         meshRef.current.position.y =
-          node.baseY + Math.sin(ft * node.speedY + node.phaseY) * node.ampY;
+          containerCenter[1] + node.baseY + Math.sin(ft * node.speedY + node.phaseY) * node.ampY;
       }
     } else {
-      scaleRef.current *= 0.9;
+      scaleRef.current *= 0.88;
     }
 
     const s = scaleRef.current;
     meshRef.current.scale.set(s, s, s);
+
+    // Pulse for PRD orb
+    if (node.emissiveIntensity && node.emissiveIntensity > 0.5 && materialRef.current) {
+      const pulse = 0.6 + Math.sin(t * 1.5) * 0.3;
+      materialRef.current.emissiveIntensity = hovered ? 1.2 : pulse;
+    }
   });
 
-  const handlePointerOver = useCallback(() => {
+  const handlePointerOver = useCallback((e: THREE.Event) => {
+    (e as unknown as { stopPropagation: () => void }).stopPropagation();
     setHovered(true);
     document.body.style.cursor = "pointer";
   }, []);
@@ -291,29 +277,32 @@ function FloatingNode({
   return (
     <mesh
       ref={meshRef}
-      position={[node.baseX, node.baseY, 0.1]}
+      position={[containerCenter[0] + node.baseX, containerCenter[1] + node.baseY, 0.1]}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
     >
-      <sphereGeometry args={[node.radius, 24, 24]} />
+      <circleGeometry args={[node.radius, 32]} />
       <meshStandardMaterial
+        ref={materialRef}
         color={hovered ? COLORS.brandGlow : node.color}
-        emissive={node.emissive || node.color}
-        emissiveIntensity={
-          hovered
-            ? (node.emissiveIntensity || 0.1) * 2
-            : node.emissiveIntensity || 0.1
-        }
-        roughness={0.6}
-        metalness={0.1}
+        emissive={node.emissive || "#000000"}
+        emissiveIntensity={node.emissiveIntensity || 0}
+        toneMapped={false}
       />
       {hovered && appeared && (
         <Html
           center
-          distanceFactor={10}
-          style={{ pointerEvents: "none" }}
+          position={[0, node.radius + 0.2, 0]}
+          style={{ pointerEvents: "none", zIndex: 50 }}
         >
-          <div className="px-2.5 py-1.5 rounded-md bg-bg-primary border border-border-secondary text-fg-primary text-xs font-mono whitespace-nowrap shadow-lg">
+          <div
+            className="px-2.5 py-1.5 rounded-md text-xs font-mono whitespace-nowrap shadow-lg"
+            style={{
+              background: "#000000",
+              border: "1px solid #44403a",
+              color: "#fffaee",
+            }}
+          >
             {node.label}
           </div>
         </Html>
@@ -323,7 +312,7 @@ function FloatingNode({
 }
 
 // ---------------------------------------------------------------------------
-// Context Box component
+// Context Box (2D rectangle with edges)
 // ---------------------------------------------------------------------------
 
 function ContextBox({
@@ -335,64 +324,57 @@ function ContextBox({
   visible: boolean;
   delay: number;
 }) {
+  const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
   const edgesRef = useRef<THREE.LineSegments>(null);
-  const scaleRef = useRef({ x: 0, opacity: 0 });
+  const progressRef = useRef(0);
   const startTime = useRef<number | null>(null);
 
   useEffect(() => {
-    if (visible) {
-      startTime.current = null;
-    }
+    if (visible) startTime.current = null;
   }, [visible]);
 
   const geometry = useMemo(
-    () => new THREE.BoxGeometry(box.width, box.height, 0.02),
+    () => new THREE.PlaneGeometry(box.width, box.height),
     [box.width, box.height]
   );
 
-  const edgesGeometry = useMemo(
-    () => new THREE.EdgesGeometry(geometry),
-    [geometry]
-  );
+  const edgesGeometry = useMemo(() => {
+    const boxGeo = new THREE.BoxGeometry(box.width, box.height, 0.001);
+    return new THREE.EdgesGeometry(boxGeo);
+  }, [box.width, box.height]);
 
   useFrame((state) => {
-    if (!meshRef.current || !edgesRef.current) return;
+    if (!meshRef.current || !edgesRef.current || !groupRef.current) return;
     const t = state.clock.elapsedTime;
 
     if (visible) {
       if (startTime.current === null) startTime.current = t;
       const elapsed = t - startTime.current;
-
       if (elapsed > delay) {
-        const progress = Math.min((elapsed - delay) * 2, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        scaleRef.current.x = eased;
-        scaleRef.current.opacity = eased;
+        const p = Math.min((elapsed - delay) * 2.5, 1);
+        progressRef.current = 1 - Math.pow(1 - p, 3);
       }
     } else {
-      scaleRef.current.x *= 0.92;
-      scaleRef.current.opacity *= 0.92;
+      progressRef.current *= 0.9;
     }
 
-    meshRef.current.scale.x = scaleRef.current.x;
-    (meshRef.current.material as THREE.MeshStandardMaterial).opacity =
-      scaleRef.current.opacity * 0.3;
-    (edgesRef.current.material as THREE.LineBasicMaterial).opacity =
-      scaleRef.current.opacity * 0.6;
+    const p = progressRef.current;
+    groupRef.current.scale.set(p, p, 1);
+    (meshRef.current.material as THREE.MeshBasicMaterial).opacity = p * 0.15;
+    (edgesRef.current.material as THREE.LineBasicMaterial).opacity = p * 0.7;
   });
 
-  const centerX = box.x + box.width / 2;
-  const centerY = box.y;
+  const cx = box.x + box.width / 2;
+  const cy = box.y;
 
   return (
-    <group position={[centerX, centerY, 0]}>
+    <group ref={groupRef} position={[cx, cy, 0]}>
       <mesh ref={meshRef} geometry={geometry}>
-        <meshStandardMaterial
+        <meshBasicMaterial
           color={COLORS.boxFill}
           transparent
           opacity={0}
-          side={THREE.DoubleSide}
         />
       </mesh>
       <lineSegments ref={edgesRef} geometry={edgesGeometry}>
@@ -402,18 +384,21 @@ function ContextBox({
           opacity={0}
         />
       </lineSegments>
-      {/* Box label */}
       <Html
-        position={[0, -box.height / 2 - 0.25, 0]}
+        position={[0, -box.height / 2 - 0.22, 0]}
         center
-        style={{
-          pointerEvents: "none",
-          opacity: scaleRef.current.opacity,
-        }}
+        style={{ pointerEvents: "none" }}
       >
         <span
-          className="text-fg-tertiary text-[10px] uppercase tracking-wider whitespace-nowrap"
-          style={{ fontFamily: "var(--font-accent)" }}
+          style={{
+            fontFamily: "var(--font-accent)",
+            fontSize: "9px",
+            color: "#78716c",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            whiteSpace: "nowrap",
+            opacity: progressRef.current,
+          }}
         >
           {box.label}
         </span>
@@ -423,17 +408,19 @@ function ContextBox({
 }
 
 // ---------------------------------------------------------------------------
-// Worktree pill + connection line
+// Worktree connection with curved line
 // ---------------------------------------------------------------------------
 
-function WorktreePill({
+function WorktreeConnection({
   wt,
   visible,
   delay,
+  boxLayout,
 }: {
   wt: WorktreeDef;
   visible: boolean;
   delay: number;
+  boxLayout: BoxDef[];
 }) {
   const [progress, setProgress] = useState(0);
   const startTime = useRef<number | null>(null);
@@ -453,51 +440,72 @@ function WorktreePill({
     const t = state.clock.elapsedTime;
     if (startTime.current === null) startTime.current = t;
     const elapsed = t - startTime.current;
-
     if (elapsed > delay) {
-      const p = Math.min((elapsed - delay) * 1.5, 1);
+      const p = Math.min((elapsed - delay) * 1.8, 1);
       setProgress(1 - Math.pow(1 - p, 3));
     }
   });
 
-  const pillY = WORKTREE_Y - (wt.wave - 1) * WAVE_GAP;
-  const lineEndY = BOX_Y + BOX_HEIGHT / 2;
-
   if (progress < 0.01) return null;
 
-  const linePoints: [number, number, number][] = [
-    [wt.x, pillY - 0.2, 0],
-    [wt.targetX, lineEndY, 0],
-  ];
+  const pillY = WORKTREE_Y;
+  const targetBox = boxLayout[wt.targetBoxIndex];
+  if (!targetBox) return null;
+
+  const lineEndY = targetBox.y + targetBox.height / 2;
+  const midX = (wt.x + wt.targetX) / 2;
+  const midY = (pillY - 0.3 + lineEndY) / 2;
 
   return (
     <group>
-      {/* Pill label */}
+      {/* Pill */}
       <Html position={[wt.x, pillY, 0]} center style={{ pointerEvents: "none" }}>
         <div
-          className="px-2 py-0.5 rounded border text-[10px] font-mono whitespace-nowrap"
           style={{
             opacity: progress,
-            backgroundColor: wt.wave === 1 ? "rgba(254, 81, 2, 0.15)" : "rgba(255, 122, 56, 0.12)",
-            borderColor: wt.wave === 1 ? "rgba(254, 81, 2, 0.4)" : "rgba(255, 122, 56, 0.3)",
-            color: wt.wave === 1 ? COLORS.brandOrange : COLORS.brandGlow,
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            whiteSpace: "nowrap",
           }}
         >
-          {wt.label}
+          <span style={{ fontSize: "11px", color: "#78716c" }}>&#9095;</span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono, monospace)",
+              fontSize: "10px",
+              color: "#a8a29e",
+            }}
+          >
+            {wt.label}
+          </span>
         </div>
       </Html>
 
-      {/* Connection line */}
-      <Line
-        points={linePoints}
-        color={wt.wave === 1 ? COLORS.brandOrange : COLORS.brandGlow}
+      {/* Curved connection */}
+      <QuadraticBezierLine
+        start={[wt.x, pillY - 0.25, 0] as unknown as THREE.Vector3}
+        end={[wt.targetX, lineEndY, 0] as unknown as THREE.Vector3}
+        mid={[midX, midY, 0] as unknown as THREE.Vector3}
+        color={COLORS.brandOrange}
         lineWidth={1}
-        opacity={progress * 0.35}
         transparent
+        opacity={progress * 0.4}
         dashed
-        dashSize={0.1}
-        gapSize={0.08}
+        dashScale={15}
+        dashSize={1}
+        gapSize={1}
       />
+
+      {/* Arrow head dot */}
+      <mesh position={[wt.targetX, lineEndY, 0.05]}>
+        <circleGeometry args={[0.06, 16]} />
+        <meshBasicMaterial
+          color={COLORS.brandOrange}
+          transparent
+          opacity={progress * 0.5}
+        />
+      </mesh>
     </group>
   );
 }
@@ -507,13 +515,9 @@ function WorktreePill({
 // ---------------------------------------------------------------------------
 
 function WaveLabel({
-  wave,
-  y,
   visible,
   delay,
 }: {
-  wave: number;
-  y: number;
   visible: boolean;
   delay: number;
 }) {
@@ -536,20 +540,29 @@ function WaveLabel({
     if (startTime.current === null) startTime.current = t;
     const elapsed = t - startTime.current;
     if (elapsed > delay) {
-      setOpacity(Math.min((elapsed - delay) * 2, 1));
+      setOpacity(Math.min((elapsed - delay) * 2.5, 1));
     }
   });
 
   if (opacity < 0.01) return null;
 
   return (
-    <Html position={[-4.5, y, 0]} style={{ pointerEvents: "none" }}>
-      <span
-        className="text-fg-tertiary text-[9px] uppercase tracking-wider whitespace-nowrap"
-        style={{ fontFamily: "var(--font-accent)", opacity }}
+    <Html position={[-3.8, WORKTREE_Y, 0]} style={{ pointerEvents: "none" }}>
+      <div
+        style={{
+          opacity,
+          padding: "2px 8px",
+          border: "1px solid #44403a",
+          borderRadius: "4px",
+          fontSize: "10px",
+          color: "#a8a29e",
+          fontFamily: "var(--font-mono, monospace)",
+          whiteSpace: "nowrap",
+          background: "rgba(28, 26, 23, 0.8)",
+        }}
       >
-        Wave {wave}
-      </span>
+        Wave 1
+      </div>
     </Html>
   );
 }
@@ -558,98 +571,218 @@ function WaveLabel({
 // Main Scene
 // ---------------------------------------------------------------------------
 
+const RESEARCH_NODES = makeResearchNodes();
+const PRD_NODE = makePRDNode();
+const TASK_NODES = makeTaskNodes();
+
 function Scene({ activeStage }: { activeStage: number }) {
   const { viewport } = useThree();
-  const boxes = BOXES[Math.min(activeStage, 3)];
+  const boxes = useMemo(() => getBoxLayout(activeStage), [activeStage]);
 
-  // Determine scale based on viewport width
   const scale = useMemo(() => {
-    if (viewport.width < 6) return 0.55;
-    if (viewport.width < 9) return 0.7;
-    return 0.85;
+    if (viewport.width < 5) return 0.42;
+    if (viewport.width < 7) return 0.55;
+    if (viewport.width < 10) return 0.7;
+    return 0.82;
   }, [viewport.width]);
 
+  // Box centers for positioning nodes inside
+  const researchCenter: [number, number] = useMemo(() => {
+    const b = boxes[0];
+    return [b.x + b.width / 2, b.y];
+  }, [boxes]);
+
+  const prdCenter: [number, number] = useMemo(() => {
+    if (boxes.length < 2) return [0, 0];
+    const b = boxes[1];
+    return [b.x + b.width / 2, b.y];
+  }, [boxes]);
+
+  const taskCenter: [number, number] = useMemo(() => {
+    if (boxes.length < 3) return [0, 0];
+    const b = boxes[2];
+    return [b.x + b.width / 2, b.y];
+  }, [boxes]);
+
   return (
-    <group scale={[scale, scale, scale]}>
-      {/* Ambient light for the scene */}
-      <ambientLight intensity={0.5} />
-      <pointLight position={[0, 3, 5]} intensity={0.4} />
+    <group scale={[scale, scale, scale]} position={[0, 0.2, 0]}>
+      <ambientLight intensity={0.8} />
+      <pointLight position={[0, 2, 5]} intensity={0.3} />
 
       {/* Context boxes */}
       {boxes.map((box, i) => (
         <ContextBox
-          key={`${box.label}-${i}`}
+          key={`box-${i}-${activeStage}`}
           box={box}
           visible
-          delay={i === 0 ? 0 : i * 0.3}
+          delay={i * 0.2}
         />
       ))}
 
-      {/* Research nodes — always visible once stage >= 0 */}
+      {/* Research nodes */}
       {RESEARCH_NODES.map((node) => (
         <FloatingNode
           key={node.id}
           node={node}
           visible={activeStage >= 0}
           stageDelay={0.3}
+          containerCenter={researchCenter}
         />
       ))}
 
-      {/* PRD node — visible from stage 1 */}
-      <FloatingNode
-        node={PRD_NODE}
-        visible={activeStage >= 1}
-        stageDelay={0.4}
-      />
-
-      {/* Brief nodes — visible from stage 2 */}
-      {BRIEF_NODES.map((node) => (
+      {/* PRD orb */}
+      {activeStage >= 1 && (
         <FloatingNode
-          key={node.id}
-          node={node}
-          visible={activeStage >= 2}
+          key="prd"
+          node={PRD_NODE}
+          visible={activeStage >= 1}
           stageDelay={0.3}
+          containerCenter={prdCenter}
         />
-      ))}
+      )}
 
-      {/* Worktree labels and connections — stage 3 only */}
-      <WaveLabel wave={1} y={WORKTREE_Y} visible={activeStage >= 3} delay={0.2} />
-      <WaveLabel wave={2} y={WORKTREE_Y - WAVE_GAP} visible={activeStage >= 3} delay={0.5} />
+      {/* Task nodes */}
+      {activeStage >= 2 &&
+        TASK_NODES.map((node) => (
+          <FloatingNode
+            key={node.id}
+            node={node}
+            visible={activeStage >= 2}
+            stageDelay={0.2}
+            containerCenter={taskCenter}
+          />
+        ))}
 
-      {WORKTREES.map((wt, i) => (
-        <WorktreePill
-          key={wt.id}
-          wt={wt}
-          visible={activeStage >= 3}
-          delay={0.3 + i * 0.1}
-        />
-      ))}
+      {/* Worktree wave + connections */}
+      <WaveLabel visible={activeStage >= 3} delay={0.1} />
+      {activeStage >= 3 &&
+        WORKTREES.map((wt, i) => (
+          <WorktreeConnection
+            key={wt.id}
+            wt={wt}
+            visible={activeStage >= 3}
+            delay={0.2 + i * 0.12}
+            boxLayout={boxes}
+          />
+        ))}
     </group>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Exported Canvas wrapper
+// Progress bar (HTML overlay)
+// ---------------------------------------------------------------------------
+
+const STAGE_LABELS = ["Research", "PRD", "Task Briefs", "Worktrees"];
+const PHASE_DURATION = 3000; // ms per phase
+const TOTAL_DURATION = PHASE_DURATION * 4;
+
+function ProgressBar({
+  activeStage,
+  onStageChange,
+  playing,
+  onTogglePlay,
+}: {
+  activeStage: number;
+  onStageChange: (stage: number) => void;
+  playing: boolean;
+  onTogglePlay: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-3 px-5 py-3 md:px-6">
+      {/* Stage segments */}
+      <div className="flex-1 flex gap-1">
+        {STAGE_LABELS.map((label, i) => (
+          <button
+            key={label}
+            onClick={() => onStageChange(i)}
+            className="flex-1 group cursor-pointer"
+          >
+            <div
+              className="h-1 rounded-full overflow-hidden transition-all duration-200"
+              style={{
+                background: i <= activeStage ? "rgba(254, 81, 2, 0.2)" : "rgba(68, 64, 58, 0.5)",
+              }}
+            >
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: i < activeStage ? "100%" : i === activeStage ? "100%" : "0%",
+                  background: "#fe5102",
+                  transition: i === activeStage ? "none" : "width 0.3s ease",
+                }}
+              />
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Play/Pause */}
+      <button
+        onClick={onTogglePlay}
+        className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-md border border-border-secondary text-fg-tertiary hover:text-fg-primary hover:border-border-primary transition-colors cursor-pointer"
+        aria-label={playing ? "Pause" : "Play"}
+      >
+        {playing ? (
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+            <rect x="1" y="1" width="3" height="8" rx="0.5" />
+            <rect x="6" y="1" width="3" height="8" rx="0.5" />
+          </svg>
+        ) : (
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+            <polygon points="2,1 9,5 2,9" />
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Exported component
 // ---------------------------------------------------------------------------
 
 interface ContextMultiplicationCanvasProps {
   activeStage: number;
+  onStageChange: (stage: number) => void;
+  playing: boolean;
+  onTogglePlay: () => void;
 }
 
 export function ContextMultiplicationCanvas({
   activeStage,
+  onStageChange,
+  playing,
+  onTogglePlay,
 }: ContextMultiplicationCanvasProps) {
   return (
-    <div className="w-full border-b border-border-secondary" style={{ height: "clamp(220px, 30vw, 340px)" }}>
-      <Canvas
-        orthographic
-        camera={{ zoom: 60, position: [0, 0.5, 10], near: 0.1, far: 100 }}
-        dpr={[1, 2]}
-        style={{ background: "transparent" }}
-        gl={{ antialias: true, alpha: true }}
+    <div className="w-full">
+      {/* Progress bar */}
+      <ProgressBar
+        activeStage={activeStage}
+        onStageChange={onStageChange}
+        playing={playing}
+        onTogglePlay={onTogglePlay}
+      />
+
+      {/* Three.js canvas */}
+      <div
+        className="w-full border-b border-border-secondary"
+        style={{ height: "clamp(240px, 32vw, 380px)" }}
       >
-        <Scene activeStage={activeStage} />
-      </Canvas>
+        <Canvas
+          orthographic
+          camera={{ zoom: 60, position: [0, 0.3, 10], near: 0.1, far: 100 }}
+          dpr={[1, 2]}
+          style={{ background: "transparent" }}
+          gl={{ antialias: true, alpha: true }}
+          onPointerMissed={() => {
+            document.body.style.cursor = "auto";
+          }}
+        >
+          <Scene activeStage={activeStage} />
+        </Canvas>
+      </div>
     </div>
   );
 }
