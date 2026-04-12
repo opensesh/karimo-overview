@@ -22,7 +22,6 @@ interface NodeDef {
   baseY: number;
   radius: number;
   color: string;
-  isPRD?: boolean;
   phaseX: number;
   phaseY: number;
   speedX: number;
@@ -40,14 +39,6 @@ interface BoxDef {
   label: string;
 }
 
-interface WorktreeDef {
-  id: string;
-  label: string;
-  pillX: number;
-  targetX: number;
-  targetBoxIndex: number;
-}
-
 // ---------------------------------------------------------------------------
 // Layout
 // ---------------------------------------------------------------------------
@@ -55,12 +46,12 @@ interface WorktreeDef {
 const BOX_SIZE = 2.0;
 const BOX_Y = -0.5;
 const BOX_GAP = 0.14;
-const WT_ROW_Y = 1.8;
+const WT_ROW_Y = 2.0;
 
 const C = {
   boxBorder: "#44403a",
   boxFill: "#0d0d0d",
-  nodeLight: "#d6d3d1",
+  nodeLight: "#e7e5e2",
   nodeMid: "#a8a29e",
   nodeDim: "#78716c",
   brand: "#fe5102",
@@ -70,7 +61,7 @@ const C = {
 };
 
 // ---------------------------------------------------------------------------
-// Node generators
+// Node generators — bouncy atoms
 // ---------------------------------------------------------------------------
 
 function makeResearchNodes(): NodeDef[] {
@@ -86,38 +77,20 @@ function makeResearchNodes(): NodeDef[] {
     return {
       id: `r-${i}`,
       label,
-      baseX: -0.5 + col * 0.5,
-      baseY: 0.45 - row * 0.45,
+      baseX: -0.48 + col * 0.48,
+      baseY: 0.42 - row * 0.42,
       radius: 0.12 + (s % 5) * 0.008,
       color: i < 2 ? C.nodeLight : i < 5 ? C.nodeMid : C.nodeDim,
       phaseX: s % 6.28,
       phaseY: (s * 1.3) % 6.28,
-      speedX: 0.35 + (s % 3) * 0.1,
-      speedY: 0.45 + (s % 4) * 0.08,
-      ampX: 0.04 + (s % 5) * 0.006,
-      ampY: 0.04 + (s % 3) * 0.008,
-      delay: i * 0.06,
+      // Much faster and larger amplitude — bouncy atoms
+      speedX: 1.2 + (s % 3) * 0.4,
+      speedY: 1.5 + (s % 4) * 0.3,
+      ampX: 0.12 + (s % 5) * 0.015,
+      ampY: 0.12 + (s % 3) * 0.018,
+      delay: i * 0.05,
     };
   });
-}
-
-function makePRDNode(): NodeDef {
-  return {
-    id: "prd-0",
-    label: "PRD",
-    baseX: 0,
-    baseY: 0,
-    radius: 0.42,
-    color: C.brand,
-    isPRD: true,
-    phaseX: 1.2,
-    phaseY: 0.8,
-    speedX: 0.18,
-    speedY: 0.22,
-    ampX: 0.015,
-    ampY: 0.015,
-    delay: 0,
-  };
 }
 
 function makeTaskNodes(): NodeDef[] {
@@ -133,17 +106,18 @@ function makeTaskNodes(): NodeDef[] {
     return {
       id: `t-${i}`,
       label,
-      baseX: -0.65 + col * 0.43,
-      baseY: 0.4 - row * 0.4,
+      baseX: -0.6 + col * 0.4,
+      baseY: 0.38 - row * 0.38,
       radius: 0.09 + (s % 5) * 0.006,
       color: C.taskNode,
       phaseX: s % 6.28,
       phaseY: (s * 1.7) % 6.28,
-      speedX: 0.4 + (s % 3) * 0.1,
-      speedY: 0.35 + (s % 4) * 0.08,
-      ampX: 0.04 + (s % 4) * 0.006,
-      ampY: 0.04 + (s % 3) * 0.008,
-      delay: i * 0.045,
+      // Bouncy like the research nodes
+      speedX: 1.3 + (s % 3) * 0.35,
+      speedY: 1.1 + (s % 4) * 0.3,
+      ampX: 0.1 + (s % 4) * 0.012,
+      ampY: 0.1 + (s % 3) * 0.014,
+      delay: i * 0.04,
     };
   });
 }
@@ -155,7 +129,6 @@ function makeTaskNodes(): NodeDef[] {
 function getBoxLayout(stage: number): BoxDef[] {
   const s = BOX_SIZE;
   const g = BOX_GAP;
-
   if (stage === 0) {
     return [{ x: -s / 2, y: BOX_Y, width: s, height: s, label: "RESEARCH" }];
   }
@@ -174,18 +147,11 @@ function getBoxLayout(stage: number): BoxDef[] {
   ];
 }
 
-const WORKTREES: WorktreeDef[] = [
-  { id: "wt-1a", label: "worktree 1a", pillX: -2.2, targetX: -2.15, targetBoxIndex: 0 },
-  { id: "wt-1b", label: "worktree 1b", pillX: -0.7, targetX: -0.7, targetBoxIndex: 0 },
-  { id: "wt-1c", label: "worktree 1c", pillX: 0.7, targetX: 0, targetBoxIndex: 1 },
-  { id: "wt-1d", label: "worktree 1d", pillX: 2.2, targetX: 2.15, targetBoxIndex: 2 },
-];
-
 // ---------------------------------------------------------------------------
-// PRD Gradient Circle (custom shader for radial gradient)
+// PRD Orb — radial gradient shader with bigger pulse
 // ---------------------------------------------------------------------------
 
-const prdVertexShader = `
+const prdVert = `
   varying vec2 vUv;
   void main() {
     vUv = uv;
@@ -193,7 +159,7 @@ const prdVertexShader = `
   }
 `;
 
-const prdFragmentShader = `
+const prdFrag = `
   uniform float uTime;
   uniform float uHover;
   varying vec2 vUv;
@@ -202,23 +168,20 @@ const prdFragmentShader = `
     vec2 center = vec2(0.5);
     float dist = length(vUv - center) * 2.0;
 
-    // Pulsing glow
-    float pulse = 0.85 + sin(uTime * 1.8) * 0.15;
-    float hoverBoost = uHover * 0.2;
+    float pulse = 0.8 + sin(uTime * 1.8) * 0.2;
+    float hoverBoost = uHover * 0.25;
 
-    // Radial gradient: bright center → dim edges
-    vec3 coreColor = vec3(1.0, 0.42, 0.08);  // #fe6b14
-    vec3 midColor  = vec3(0.996, 0.318, 0.008); // #fe5102
-    vec3 edgeColor = vec3(0.7, 0.2, 0.0);
+    vec3 coreColor = vec3(1.0, 0.45, 0.1);
+    vec3 midColor  = vec3(0.996, 0.318, 0.008);
+    vec3 edgeColor = vec3(0.6, 0.15, 0.0);
 
-    vec3 color = mix(coreColor, midColor, smoothstep(0.0, 0.5, dist));
-    color = mix(color, edgeColor, smoothstep(0.4, 0.9, dist));
+    vec3 color = mix(coreColor, midColor, smoothstep(0.0, 0.45, dist));
+    color = mix(color, edgeColor, smoothstep(0.35, 0.85, dist));
 
-    float alpha = (1.0 - smoothstep(0.7, 1.0, dist)) * (pulse + hoverBoost);
+    float alpha = (1.0 - smoothstep(0.65, 1.0, dist)) * (pulse + hoverBoost);
 
-    // Soft outer glow
-    float glow = exp(-dist * 2.0) * 0.3 * pulse;
-    color += vec3(1.0, 0.5, 0.1) * glow;
+    float glow = exp(-dist * 1.8) * 0.35 * pulse;
+    color += vec3(1.0, 0.5, 0.12) * glow;
 
     gl_FragColor = vec4(color, alpha);
   }
@@ -240,23 +203,14 @@ function PRDOrb({
   const scaleRef = useRef(0);
   const startTime = useRef<number | null>(null);
 
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uHover: { value: 0 },
-    }),
-    []
-  );
+  const uniforms = useMemo(() => ({
+    uTime: { value: 0 },
+    uHover: { value: 0 },
+  }), []);
 
   useEffect(() => {
-    if (visible) {
-      startTime.current = null;
-      setAppeared(false);
-    } else {
-      scaleRef.current = 0;
-      setAppeared(false);
-      startTime.current = null;
-    }
+    if (visible) { startTime.current = null; setAppeared(false); }
+    else { scaleRef.current = 0; setAppeared(false); startTime.current = null; }
   }, [visible]);
 
   useFrame((state) => {
@@ -267,20 +221,22 @@ function PRDOrb({
       if (startTime.current === null) startTime.current = t;
       const elapsed = t - startTime.current;
       if (elapsed > stageDelay) {
-        const springT = Math.min((elapsed - stageDelay) * 2.5, 1);
+        const springT = Math.min((elapsed - stageDelay) * 2.2, 1);
         scaleRef.current = 1 - Math.pow(1 - springT, 3);
         if (springT >= 1 && !appeared) setAppeared(true);
       }
     } else {
-      scaleRef.current *= 0.88;
+      scaleRef.current *= 0.85;
     }
 
-    const s = scaleRef.current;
+    // Dramatic scale pulse — breathes in and out
+    const breathe = 1 + Math.sin(t * 1.2) * 0.12;
+    const s = scaleRef.current * breathe;
     meshRef.current.scale.set(s, s, s);
+
     materialRef.current.uniforms.uTime.value = t;
-    materialRef.current.uniforms.uHover.value += (
-      (hovered ? 1 : 0) - materialRef.current.uniforms.uHover.value
-    ) * 0.1;
+    materialRef.current.uniforms.uHover.value +=
+      ((hovered ? 1 : 0) - materialRef.current.uniforms.uHover.value) * 0.08;
   });
 
   const handlePointerOver = useCallback((e: { stopPropagation: () => void }) => {
@@ -296,8 +252,6 @@ function PRDOrb({
 
   if (!visible && scaleRef.current < 0.01) return null;
 
-  const r = 0.42;
-
   return (
     <mesh
       ref={meshRef}
@@ -305,33 +259,22 @@ function PRDOrb({
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
     >
-      <circleGeometry args={[r, 48]} />
+      <circleGeometry args={[0.48, 48]} />
       <shaderMaterial
         ref={materialRef}
-        vertexShader={prdVertexShader}
-        fragmentShader={prdFragmentShader}
+        vertexShader={prdVert}
+        fragmentShader={prdFrag}
         uniforms={uniforms}
         transparent
       />
       {hovered && appeared && (
-        <Html
-          center
-          position={[0, r + 0.22, 0]}
-          style={{ pointerEvents: "none", zIndex: 50 }}
-        >
-          <div
-            style={{
-              padding: "4px 10px",
-              borderRadius: "6px",
-              background: "#000",
-              border: "1px solid #44403a",
-              color: "#fffaee",
-              fontSize: "11px",
-              fontFamily: "var(--font-mono, monospace)",
-              whiteSpace: "nowrap",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
-            }}
-          >
+        <Html center position={[0, 0.6, 0]} style={{ pointerEvents: "none", zIndex: 50 }}>
+          <div style={{
+            padding: "4px 10px", borderRadius: "6px", background: "#000",
+            border: "1px solid #44403a", color: "#fffaee", fontSize: "11px",
+            fontFamily: "var(--font-mono, monospace)", whiteSpace: "nowrap",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+          }}>
             PRD
           </div>
         </Html>
@@ -341,7 +284,7 @@ function PRDOrb({
 }
 
 // ---------------------------------------------------------------------------
-// Floating Node (research & task nodes)
+// Floating Node — bouncy atom behavior
 // ---------------------------------------------------------------------------
 
 function FloatingNode({
@@ -349,11 +292,13 @@ function FloatingNode({
   visible,
   stageDelay,
   containerCenter,
+  containerHalfSize,
 }: {
   node: NodeDef;
   visible: boolean;
   stageDelay: number;
   containerCenter: [number, number];
+  containerHalfSize: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
@@ -362,14 +307,8 @@ function FloatingNode({
   const startTime = useRef<number | null>(null);
 
   useEffect(() => {
-    if (visible) {
-      startTime.current = null;
-      setAppeared(false);
-    } else {
-      scaleRef.current = 0;
-      setAppeared(false);
-      startTime.current = null;
-    }
+    if (visible) { startTime.current = null; setAppeared(false); }
+    else { scaleRef.current = 0; setAppeared(false); startTime.current = null; }
   }, [visible]);
 
   useFrame((state) => {
@@ -387,13 +326,23 @@ function FloatingNode({
         if (springT >= 1 && !appeared) setAppeared(true);
 
         const ft = elapsed - totalDelay;
-        meshRef.current.position.x =
-          containerCenter[0] + node.baseX + Math.sin(ft * node.speedX + node.phaseX) * node.ampX;
-        meshRef.current.position.y =
-          containerCenter[1] + node.baseY + Math.sin(ft * node.speedY + node.phaseY) * node.ampY;
+
+        // Bouncy atom — multiple sin waves layered for organic motion
+        let dx = Math.sin(ft * node.speedX + node.phaseX) * node.ampX;
+        dx += Math.sin(ft * node.speedX * 1.7 + node.phaseY) * node.ampX * 0.4;
+
+        let dy = Math.sin(ft * node.speedY + node.phaseY) * node.ampY;
+        dy += Math.sin(ft * node.speedY * 1.3 + node.phaseX) * node.ampY * 0.5;
+
+        // Clamp to stay inside the container
+        const limit = containerHalfSize - node.radius - 0.08;
+        const rawX = node.baseX + dx;
+        const rawY = node.baseY + dy;
+        meshRef.current.position.x = containerCenter[0] + Math.max(-limit, Math.min(limit, rawX));
+        meshRef.current.position.y = containerCenter[1] + Math.max(-limit, Math.min(limit, rawY));
       }
     } else {
-      scaleRef.current *= 0.88;
+      scaleRef.current *= 0.85;
     }
 
     const s = scaleRef.current;
@@ -421,29 +370,15 @@ function FloatingNode({
       onPointerOut={handlePointerOut}
     >
       <circleGeometry args={[node.radius, 32]} />
-      <meshBasicMaterial
-        color={hovered ? C.brandGlow : node.color}
-        toneMapped={false}
-      />
+      <meshBasicMaterial color={hovered ? C.brandGlow : node.color} toneMapped={false} />
       {hovered && appeared && (
-        <Html
-          center
-          position={[0, node.radius + 0.18, 0]}
-          style={{ pointerEvents: "none", zIndex: 50 }}
-        >
-          <div
-            style={{
-              padding: "4px 10px",
-              borderRadius: "6px",
-              background: "#000",
-              border: "1px solid #44403a",
-              color: "#fffaee",
-              fontSize: "11px",
-              fontFamily: "var(--font-mono, monospace)",
-              whiteSpace: "nowrap",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
-            }}
-          >
+        <Html center position={[0, node.radius + 0.18, 0]} style={{ pointerEvents: "none", zIndex: 50 }}>
+          <div style={{
+            padding: "4px 10px", borderRadius: "6px", background: "#000",
+            border: "1px solid #44403a", color: "#fffaee", fontSize: "11px",
+            fontFamily: "var(--font-mono, monospace)", whiteSpace: "nowrap",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+          }}>
             {node.label}
           </div>
         </Html>
@@ -464,9 +399,7 @@ function ContextBox({ box, delay }: { box: BoxDef; delay: number }) {
   const progressRef = useRef(0);
   const startTime = useRef<number | null>(null);
 
-  useEffect(() => {
-    startTime.current = null;
-  }, [box.x]);
+  useEffect(() => { startTime.current = null; }, [box.x]);
 
   const geo = useMemo(() => new THREE.PlaneGeometry(box.width, box.height), [box.width, box.height]);
   const edgeGeo = useMemo(() => {
@@ -479,23 +412,19 @@ function ContextBox({ box, delay }: { box: BoxDef; delay: number }) {
     const t = state.clock.elapsedTime;
     if (startTime.current === null) startTime.current = t;
     const elapsed = t - startTime.current;
-
     if (elapsed > delay) {
       const p = Math.min((elapsed - delay) * 2.5, 1);
       progressRef.current = 1 - Math.pow(1 - p, 3);
     }
-
     const p = progressRef.current;
     groupRef.current.scale.set(p, p, 1);
     (fillRef.current.material as THREE.MeshBasicMaterial).opacity = p * 0.12;
-    (edgesRef.current.material as THREE.LineBasicMaterial).opacity = p * 0.55;
+    (edgesRef.current.material as THREE.LineBasicMaterial).opacity = p * 0.5;
     if (labelRef.current) labelRef.current.style.opacity = String(p);
   });
 
-  const cx = box.x + box.width / 2;
-
   return (
-    <group ref={groupRef} position={[cx, box.y, 0]}>
+    <group ref={groupRef} position={[box.x + box.width / 2, box.y, 0]}>
       <mesh ref={fillRef} geometry={geo}>
         <meshBasicMaterial color={C.boxFill} transparent opacity={0} />
       </mesh>
@@ -503,18 +432,10 @@ function ContextBox({ box, delay }: { box: BoxDef; delay: number }) {
         <lineBasicMaterial color={C.boxBorder} transparent opacity={0} />
       </lineSegments>
       <Html position={[0, -box.height / 2 - 0.24, 0]} center style={{ pointerEvents: "none" }}>
-        <span
-          ref={labelRef}
-          style={{
-            fontFamily: "var(--font-accent)",
-            fontSize: "9px",
-            color: C.labelColor,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            whiteSpace: "nowrap",
-            opacity: 0,
-          }}
-        >
+        <span ref={labelRef} style={{
+          fontFamily: "var(--font-accent)", fontSize: "9px", color: C.labelColor,
+          letterSpacing: "0.12em", textTransform: "uppercase", whiteSpace: "nowrap", opacity: 0,
+        }}>
           {box.label}
         </span>
       </Html>
@@ -523,33 +444,46 @@ function ContextBox({ box, delay }: { box: BoxDef; delay: number }) {
 }
 
 // ---------------------------------------------------------------------------
-// Worktree connection (clean vertical dashed line + arrow dot)
+// Worktree Row — single horizontal row with Wave label, git icons, labels,
+// and curved arrows down to boxes (matching Figma)
 // ---------------------------------------------------------------------------
 
-function WorktreeConnection({
-  wt,
+interface WTDef {
+  id: string;
+  label: string;
+  /** Index into the boxLayout array this worktree connects to */
+  targetBoxIndex: number;
+  /** X position within the target box to connect to (0 = center) */
+  targetOffsetX: number;
+}
+
+const WORKTREE_DEFS: WTDef[] = [
+  { id: "wt-1a", label: "worktree 1a", targetBoxIndex: 0, targetOffsetX: 0 },
+  { id: "wt-1b", label: "worktree 1b", targetBoxIndex: 1, targetOffsetX: 0 },
+  { id: "wt-1c", label: "worktree 1c", targetBoxIndex: 2, targetOffsetX: -0.3 },
+  { id: "wt-1d", label: "worktree 1d", targetBoxIndex: 2, targetOffsetX: 0.3 },
+];
+
+// Git branch icon SVG as inline data URI
+const GIT_ICON = `data:image/svg+xml,${encodeURIComponent(
+  '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+  '<path d="M6 3a3 3 0 1 0-4 2.83V10a1 1 0 0 0 1 1h2a2 2 0 0 1 2 2v.17a3 3 0 1 0 2 0V13a4 4 0 0 0-4-4H3V5.83A3 3 0 0 0 6 3Z" fill="%23fe5102"/>' +
+  '</svg>'
+)}`;
+
+function WorktreeRow({
   visible,
-  delay,
   boxLayout,
 }: {
-  wt: WorktreeDef;
   visible: boolean;
-  delay: number;
   boxLayout: BoxDef[];
 }) {
-  const lineRef = useRef<THREE.Mesh>(null);
-  const dotRef = useRef<THREE.Mesh>(null);
   const [progress, setProgress] = useState(0);
   const startTime = useRef<number | null>(null);
 
   useEffect(() => {
-    if (visible) {
-      startTime.current = null;
-      setProgress(0);
-    } else {
-      setProgress(0);
-      startTime.current = null;
-    }
+    if (visible) { startTime.current = null; setProgress(0); }
+    else { setProgress(0); startTime.current = null; }
   }, [visible]);
 
   useFrame((state) => {
@@ -557,131 +491,177 @@ function WorktreeConnection({
     const t = state.clock.elapsedTime;
     if (startTime.current === null) startTime.current = t;
     const elapsed = t - startTime.current;
-    if (elapsed > delay) {
-      const p = Math.min((elapsed - delay) * 2, 1);
+    if (elapsed > 0.1) {
+      const p = Math.min((elapsed - 0.1) * 1.8, 1);
       setProgress(1 - Math.pow(1 - p, 3));
     }
   });
 
   if (progress < 0.01) return null;
 
-  const box = boxLayout[wt.targetBoxIndex];
-  if (!box) return null;
-
-  const topY = WT_ROW_Y - 0.28;
-  const bottomY = box.y + box.height / 2;
-  const lineHeight = topY - bottomY;
-  const midY = (topY + bottomY) / 2;
-
-  // For worktrees that connect to a different X than their pill, we draw a slight curve
-  const dx = wt.targetX - wt.pillX;
-  const isStraight = Math.abs(dx) < 0.1;
+  // Position each worktree pill evenly across the row
+  const totalWidth = BOX_SIZE * 3 + BOX_GAP * 2;
+  const startX = -totalWidth / 2;
 
   return (
     <group>
-      {/* Pill label */}
-      <Html position={[wt.pillX, WT_ROW_Y, 0]} center style={{ pointerEvents: "none" }}>
+      {/* Single HTML row for Wave label + worktree items */}
+      <Html position={[0, WT_ROW_Y, 0]} center style={{ pointerEvents: "none", width: "100%" }}>
         <div
           style={{
             opacity: progress,
             display: "flex",
             alignItems: "center",
-            gap: "3px",
+            gap: "16px",
+            justifyContent: "center",
             whiteSpace: "nowrap",
           }}
         >
-          <svg width="10" height="10" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.5 }}>
-            <path d="M8 1v6M5 4l3-3 3 3M3 8v4a2 2 0 002 2h6a2 2 0 002-2V8" stroke={C.brand} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span
-            style={{
-              fontFamily: "var(--font-mono, monospace)",
-              fontSize: "10px",
-              color: C.nodeMid,
-              letterSpacing: "0.02em",
-            }}
-          >
-            {wt.label}
-          </span>
+          {/* Wave 1 pill */}
+          <div style={{
+            padding: "3px 10px",
+            border: "1px solid #44403a",
+            borderRadius: "5px",
+            fontSize: "10px",
+            color: "#a8a29e",
+            fontFamily: "var(--font-mono, monospace)",
+            background: "rgba(13, 13, 13, 0.9)",
+            letterSpacing: "0.02em",
+            flexShrink: 0,
+          }}>
+            Wave 1
+          </div>
+
+          {/* Worktree items */}
+          {WORKTREE_DEFS.map((wt) => (
+            <div key={wt.id} style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              flexShrink: 0,
+            }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={GIT_ICON} alt="" width={12} height={12} style={{ opacity: 0.7 }} />
+              <span style={{
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: "10px",
+                color: "#a8a29e",
+                letterSpacing: "0.01em",
+              }}>
+                {wt.label}
+              </span>
+            </div>
+          ))}
         </div>
       </Html>
 
-      {isStraight ? (
-        /* Straight dashed vertical line */
-        <mesh ref={lineRef} position={[wt.pillX, midY, 0]}>
-          <planeGeometry args={[0.01, lineHeight * progress]} />
-          <meshBasicMaterial color={C.brand} transparent opacity={progress * 0.4} />
-        </mesh>
-      ) : (
-        /* Angled line: pill → target (two segments forming a bend) */
-        <>
-          {/* Vertical from pill */}
-          <mesh position={[wt.pillX, (topY + midY) / 2, 0]}>
-            <planeGeometry args={[0.01, (topY - midY) * progress]} />
-            <meshBasicMaterial color={C.brand} transparent opacity={progress * 0.35} />
-          </mesh>
-          {/* Angled segment to target */}
-          <mesh position={[(wt.pillX + wt.targetX) / 2, (midY + bottomY) / 2, 0]}
-            rotation={[0, 0, Math.atan2(bottomY - midY, wt.targetX - wt.pillX)]}
-          >
-            <planeGeometry args={[Math.sqrt(dx * dx + (midY - bottomY) ** 2) * progress, 0.01]} />
-            <meshBasicMaterial color={C.brand} transparent opacity={progress * 0.3} />
-          </mesh>
-        </>
-      )}
+      {/* Curved connection lines from each worktree down to its box */}
+      {WORKTREE_DEFS.map((wt, i) => {
+        const box = boxLayout[wt.targetBoxIndex];
+        if (!box) return null;
 
-      {/* Arrow dot at connection point */}
-      <mesh ref={dotRef} position={[wt.targetX, bottomY, 0.05]}>
-        <circleGeometry args={[0.05, 16]} />
-        <meshBasicMaterial color={C.brand} transparent opacity={progress * 0.6} />
-      </mesh>
+        // Pill X position — evenly spaced across the row
+        const pillX = startX + 0.8 + i * (totalWidth - 1.0) / (WORKTREE_DEFS.length - 1);
+        // Target point on top of the box
+        const targetX = box.x + box.width / 2 + wt.targetOffsetX;
+        const topY = WT_ROW_Y - 0.2;
+        const bottomY = box.y + box.height / 2;
+
+        return (
+          <WorktreeArrow
+            key={wt.id}
+            fromX={pillX}
+            fromY={topY}
+            toX={targetX}
+            toY={bottomY}
+            progress={progress}
+            delay={i * 0.08}
+          />
+        );
+      })}
     </group>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Wave label
-// ---------------------------------------------------------------------------
-
-function WaveLabel({ visible, delay }: { visible: boolean; delay: number }) {
-  const [opacity, setOpacity] = useState(0);
+// A single curved arrow from a worktree label down to a box
+function WorktreeArrow({
+  fromX, fromY, toX, toY, progress, delay,
+}: {
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  progress: number;
+  delay: number;
+}) {
+  const [localProgress, setLocalProgress] = useState(0);
   const startTime = useRef<number | null>(null);
 
   useEffect(() => {
-    if (visible) { startTime.current = null; setOpacity(0); }
-    else { setOpacity(0); startTime.current = null; }
-  }, [visible]);
+    if (progress > 0) { startTime.current = null; setLocalProgress(0); }
+    else { setLocalProgress(0); startTime.current = null; }
+  }, [progress > 0]);
 
   useFrame((state) => {
-    if (!visible) return;
+    if (progress < 0.01) return;
     const t = state.clock.elapsedTime;
     if (startTime.current === null) startTime.current = t;
-    if (t - startTime.current > delay) {
-      setOpacity(Math.min((t - startTime.current - delay) * 2.5, 1));
+    const elapsed = t - startTime.current;
+    if (elapsed > delay) {
+      const p = Math.min((elapsed - delay) * 2.5, 1);
+      setLocalProgress(1 - Math.pow(1 - p, 3));
     }
   });
 
-  if (opacity < 0.01) return null;
+  // Build a curved path with a control point
+  const curve = useMemo(() => {
+    const midX = (fromX + toX) / 2;
+    const midY = fromY - 0.15; // Pull the curve up slightly for a nice arc
+    return new THREE.QuadraticBezierCurve3(
+      new THREE.Vector3(fromX, fromY, 0),
+      new THREE.Vector3(midX, midY, 0),
+      new THREE.Vector3(toX, toY, 0)
+    );
+  }, [fromX, fromY, toX, toY]);
+
+  const points = useMemo(() => curve.getPoints(30), [curve]);
+
+  // Only show the portion of the curve that has been "drawn"
+  const visiblePoints = useMemo(() => {
+    const count = Math.max(2, Math.floor(points.length * localProgress));
+    return points.slice(0, count);
+  }, [points, localProgress]);
+
+  const lineObj = useMemo(() => {
+    const geo = new THREE.BufferGeometry().setFromPoints(visiblePoints);
+    const mat = new THREE.LineBasicMaterial({ color: C.brand, transparent: true, opacity: 0 });
+    return new THREE.Line(geo, mat);
+  }, [visiblePoints]);
+
+  useFrame(() => {
+    if (lineObj.material instanceof THREE.LineBasicMaterial) {
+      lineObj.material.opacity = localProgress * 0.45;
+    }
+  });
+
+  if (localProgress < 0.01) return null;
 
   return (
-    <Html position={[-3.6, WT_ROW_Y, 0]} style={{ pointerEvents: "none" }}>
-      <div
-        style={{
-          opacity,
-          padding: "3px 10px",
-          border: "1px solid #44403a",
-          borderRadius: "5px",
-          fontSize: "10px",
-          color: "#a8a29e",
-          fontFamily: "var(--font-mono, monospace)",
-          whiteSpace: "nowrap",
-          background: "rgba(13, 13, 13, 0.9)",
-          letterSpacing: "0.02em",
-        }}
-      >
-        Wave 1
-      </div>
-    </Html>
+    <group>
+      <primitive object={lineObj} />
+      {/* Arrow dot at bottom */}
+      <mesh position={[toX, toY, 0.05]}>
+        <circleGeometry args={[0.045, 16]} />
+        <meshBasicMaterial color={C.brand} transparent opacity={localProgress * 0.7} />
+      </mesh>
+      {/* Small downward arrow triangle */}
+      {localProgress > 0.5 && (
+        <mesh position={[toX, toY + 0.12, 0.05]} rotation={[0, 0, Math.PI]}>
+          <coneGeometry args={[0.06, 0.1, 3]} />
+          <meshBasicMaterial color={C.brand} transparent opacity={localProgress * 0.5} />
+        </mesh>
+      )}
+    </group>
   );
 }
 
@@ -690,7 +670,6 @@ function WaveLabel({ visible, delay }: { visible: boolean; delay: number }) {
 // ---------------------------------------------------------------------------
 
 const RESEARCH_NODES = makeResearchNodes();
-const PRD_NODE_DEF = makePRDNode();
 const TASK_NODES = makeTaskNodes();
 
 function Scene({ activeStage }: { activeStage: number }) {
@@ -704,10 +683,12 @@ function Scene({ activeStage }: { activeStage: number }) {
     return 0.8;
   }, [viewport.width]);
 
-  const center = (i: number): [number, number] => {
+  const center = useCallback((i: number): [number, number] => {
     const b = boxes[i];
     return b ? [b.x + b.width / 2, b.y] : [0, 0];
-  };
+  }, [boxes]);
+
+  const halfBox = BOX_SIZE / 2;
 
   return (
     <group scale={[scale, scale, scale]} position={[0, 0.15, 0]}>
@@ -718,7 +699,7 @@ function Scene({ activeStage }: { activeStage: number }) {
         <ContextBox key={`box-${i}-${activeStage}`} box={box} delay={i * 0.15} />
       ))}
 
-      {/* Research nodes */}
+      {/* Research nodes — bouncy atoms */}
       {RESEARCH_NODES.map((node) => (
         <FloatingNode
           key={node.id}
@@ -726,42 +707,30 @@ function Scene({ activeStage }: { activeStage: number }) {
           visible={activeStage >= 0}
           stageDelay={0.25}
           containerCenter={center(0)}
+          containerHalfSize={halfBox}
         />
       ))}
 
-      {/* PRD radial gradient orb */}
+      {/* PRD orb — dramatic pulse */}
       {activeStage >= 1 && (
-        <PRDOrb
-          visible={activeStage >= 1}
-          stageDelay={0.3}
-          containerCenter={center(1)}
-        />
+        <PRDOrb visible stageDelay={0.3} containerCenter={center(1)} />
       )}
 
-      {/* Task nodes */}
+      {/* Task nodes — bouncy atoms */}
       {activeStage >= 2 &&
         TASK_NODES.map((node) => (
           <FloatingNode
             key={node.id}
             node={node}
-            visible={activeStage >= 2}
+            visible
             stageDelay={0.2}
             containerCenter={center(2)}
+            containerHalfSize={halfBox}
           />
         ))}
 
-      {/* Worktrees */}
-      <WaveLabel visible={activeStage >= 3} delay={0.1} />
-      {activeStage >= 3 &&
-        WORKTREES.map((wt, i) => (
-          <WorktreeConnection
-            key={wt.id}
-            wt={wt}
-            visible={activeStage >= 3}
-            delay={0.15 + i * 0.1}
-            boxLayout={boxes}
-          />
-        ))}
+      {/* Worktree row */}
+      <WorktreeRow visible={activeStage >= 3} boxLayout={boxes} />
     </group>
   );
 }
@@ -773,10 +742,7 @@ function Scene({ activeStage }: { activeStage: number }) {
 const STAGE_LABELS = ["Research", "PRD", "Task Briefs", "Worktrees"];
 
 function ProgressBar({
-  activeStage,
-  onStageChange,
-  playing,
-  onTogglePlay,
+  activeStage, onStageChange, playing, onTogglePlay,
 }: {
   activeStage: number;
   onStageChange: (stage: number) => void;
@@ -785,15 +751,12 @@ function ProgressBar({
 }) {
   return (
     <div className="flex items-center gap-3 px-5 py-3 md:px-6">
-      {/* Effective Context label */}
       <span
         className="text-fg-tertiary text-[10px] uppercase tracking-wider shrink-0 hidden sm:block"
         style={{ fontFamily: "var(--font-accent)" }}
       >
         Effective Context
       </span>
-
-      {/* Stage segments */}
       <div className="flex-1 flex gap-1">
         {STAGE_LABELS.map((label, i) => (
           <button
@@ -820,8 +783,6 @@ function ProgressBar({
           </button>
         ))}
       </div>
-
-      {/* Play / Pause */}
       <button
         onClick={onTogglePlay}
         className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md border border-border-secondary text-fg-tertiary hover:text-fg-primary hover:border-border-primary transition-colors cursor-pointer"
@@ -854,10 +815,7 @@ interface ContextMultiplicationCanvasProps {
 }
 
 export function ContextMultiplicationCanvas({
-  activeStage,
-  onStageChange,
-  playing,
-  onTogglePlay,
+  activeStage, onStageChange, playing, onTogglePlay,
 }: ContextMultiplicationCanvasProps) {
   return (
     <div className="w-full">
@@ -867,7 +825,6 @@ export function ContextMultiplicationCanvas({
         playing={playing}
         onTogglePlay={onTogglePlay}
       />
-
       <div
         className="w-full border-b border-border-secondary"
         style={{ height: "clamp(260px, 34vw, 400px)" }}
