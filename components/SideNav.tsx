@@ -15,32 +15,25 @@ const sections = [
 ];
 
 const HEADER_HEIGHT = 56;
-const SCROLL_OFFSET = 64;
 
 export function SideNav() {
   const { headerVisible, lockHeader } = useViewport();
-  const [activeSection, setActiveSection] = useState("overview");
+  const [activeSection, setActiveSection] = useState("home");
 
   useEffect(() => {
     const handleScroll = () => {
-      const trigger = window.scrollY + HEADER_HEIGHT + 100;
-
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const s = sections[i];
-        if (s.id === "home") {
-          if (trigger < (document.getElementById(sections[1].id)?.getBoundingClientRect().top ?? 0) + window.scrollY) {
-            setActiveSection("home");
-          }
-          continue;
-        }
+      // Simple approach: iterate top→bottom, last section whose top
+      // is near or above the viewport top wins.
+      let active = "home";
+      for (const s of sections) {
+        if (s.id === "home") continue;
         const el = document.getElementById(s.id);
         if (!el) continue;
-        const top = el.getBoundingClientRect().top + window.scrollY;
-        if (trigger >= top) {
-          setActiveSection(s.id);
-          break;
+        if (el.getBoundingClientRect().top <= HEADER_HEIGHT + 120) {
+          active = s.id;
         }
       }
+      setActiveSection(active);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -59,7 +52,7 @@ export function SideNav() {
     const top =
       el.getBoundingClientRect().top +
       window.scrollY -
-      SCROLL_OFFSET;
+      HEADER_HEIGHT - 8;
     window.scrollTo({ top, behavior: "smooth" });
   };
 

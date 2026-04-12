@@ -171,6 +171,11 @@ body::-webkit-scrollbar {
   scroll-margin-top: 64px;
 }
 
+/* Override for the overview section — tighter scroll target for seamless hero→overview */
+#pipeline {
+  scroll-margin-top: 0;
+}
+
 /* =============================================================================
    Focus Styles
    ============================================================================= */
@@ -292,21 +297,21 @@ body::-webkit-scrollbar {
    ============================================================================= */
 
 .section-padding {
-  padding-top: 8rem;
-  padding-bottom: 8rem;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
 }
 
 @media (min-width: 768px) {
   .section-padding {
-    padding-top: 10rem;
-    padding-bottom: 10rem;
+    padding-top: 6rem;
+    padding-bottom: 6rem;
   }
 }
 
 @media (min-width: 1024px) {
   .section-padding {
-    padding-top: 12rem;
-    padding-bottom: 12rem;
+    padding-top: 8rem;
+    padding-bottom: 8rem;
   }
 }
 
@@ -404,24 +409,7 @@ body::-webkit-scrollbar {
   left: 0;
   right: 0;
   height: 1px;
-  background: rgba(255, 250, 238, 0.05);
-  z-index: 1;
-  pointer-events: none;
-}
-
-.section-layer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.4) 0%,
-    rgba(0, 0, 0, 0.15) 30%,
-    transparent 100%
-  );
+  background: rgba(255, 250, 238, 0.04);
   z-index: 1;
   pointer-events: none;
 }

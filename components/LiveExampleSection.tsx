@@ -468,7 +468,7 @@ export function LiveExampleSection() {
   return (
     <section
       id="live-example"
-      className="bg-bg-secondary relative overflow-hidden"
+      className="bg-bg-primary relative overflow-hidden"
       style={{ minHeight: "100dvh", scrollMarginTop: "56px" }}
     >
       {/* Noise texture */}

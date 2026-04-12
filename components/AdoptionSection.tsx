@@ -86,7 +86,7 @@ export function AdoptionSection() {
   const activePreview = terminalPreviews[expandedPhase] || terminalPreviews[1];
 
   return (
-    <section ref={sectionRef} id="adoption" className="section-padding min-h-screen bg-bg-primary overflow-hidden">
+    <section ref={sectionRef} id="adoption" className="section-padding min-h-screen bg-bg-secondary overflow-hidden">
       <motion.div style={{ y }}>
       <div className="max-w-5xl mx-auto px-6">
         {/* Header */}

@@ -47,7 +47,7 @@ export function EncodingSection() {
   );
 
   return (
-    <section ref={sectionRef} id="orchestration" className="section-padding min-h-screen bg-bg-primary overflow-hidden">
+    <section ref={sectionRef} id="orchestration" className="section-padding min-h-screen bg-bg-secondary overflow-hidden">
       <motion.div style={{ y }}>
       {/* Header + Phase toggle — narrower container */}
       <div className="max-w-5xl mx-auto px-6">
