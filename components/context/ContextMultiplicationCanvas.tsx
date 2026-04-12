@@ -77,17 +77,17 @@ function makeResearchNodes(): NodeDef[] {
     return {
       id: `r-${i}`,
       label,
-      baseX: -0.48 + col * 0.48,
-      baseY: 0.42 - row * 0.42,
-      radius: 0.12 + (s % 5) * 0.008,
+      baseX: -0.5 + col * 0.5,
+      baseY: 0.45 - row * 0.45,
+      radius: 0.1 + (s % 5) * 0.006,
       color: i < 2 ? C.nodeLight : i < 5 ? C.nodeMid : C.nodeDim,
       phaseX: s % 6.28,
       phaseY: (s * 1.3) % 6.28,
-      // Much faster and larger amplitude — bouncy atoms
-      speedX: 1.2 + (s % 3) * 0.4,
-      speedY: 1.5 + (s % 4) * 0.3,
-      ampX: 0.12 + (s % 5) * 0.015,
-      ampY: 0.12 + (s % 3) * 0.018,
+      // Bouncy but with unique speeds per node to avoid sync overlap
+      speedX: 0.8 + i * 0.15,
+      speedY: 1.0 + i * 0.12,
+      ampX: 0.08 + (s % 5) * 0.008,
+      ampY: 0.08 + (s % 3) * 0.01,
       delay: i * 0.05,
     };
   });
@@ -419,7 +419,7 @@ function ContextBox({ box, delay }: { box: BoxDef; delay: number }) {
     const p = progressRef.current;
     groupRef.current.scale.set(p, p, 1);
     (fillRef.current.material as THREE.MeshBasicMaterial).opacity = p * 0.12;
-    (edgesRef.current.material as THREE.LineBasicMaterial).opacity = p * 0.5;
+    (edgesRef.current.material as THREE.LineBasicMaterial).opacity = p * 0.85;
     if (labelRef.current) labelRef.current.style.opacity = String(p);
   });
 
@@ -451,17 +451,26 @@ function ContextBox({ box, delay }: { box: BoxDef; delay: number }) {
 interface WTDef {
   id: string;
   label: string;
-  /** Index into the boxLayout array this worktree connects to */
-  targetBoxIndex: number;
-  /** X position within the target box to connect to (0 = center) */
-  targetOffsetX: number;
+  /** Each worktree connects to multiple boxes */
+  targets: { boxIndex: number; offsetX: number }[];
 }
 
 const WORKTREE_DEFS: WTDef[] = [
-  { id: "wt-1a", label: "worktree 1a", targetBoxIndex: 0, targetOffsetX: 0 },
-  { id: "wt-1b", label: "worktree 1b", targetBoxIndex: 1, targetOffsetX: 0 },
-  { id: "wt-1c", label: "worktree 1c", targetBoxIndex: 2, targetOffsetX: -0.3 },
-  { id: "wt-1d", label: "worktree 1d", targetBoxIndex: 2, targetOffsetX: 0.3 },
+  // 1a → Research + PRD Tasks
+  { id: "wt-1a", label: "worktree 1a", targets: [
+    { boxIndex: 0, offsetX: 0 },
+    { boxIndex: 2, offsetX: -0.3 },
+  ]},
+  // 1b → PRD Tasks + Research
+  { id: "wt-1b", label: "worktree 1b", targets: [
+    { boxIndex: 2, offsetX: 0.3 },
+    { boxIndex: 0, offsetX: 0.3 },
+  ]},
+  // 1c → PRD Tasks + PRD
+  { id: "wt-1c", label: "worktree 1c", targets: [
+    { boxIndex: 2, offsetX: 0 },
+    { boxIndex: 1, offsetX: 0 },
+  ]},
 ];
 
 // Git branch icon SVG as inline data URI
@@ -555,29 +564,30 @@ function WorktreeRow({
         </div>
       </Html>
 
-      {/* Curved connection lines from each worktree down to its box */}
+      {/* Curved connection lines — each worktree has multiple targets */}
       {WORKTREE_DEFS.map((wt, i) => {
-        const box = boxLayout[wt.targetBoxIndex];
-        if (!box) return null;
+        // Pill X position — evenly spaced across the row (3 items now)
+        const pillX = startX + 1.0 + i * (totalWidth - 2.0) / Math.max(WORKTREE_DEFS.length - 1, 1);
+        const topY = WT_ROW_Y - 0.22;
 
-        // Pill X position — evenly spaced across the row
-        const pillX = startX + 0.8 + i * (totalWidth - 1.0) / (WORKTREE_DEFS.length - 1);
-        // Target point on top of the box
-        const targetX = box.x + box.width / 2 + wt.targetOffsetX;
-        const topY = WT_ROW_Y - 0.2;
-        const bottomY = box.y + box.height / 2;
+        return wt.targets.map((target, j) => {
+          const box = boxLayout[target.boxIndex];
+          if (!box) return null;
+          const targetX = box.x + box.width / 2 + target.offsetX;
+          const bottomY = box.y + box.height / 2;
 
-        return (
-          <WorktreeArrow
-            key={wt.id}
-            fromX={pillX}
-            fromY={topY}
-            toX={targetX}
-            toY={bottomY}
-            progress={progress}
-            delay={i * 0.08}
-          />
-        );
+          return (
+            <WorktreeArrow
+              key={`${wt.id}-${j}`}
+              fromX={pillX}
+              fromY={topY}
+              toX={targetX}
+              toY={bottomY}
+              progress={progress}
+              delay={i * 0.1 + j * 0.06}
+            />
+          );
+        });
       })}
     </group>
   );
@@ -644,22 +654,35 @@ function WorktreeArrow({
 
   useFrame(() => {
     if (lineObj.material instanceof THREE.LineBasicMaterial) {
-      lineObj.material.opacity = localProgress * 0.5;
+      lineObj.material.opacity = localProgress * 0.65;
     }
   });
 
   if (localProgress < 0.01) return null;
 
+  // Stroke-only arrow chevron at the end
+  const arrowObj = useMemo(() => {
+    const size = 0.08;
+    const pts = [
+      new THREE.Vector3(toX - size, toY + size * 1.2, 0),
+      new THREE.Vector3(toX, toY, 0),
+      new THREE.Vector3(toX + size, toY + size * 1.2, 0),
+    ];
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color: C.brand, transparent: true, opacity: 0 });
+    return new THREE.Line(geo, mat);
+  }, [toX, toY]);
+
+  useFrame(() => {
+    if (arrowObj.material instanceof THREE.LineBasicMaterial) {
+      arrowObj.material.opacity = localProgress > 0.4 ? localProgress * 0.65 : 0;
+    }
+  });
+
   return (
     <group>
       <primitive object={lineObj} />
-      {/* Downward arrow at connection point */}
-      {localProgress > 0.4 && (
-        <mesh position={[toX, toY + 0.08, 0.05]} rotation={[0, 0, Math.PI]}>
-          <coneGeometry args={[0.05, 0.1, 3]} />
-          <meshBasicMaterial color={C.brand} transparent opacity={localProgress * 0.6} />
-        </mesh>
-      )}
+      <primitive object={arrowObj} />
     </group>
   );
 }
