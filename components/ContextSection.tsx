@@ -351,7 +351,7 @@ export function ContextSection() {
   const [activeLayer, setActiveLayer] = useState("l0");
 
   return (
-    <section ref={sectionRef} id="context" className="section-padding min-h-screen bg-bg-secondary overflow-hidden">
+    <section ref={sectionRef} id="context" className="section-padding min-h-screen bg-bg-primary overflow-hidden">
       <motion.div style={{ y }}>
       <div className="max-w-5xl mx-auto px-6">
         {/* Section header */}
@@ -981,20 +981,37 @@ function ContextMultiplicationViz() {
   const [activeModalFile, setActiveModalFile] = useState<string | null>(null);
   const [modalTabs, setModalTabs] = useState<string[]>([]);
   const [playing, setPlaying] = useState(true);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [stageProgress, setStageProgress] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  const stageStartRef = useRef(Date.now());
 
-  // Auto-advance timer
+  const STAGE_DURATION = 3000; // ms per stage
+
+  // Smooth timer using rAF
   useEffect(() => {
     if (!playing) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      timerRef.current = null;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
       return;
     }
-    timerRef.current = setInterval(() => {
-      setExpandedStage((prev) => (prev + 1) % 4);
-    }, 3000);
+    stageStartRef.current = Date.now();
+    setStageProgress(0);
+
+    const tick = () => {
+      const elapsed = Date.now() - stageStartRef.current;
+      const p = Math.min(elapsed / STAGE_DURATION, 1);
+      setStageProgress(p);
+
+      if (p >= 1) {
+        setExpandedStage((prev) => (prev + 1) % 4);
+        stageStartRef.current = Date.now();
+        setStageProgress(0);
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [playing]);
 
@@ -1044,6 +1061,7 @@ function ContextMultiplicationViz() {
       {/* Three.js visualization with progress bar */}
       <ContextMultiplicationCanvas
         activeStage={expandedStage}
+        stageProgress={stageProgress}
         onStageChange={handleStageSelect}
         playing={playing}
         onTogglePlay={handleTogglePlay}

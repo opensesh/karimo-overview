@@ -506,45 +506,45 @@ function WorktreeRow({
   return (
     <group>
       {/* Single HTML row for Wave label + worktree items */}
-      <Html position={[0, WT_ROW_Y, 0]} center style={{ pointerEvents: "none", width: "100%" }}>
+      <Html position={[0, WT_ROW_Y, 0]} center style={{ pointerEvents: "none" }}>
         <div
           style={{
             opacity: progress,
             display: "flex",
             alignItems: "center",
-            gap: "16px",
+            gap: "24px",
             justifyContent: "center",
             whiteSpace: "nowrap",
           }}
         >
           {/* Wave 1 pill */}
           <div style={{
-            padding: "3px 10px",
+            padding: "4px 12px",
             border: "1px solid #44403a",
             borderRadius: "5px",
-            fontSize: "10px",
+            fontSize: "11px",
             color: "#a8a29e",
             fontFamily: "var(--font-mono, monospace)",
             background: "rgba(13, 13, 13, 0.9)",
-            letterSpacing: "0.02em",
+            letterSpacing: "0.03em",
             flexShrink: 0,
           }}>
             Wave 1
           </div>
 
-          {/* Worktree items */}
+          {/* Worktree items — evenly spaced */}
           {WORKTREE_DEFS.map((wt) => (
             <div key={wt.id} style={{
               display: "flex",
               alignItems: "center",
-              gap: "4px",
+              gap: "5px",
               flexShrink: 0,
             }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={GIT_ICON} alt="" width={12} height={12} style={{ opacity: 0.7 }} />
+              <img src={GIT_ICON} alt="" width={13} height={13} style={{ opacity: 0.6 }} />
               <span style={{
                 fontFamily: "var(--font-mono, monospace)",
-                fontSize: "10px",
+                fontSize: "11px",
                 color: "#a8a29e",
                 letterSpacing: "0.01em",
               }}>
@@ -583,7 +583,7 @@ function WorktreeRow({
   );
 }
 
-// A single curved arrow from a worktree label down to a box
+// Bracket-style arrow: straight down, then curve to target box
 function WorktreeArrow({
   fromX, fromY, toX, toY, progress, delay,
 }: {
@@ -600,6 +600,7 @@ function WorktreeArrow({
   useEffect(() => {
     if (progress > 0) { startTime.current = null; setLocalProgress(0); }
     else { setLocalProgress(0); startTime.current = null; }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress > 0]);
 
   useFrame((state) => {
@@ -613,24 +614,27 @@ function WorktreeArrow({
     }
   });
 
-  // Build a curved path with a control point
+  // Bracket path: vertical down from label, then curve out to target
   const curve = useMemo(() => {
-    const midX = (fromX + toX) / 2;
-    const midY = fromY - 0.15; // Pull the curve up slightly for a nice arc
-    return new THREE.QuadraticBezierCurve3(
-      new THREE.Vector3(fromX, fromY, 0),
-      new THREE.Vector3(midX, midY, 0),
-      new THREE.Vector3(toX, toY, 0)
+    const dx = toX - fromX;
+    const verticalDrop = (fromY - toY) * 0.4; // go 40% straight down first
+    const bendY = fromY - verticalDrop;
+
+    // Cubic bezier: straight down, curve at the bend, arrive at target
+    return new THREE.CubicBezierCurve3(
+      new THREE.Vector3(fromX, fromY, 0),            // start: under label
+      new THREE.Vector3(fromX, bendY, 0),             // control 1: straight down
+      new THREE.Vector3(toX, bendY + dx * 0.15, 0),   // control 2: curve toward target
+      new THREE.Vector3(toX, toY, 0)                  // end: top of box
     );
   }, [fromX, fromY, toX, toY]);
 
-  const points = useMemo(() => curve.getPoints(30), [curve]);
+  const allPoints = useMemo(() => curve.getPoints(40), [curve]);
 
-  // Only show the portion of the curve that has been "drawn"
   const visiblePoints = useMemo(() => {
-    const count = Math.max(2, Math.floor(points.length * localProgress));
-    return points.slice(0, count);
-  }, [points, localProgress]);
+    const count = Math.max(2, Math.floor(allPoints.length * localProgress));
+    return allPoints.slice(0, count);
+  }, [allPoints, localProgress]);
 
   const lineObj = useMemo(() => {
     const geo = new THREE.BufferGeometry().setFromPoints(visiblePoints);
@@ -640,7 +644,7 @@ function WorktreeArrow({
 
   useFrame(() => {
     if (lineObj.material instanceof THREE.LineBasicMaterial) {
-      lineObj.material.opacity = localProgress * 0.45;
+      lineObj.material.opacity = localProgress * 0.5;
     }
   });
 
@@ -649,16 +653,11 @@ function WorktreeArrow({
   return (
     <group>
       <primitive object={lineObj} />
-      {/* Arrow dot at bottom */}
-      <mesh position={[toX, toY, 0.05]}>
-        <circleGeometry args={[0.045, 16]} />
-        <meshBasicMaterial color={C.brand} transparent opacity={localProgress * 0.7} />
-      </mesh>
-      {/* Small downward arrow triangle */}
-      {localProgress > 0.5 && (
-        <mesh position={[toX, toY + 0.12, 0.05]} rotation={[0, 0, Math.PI]}>
-          <coneGeometry args={[0.06, 0.1, 3]} />
-          <meshBasicMaterial color={C.brand} transparent opacity={localProgress * 0.5} />
+      {/* Downward arrow at connection point */}
+      {localProgress > 0.4 && (
+        <mesh position={[toX, toY + 0.08, 0.05]} rotation={[0, 0, Math.PI]}>
+          <coneGeometry args={[0.05, 0.1, 3]} />
+          <meshBasicMaterial color={C.brand} transparent opacity={localProgress * 0.6} />
         </mesh>
       )}
     </group>
@@ -742,9 +741,10 @@ function Scene({ activeStage }: { activeStage: number }) {
 const STAGE_LABELS = ["Research", "PRD", "Task Briefs", "Worktrees"];
 
 function ProgressBar({
-  activeStage, onStageChange, playing, onTogglePlay,
+  activeStage, stageProgress, onStageChange, playing, onTogglePlay,
 }: {
   activeStage: number;
+  stageProgress: number;
   onStageChange: (stage: number) => void;
   playing: boolean;
   onTogglePlay: () => void;
@@ -758,30 +758,39 @@ function ProgressBar({
         Effective Context
       </span>
       <div className="flex-1 flex gap-1">
-        {STAGE_LABELS.map((label, i) => (
-          <button
-            key={label}
-            onClick={() => onStageChange(i)}
-            className="flex-1 group cursor-pointer"
-            title={label}
-          >
-            <div
-              className="h-[3px] rounded-full overflow-hidden transition-all duration-300"
-              style={{
-                background: i <= activeStage ? "rgba(254, 81, 2, 0.18)" : "rgba(68, 64, 58, 0.4)",
-              }}
+        {STAGE_LABELS.map((label, i) => {
+          // Determine fill width: completed stages = 100%, current = animated, future = 0%
+          let fillWidth: string;
+          if (i < activeStage) fillWidth = "100%";
+          else if (i === activeStage) fillWidth = `${Math.round(stageProgress * 100)}%`;
+          else fillWidth = "0%";
+
+          return (
+            <button
+              key={label}
+              onClick={() => onStageChange(i)}
+              className="flex-1 group cursor-pointer"
+              title={label}
             >
               <div
-                className="h-full rounded-full"
+                className="h-[3px] rounded-full overflow-hidden"
                 style={{
-                  width: i <= activeStage ? "100%" : "0%",
-                  background: i <= activeStage ? "#fe5102" : "transparent",
-                  transition: "width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+                  background: i <= activeStage ? "rgba(254, 81, 2, 0.18)" : "rgba(68, 64, 58, 0.4)",
                 }}
-              />
-            </div>
-          </button>
-        ))}
+              >
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: fillWidth,
+                    background: "#fe5102",
+                    // No transition on current stage (it's driven by rAF), smooth on others
+                    transition: i === activeStage ? "none" : "width 0.3s ease",
+                  }}
+                />
+              </div>
+            </button>
+          );
+        })}
       </div>
       <button
         onClick={onTogglePlay}
@@ -809,18 +818,20 @@ function ProgressBar({
 
 interface ContextMultiplicationCanvasProps {
   activeStage: number;
+  stageProgress: number;
   onStageChange: (stage: number) => void;
   playing: boolean;
   onTogglePlay: () => void;
 }
 
 export function ContextMultiplicationCanvas({
-  activeStage, onStageChange, playing, onTogglePlay,
+  activeStage, stageProgress, onStageChange, playing, onTogglePlay,
 }: ContextMultiplicationCanvasProps) {
   return (
     <div className="w-full">
       <ProgressBar
         activeStage={activeStage}
+        stageProgress={stageProgress}
         onStageChange={onStageChange}
         playing={playing}
         onTogglePlay={onTogglePlay}
