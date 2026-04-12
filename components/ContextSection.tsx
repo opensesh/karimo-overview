@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { useParallax } from "@/components/ui/ParallaxSection";
 import { Modal } from "@/components/ui/Modal";
 import { FileTree } from "@/components/vscode/FileTree";
 import { EditorPanel } from "@/components/vscode/EditorPanel";
+import { ContextMultiplicationCanvas } from "@/components/context/ContextMultiplicationCanvas";
 import type { FileNode } from "@/lib/vscode-data";
 
 // ---------------------------------------------------------------------------
@@ -993,6 +994,25 @@ function ContextMultiplicationViz() {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [activeModalFile, setActiveModalFile] = useState<string | null>(null);
   const [modalTabs, setModalTabs] = useState<string[]>([]);
+  const hasInteracted = useRef(false);
+
+  // Auto-advance through stages until user interacts
+  useEffect(() => {
+    if (hasInteracted.current) return;
+    const interval = setInterval(() => {
+      if (hasInteracted.current) {
+        clearInterval(interval);
+        return;
+      }
+      setExpandedStage((prev) => (prev + 1) % 4);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleStageSelect = useCallback((i: number) => {
+    hasInteracted.current = true;
+    setExpandedStage(i);
+  }, []);
 
   const openStageModal = useCallback((stageId: string) => {
     const data = stageModalData[stageId];
@@ -1028,14 +1048,27 @@ function ContextMultiplicationViz() {
       transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className="rounded-xl border border-border-secondary bg-bg-primary overflow-hidden"
     >
+      {/* Effective Context label */}
+      <div className="flex items-center gap-4 px-5 pt-5 md:px-6 md:pt-6 pb-0">
+        <span className="text-body text-xs text-fg-tertiary uppercase tracking-wider">
+          Effective context
+        </span>
+        <div className="flex-1 h-px bg-border-secondary" />
+      </div>
+
+      {/* Three.js visualization */}
+      <ContextMultiplicationCanvas activeStage={expandedStage} />
+
       {/* Desktop: 4-column grid */}
       <div className="hidden lg:grid lg:grid-cols-4">
         {multiplicationStages.map((stage, i) => (
           <div
             key={stage.id}
+            onMouseEnter={() => handleStageSelect(i)}
             className={`
-              p-5 md:p-6 flex flex-col
+              p-5 md:p-6 flex flex-col cursor-pointer transition-colors duration-200
               ${i < multiplicationStages.length - 1 ? "border-r border-border-secondary" : ""}
+              ${expandedStage === i ? "bg-bg-secondary/40" : "hover:bg-bg-secondary/20"}
             `}
           >
             {/* Stage number + arrow */}
@@ -1087,7 +1120,7 @@ function ContextMultiplicationViz() {
           return (
             <div key={stage.id}>
               <button
-                onClick={() => setExpandedStage(isOpen ? -1 : i)}
+                onClick={() => handleStageSelect(isOpen ? -1 : i)}
                 className="w-full flex items-center justify-between px-5 py-4 text-left cursor-pointer"
               >
                 <div className="flex items-center gap-2">
@@ -1139,121 +1172,6 @@ function ContextMultiplicationViz() {
             </div>
           );
         })}
-      </div>
-
-      {/* Effective context — pipeline flow comparison */}
-      <div className="border-t border-border-secondary p-5 md:p-6">
-        <div className="flex items-center gap-4 mb-6">
-          <span className="text-body text-xs text-fg-tertiary uppercase tracking-wider">
-            Effective context
-          </span>
-          <div className="flex-1 h-px bg-border-secondary" />
-        </div>
-
-        {/* Plan Mode row */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-display text-sm text-fg-primary">Basic Plan Mode</span>
-            <span className="text-fg-tertiary text-xs">— linear</span>
-          </div>
-          <div className="flex items-center gap-1.5 md:gap-2 mb-2 overflow-x-auto">
-            {["Session 1", "Session 2", "Session 3"].map((label, i) => (
-              <div key={label} className="flex items-center gap-1.5 md:gap-2">
-                <motion.div
-                  className="rounded border border-[#ff5f56]/30 bg-[#ff5f56]/10 px-3 py-2 md:px-4 md:py-2.5 shrink-0"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: 0.2 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <span className="font-mono text-[10px] md:text-xs text-[#ff5f56]">1M</span>
-                </motion.div>
-                {i < 2 && (
-                  <span className="text-fg-tertiary text-xs shrink-0">→</span>
-                )}
-              </div>
-            ))}
-            <motion.span
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: 0.6 }}
-              className="text-[10px] md:text-xs text-[#ff5f56]/60 font-mono ml-1 shrink-0"
-            >
-              resets each time
-            </motion.span>
-          </div>
-          <p className="font-mono text-xs text-fg-tertiary">
-            = <span className="text-[#ff5f56]">2-3M</span> effective tokens
-          </p>
-        </div>
-
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-5">
-          <div className="flex-1 h-px bg-border-secondary" />
-          <span className="text-[10px] text-fg-tertiary uppercase tracking-wider">vs</span>
-          <div className="flex-1 h-px bg-border-secondary" />
-        </div>
-
-        {/* KARIMO row */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-display text-sm text-fg-primary">KARIMO</span>
-            <span className="text-fg-tertiary text-xs">— compounding</span>
-          </div>
-          <div className="flex items-center gap-1.5 md:gap-2 mb-2 overflow-x-auto">
-            {[
-              { label: "1M", stage: "research", width: "px-3 py-2 md:px-4 md:py-2.5" },
-              { label: "4M", stage: "PRD", width: "px-4 py-2.5 md:px-5 md:py-3" },
-              { label: "40M", stage: "briefs", width: "px-5 py-3 md:px-7 md:py-3.5" },
-            ].map((block, i) => (
-              <div key={block.stage} className="flex items-center gap-1.5 md:gap-2">
-                {i > 0 && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: 0.3 + i * 0.15 }}
-                    className="text-[#27c93f] font-mono text-[10px] md:text-xs font-bold shrink-0"
-                  >
-                    {i === 1 ? "×4" : "×10"}
-                  </motion.span>
-                )}
-                <motion.div
-                  className={`rounded border border-[#27c93f]/40 bg-[#27c93f]/10 ${block.width} shrink-0`}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: 0.3 + i * 0.15, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <span className="font-mono text-[10px] md:text-xs text-[#27c93f]">{block.label}</span>
-                </motion.div>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            {["research", "PRD", "briefs"].map((stage) => (
-              <span key={stage} className="text-body text-[10px] text-fg-tertiary font-mono">
-                {stage}
-              </span>
-            ))}
-          </div>
-          <p className="font-mono text-xs text-fg-tertiary">
-            = <span className="text-[#27c93f]">10-100M</span> effective tokens
-          </p>
-        </div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-          className="text-body text-sm text-fg-secondary mt-6 text-center"
-        >
-          KARIMO turns a single 1M-token window into{" "}
-          <span className="text-fg-primary font-mono text-xs">10-100M tokens</span>
-          {" "}of effective, compounding context.
-        </motion.p>
       </div>
 
       {/* Stage example modal */}
