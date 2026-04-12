@@ -810,14 +810,27 @@ function ComplexityDurationChart() {
               const activeOpacity = point.disabled ? 0.3 : 1;
               const inactiveOpacity = point.disabled ? 0.15 : 0.4;
 
-              return (
+              return point.disabled ? (
+                /* Disabled: two dashed side lines only (no bottom edge) */
+                <motion.g
+                  key={`tri-${point.id}`}
+                  opacity={isActive ? activeOpacity : inactiveOpacity}
+                  style={{ transition: "opacity 0.3s" }}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: isActive ? activeOpacity : inactiveOpacity }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.3 + i * 0.3, ease: springEase }}
+                >
+                  <line x1={dotX} y1={dotY} x2={leftX} y2={baseY}
+                    stroke={point.dotColor} strokeWidth="1" strokeDasharray="4 3" />
+                  <line x1={dotX} y1={dotY} x2={rightX} y2={baseY}
+                    stroke={point.dotColor} strokeWidth="1" strokeDasharray="4 3" />
+                </motion.g>
+              ) : (
                 <motion.polygon
                   key={`tri-${point.id}`}
                   points={`${dotX},${dotY} ${leftX},${baseY} ${rightX},${baseY}`}
-                  fill={point.disabled ? "none" : `url(#${point.gradientId})`}
-                  stroke={point.disabled ? point.dotColor : "none"}
-                  strokeWidth={point.disabled ? "1" : "0"}
-                  strokeDasharray={point.disabled ? "4 3" : "none"}
+                  fill={`url(#${point.gradientId})`}
                   opacity={isActive ? activeOpacity : inactiveOpacity}
                   style={{ transition: "opacity 0.3s" }}
                   initial={{ opacity: 0 }}
@@ -881,7 +894,7 @@ function ComplexityDurationChart() {
                     x={cx}
                     y={cy + DOT_R + 15}
                     textAnchor="middle"
-                    fill={point.disabled ? (isActive ? "#a8a29e" : "#57534e") : (isActive ? "#fffaee" : "#78716c")}
+                    fill={isActive ? "#fffaee" : "#78716c"}
                     fontSize="10"
                     style={{ fontFamily: "var(--font-accent)", transition: "fill 0.3s" }}
                   >
@@ -892,9 +905,9 @@ function ComplexityDurationChart() {
                     x={cx}
                     y={cy + DOT_R + 25}
                     textAnchor="middle"
-                    fill={point.disabled ? (isActive ? "#78716c" : "#44403a") : "#57534e"}
+                    fill="#57534e"
                     fontSize="8"
-                    style={{ fontFamily: "var(--font-mono)", transition: "fill 0.3s" }}
+                    style={{ fontFamily: "var(--font-mono)" }}
                   >
                     {point.modelLabel}
                   </text>
