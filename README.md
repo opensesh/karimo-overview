@@ -46,15 +46,6 @@ KARIMO is a **framework and Claude Code plugin** for PRD-driven autonomous devel
 
 This site walks through KARIMO's pipeline visually — from research through merge — with interactive animations, a live VS Code simulation, and a deep dive into context architecture. Built to help teams understand what KARIMO does before diving into the framework itself.
 
-## Running Locally
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
 ## Tech Stack
 
 - **Framework:** Next.js 16+ (App Router)
