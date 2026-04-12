@@ -1,9 +1,9 @@
-// ─── VS Code Emulator Data ────────────────────────────────
+// --- VS Code Emulator Data --------------------------------
 // Static data for the Live Example section's VS Code emulator.
 // File tree, content excerpts, chat script, and timeline events
 // sourced from the real framer-cms-migration PRD output.
 
-// ─── Types ────────────────────────────────────────────────
+// --- Types ------------------------------------------------
 
 export interface FileNode {
   name: string;
@@ -30,7 +30,7 @@ export interface TimelineEvent {
   payload: string;
 }
 
-// ─── VS Code Dark+ Palette ───────────────────────────────
+// --- VS Code Dark+ Palette -------------------------------
 
 export const VSCODE = {
   bg: "#1e1e1e",
@@ -53,7 +53,7 @@ export const VSCODE = {
   red: "#ff5f57",
 } as const;
 
-// ─── File Extension → Language ────────────────────────────
+// --- File Extension -> Language ----------------------------
 
 export const EXT_LANG: Record<string, string> = {
   md: "markdown",
@@ -76,7 +76,7 @@ export const EXT_COLOR: Record<string, string> = {
 };
 
 
-// ─── File Tree ────────────────────────────────────────────
+// --- File Tree --------------------------------------------
 
 export const FILE_TREE: FileNode = {
   name: "OS-Portfolio",
@@ -259,7 +259,7 @@ export const FILE_TREE: FileNode = {
   ],
 };
 
-// ─── File Contents (carbon copies from real PRD) ────────────
+// --- File Contents (carbon copies from real PRD) ------------
 
 export const FILE_CONTENTS: Record<
   string,
@@ -394,7 +394,7 @@ All content data files should contain a clear \`// TEMPLATE: replace with your c
 
 ### Git Workflow
 
-Feature branch (\`feat/framer-cms-migration\`) → individual task branches as worktrees → merge to main via PR per wave.
+Feature branch (\`feat/framer-cms-migration\`) -> individual task branches as worktrees -> merge to main via PR per wave.
 
 ---
 
@@ -481,7 +481,7 @@ type BlogCategory =
 
 **MDX files location:** \`/src/content/blog/{slug}.mdx\`
 **4 posts to create:** EP02 Creative AI Framework, EP01 Creativity over Compute, Democratizing Fortune 500 Design, MCP for Designers.
-**Source:** Framer CSV HTML → convert to MDX.
+**Source:** Framer CSV HTML -> convert to MDX.
 
 ### 3. Playbooks
 
@@ -529,7 +529,7 @@ interface FreeResource {
 \`\`\`
 
 **5 resources:** Portfolio Template, Design Directory, Brand Design System, Linktree Template, KARIMO.
-**Asset source:** \`/Users/alexbouhdary/Documents/GitHub.nosync/OS_our-links/public/images/\` → copy to \`/public/images/resources/\`.
+**Asset source:** \`/Users/alexbouhdary/Documents/GitHub.nosync/OS_our-links/public/images/\` -> copy to \`/public/images/resources/\`.
 
 ---
 
@@ -539,10 +539,10 @@ Tasks are organized in 4 waves. Full detail in \`tasks.yaml\`.
 
 | Wave | Focus | Tasks | Key Outputs |
 |------|-------|-------|-------------|
-| 1 | Foundation | T001–T004 | Image download script, enriched schemas, content directories, next.config update |
-| 2 | Content Migration | T005–T008, T013 | All project/blog/resource/legal data populated, playbook scaffolding |
-| 3 | Component Updates | T009–T012, T014, T019–T020 | Project detail, blog MDX, resource cards, filter update, homepage + about images |
-| 4 | Integration & Polish | T015–T018 | Lab page, SEO, validation script, template strip script |
+| 1 | Foundation | T001--T004 | Image download script, enriched schemas, content directories, next.config update |
+| 2 | Content Migration | T005--T008, T013 | All project/blog/resource/legal data populated, playbook scaffolding |
+| 3 | Component Updates | T009--T012, T014, T019--T020 | Project detail, blog MDX, resource cards, filter update, homepage + about images |
+| 4 | Integration & Polish | T015--T018 | Lab page, SEO, validation script, template strip script |
 
 **Total tasks:** 20
 **Estimated complexity sum:** 89 points
@@ -602,9 +602,9 @@ project: framer-cms-migration
 created: "2026-04-07"
 
 tasks:
-  # ─────────────────────────────────────────────
+  # ---------------------------------------------
   # WAVE 1: Foundation
-  # ─────────────────────────────────────────────
+  # ---------------------------------------------
 
   - id: T001
     title: Write image download script
@@ -711,9 +711,9 @@ tasks:
     files_likely_affected:
       - next.config.ts
 
-  # ─────────────────────────────────────────────
+  # ---------------------------------------------
   # WAVE 2: Content Migration
-  # ─────────────────────────────────────────────
+  # ---------------------------------------------
 
   - id: T005
     title: Migrate all 5 project data records
@@ -873,9 +873,9 @@ tasks:
       - src/app/playbooks/[slug]/page.tsx
       - src/types/playbook.ts
 
-  # ─────────────────────────────────────────────
+  # ---------------------------------------------
   # WAVE 3: Component Updates
-  # ─────────────────────────────────────────────
+  # ---------------------------------------------
 
   - id: T009
     title: Update category system to multi-tag with canonical slugs
@@ -1069,9 +1069,9 @@ tasks:
       - src/components/about/about-hero.tsx
       - src/components/about/team-showcase.tsx
 
-  # ─────────────────────────────────────────────
+  # ---------------------------------------------
   # WAVE 4: Integration & Polish
-  # ─────────────────────────────────────────────
+  # ---------------------------------------------
 
   - id: T015
     title: Build Lab / View All page aggregating blog, playbooks, and free resources
@@ -1204,7 +1204,7 @@ principle: "Get it right over ship fast. Commit after each task. PR per wave."
 git:
   base_branch: main
   feature_branch: feat/framer-cms-migration
-  workflow: "feature branch → task branches as worktrees → merge via PR per wave"
+  workflow: "feature branch -> task branches as worktrees -> merge via PR per wave"
 
 waves:
   - wave: 1
@@ -1449,12 +1449,12 @@ complexity_summary:
   wave_3_total: 33
   wave_4_total: 18
   grand_total: 89
-  model_assignment: "complexity >= 5 tasks → Opus preferred; complexity <= 4 → Sonnet"
+  model_assignment: "complexity >= 5 tasks -> Opus preferred; complexity <= 4 -> Sonnet"
 
 high_complexity_tasks:
   - id: T005
     complexity: 8
-    reason: 5 projects × full structured content + gallery images (data only)
+    reason: 5 projects x full structured content + gallery images (data only)
   - id: T010
     complexity: 7
     reason: Multiple new sub-components, 5 project pages to validate, image rendering
@@ -1492,7 +1492,7 @@ This document tracks cross-task discoveries, shared issues, and emergent pattern
 
 ---
 
-## Wave 1: Foundation (T001–T004)
+## Wave 1: Foundation (T001--T004)
 
 ### Discovery: Framer CDN URL stability
 - **Task:** T001 (image download script)
@@ -1511,10 +1511,10 @@ This document tracks cross-task discoveries, shared issues, and emergent pattern
 
 ---
 
-## Wave 2: Content Migration (T005–T008, T013)
+## Wave 2: Content Migration (T005--T008, T013)
 
 ### Discovery: Framer HTML-to-MDX conversion quality
-- **Task:** T005–T006 (project data, blog MDX)
+- **Task:** T005--T006 (project data, blog MDX)
 - **Finding:** Framer's HTML export includes nested \`<div>\` wrappers and inline styles that don't map cleanly to MDX. Manual cleanup was required for all 4 blog posts. The \`<em>\` and \`<strong>\` tags converted cleanly; \`<div>\` containers were stripped.
 - **Impact:** Future blog post imports from Framer will need the same manual cleanup pass.
 
@@ -1530,7 +1530,7 @@ This document tracks cross-task discoveries, shared issues, and emergent pattern
 
 ---
 
-## Wave 3: Component Updates (T009–T012, T014, T019–T020)
+## Wave 3: Component Updates (T009--T012, T014, T019--T020)
 
 ### Discovery: Category filter multi-select complexity
 - **Task:** T009 (category system) + T014 (project listing filter)
@@ -1549,7 +1549,7 @@ This document tracks cross-task discoveries, shared issues, and emergent pattern
 
 ---
 
-## Wave 4: Integration & Polish (T015–T018)
+## Wave 4: Integration & Polish (T015--T018)
 
 ### Discovery: Lab page aggregation pattern
 - **Task:** T015 (lab page)
@@ -1581,7 +1581,7 @@ This document tracks cross-task discoveries, shared issues, and emergent pattern
     content: `# Brief Review: framer-cms-migration
 
 **Reviewed:** 2026-04-07
-**Briefs reviewed:** T001–T020 (20 tasks)
+**Briefs reviewed:** T001--T020 (20 tasks)
 **Codebase verified against:** \`main\` branch at \`/Users/alexbouhdary/Documents/GitHub.nosync/OS-Portfolio\`
 
 ---
@@ -1590,7 +1590,7 @@ This document tracks cross-task discoveries, shared issues, and emergent pattern
 
 ### C1 — T006/T011 Build Break: \`post.content\` removed but blog detail page reads it at runtime
 
-**Affected briefs:** T006 (line 293–355), T011 (line 25–42)
+**Affected briefs:** T006 (line 293--355), T011 (line 25--42)
 **Codebase evidence:** \`src/app/blog/[slug]/page.tsx\` line 53 calls \`p.category === post.category\`; \`src/components/blog/blog-post.tsx\` line 117 calls \`post.content.split("\\n\\n")\`.
 
 T006 instructs removing \`content: string\` from blog.ts records and replacing with \`contentPath\`. However, \`blog-post.tsx\` directly renders \`post.content.split("\\n\\n")\` — this will throw at runtime the moment T006 removes the field, causing all 4 blog post pages to crash. T006's guidance acknowledges this (the "bridge" options) but leaves the resolution ambiguous, which will cause a broken build in Wave 2 before T011 arrives in Wave 3.
@@ -1601,7 +1601,7 @@ T006 instructs removing \`content: string\` from blog.ts records and replacing w
 
 ### C2 — T007/T002/T012 Schema Conflict: \`badge\` field type is inconsistent across three tasks
 
-**Affected briefs:** T002 (line 263–272), T007 (lines 40, 162–178, 202+), T012 (line 62, 138, 143)
+**Affected briefs:** T002 (line 263--272), T007 (lines 40, 162--178, 202+), T012 (line 62, 138, 143)
 **Detail:**
 
 - T002 defines: \`export type ResourceBadge = 'live' | 'coming-soon'\` and \`badge: ResourceBadge\` on \`FreeResource\` — meaning \`badge\` is a plain string union.
@@ -1609,7 +1609,7 @@ T006 instructs removing \`content: string\` from blog.ts records and replacing w
 - T007's actual data records use: \`badge: { text: "Live", variant: "live" }\` — the object shape.
 - T012's \`ResourceBadgeChip\` component renders: \`badge === "live"\` and \`badge === "coming-soon"\` — treating badge as a **plain string**.
 
-The type is incompatible between T002 (string) → T007 (object) → T012 (string comparison). Whichever shape T002 ships will break either T007's data or T012's rendering.
+The type is incompatible between T002 (string) -> T007 (object) -> T012 (string comparison). Whichever shape T002 ships will break either T007's data or T012's rendering.
 
 **Fix:** Decide on one canonical shape and propagate it consistently. The PRD (research/findings section 6) uses the object shape \`{ quote, author }\` but the PRD type definition uses the simple string union. The most practical fix is to align on T002's simple string union (\`badge: 'live' | 'coming-soon'\`) and update T007 data records to use \`badge: "live"\` not \`badge: { text: "Live", variant: "live" }\`. T012 badge rendering is already written for the string shape and won't need changes.
 
@@ -1618,17 +1618,17 @@ The type is incompatible between T002 (string) → T007 (object) → T012 (strin
 ### C3 — T005 Slug Conflict: \`google-gemini-infinite-nature\` vs existing \`gemini-infinite-nature\`
 
 **Affected brief:** T005 (lines 247, 266+, 410)
-**Codebase evidence:** \`src/data/projects.ts\` line 47–48: \`id: "gemini-infinite-nature"\`, \`slug: "gemini-infinite-nature"\`.
+**Codebase evidence:** \`src/data/projects.ts\` line 47--48: \`id: "gemini-infinite-nature"\`, \`slug: "gemini-infinite-nature"\`.
 
 T005 instructs using slug \`google-gemini-infinite-nature\` (matching the Framer CSV and T001 image download paths). The existing codebase record uses \`gemini-infinite-nature\`. T001 downloads images to \`/public/images/projects/google-gemini-infinite-nature/\`. If T005 changes the slug to \`google-gemini-infinite-nature\`, the existing \`/projects/gemini-infinite-nature\` URL will 404 and any hardcoded references will break. T005 acknowledges the discrepancy but doesn't mandate a redirect.
 
-**Fix:** Add a redirect rule to \`next.config.ts\` for \`/projects/gemini-infinite-nature\` → \`/projects/google-gemini-infinite-nature\`, OR instruct T001 to use \`/public/images/projects/gemini-infinite-nature/\` to match the existing slug. The brief currently says "Use the Framer CSV slug" but that breaks existing URL. Document the chosen approach explicitly.
+**Fix:** Add a redirect rule to \`next.config.ts\` for \`/projects/gemini-infinite-nature\` -> \`/projects/google-gemini-infinite-nature\`, OR instruct T001 to use \`/public/images/projects/gemini-infinite-nature/\` to match the existing slug. The brief currently says "Use the Framer CSV slug" but that breaks existing URL. Document the chosen approach explicitly.
 
 ---
 
 ### C4 — T008 Incorrect Assumption: \`/terms\` and \`/privacy\` routes already exist
 
-**Affected brief:** T008 (lines 662–664)
+**Affected brief:** T008 (lines 662--664)
 **Codebase evidence:** \`src/app/terms/\` and \`src/app/privacy/\` both exist (\`page.tsx\` confirmed in each directory).
 
 T008 says: "There are no existing \`/src/app/terms/\` or \`/src/app/privacy/\` directories (confirmed via codebase check). No redirect needed — the old hrefs simply didn't have corresponding pages." This is factually wrong — both directories exist. T008 will need to either remove or redirect these existing routes, not just create new \`/legal/\` pages.
@@ -1639,7 +1639,7 @@ T008 says: "There are no existing \`/src/app/terms/\` or \`/src/app/privacy/\` d
 
 ### C5 — T018 Stub Schema Mismatch: \`ProjectSection\` stub has \`type\` field that doesn't exist in T002's schema
 
-**Affected brief:** T018 (lines 116–128)
+**Affected brief:** T018 (lines 116--128)
 **T002 schema:** \`ProjectSection\` has \`{ heading: string; headline: string; body: string }\` — no \`type\` field.
 
 The T018 \`projects.ts\` stub includes \`type: "challenge"\` on each section object:
@@ -1654,7 +1654,7 @@ This extra \`type\` field doesn't exist in the \`ProjectSection\` interface defi
 
 ### C6 — T018 Stub Schema Mismatch: \`FreeResource\` badge field
 
-**Affected brief:** T018 (lines 183–191)
+**Affected brief:** T018 (lines 183--191)
 **T002 schema:** \`badge: ResourceBadge = 'live' | 'coming-soon'\` (simple string) OR per T007's object shape — see C2.
 
 T018's free-resources stub uses \`badge: "live"\` which matches T002's simple string union. However if T007's object shape wins (badge as \`{ text, variant }\`), the T018 stub will also break TypeScript.
@@ -1665,19 +1665,19 @@ T018's free-resources stub uses \`badge: "live"\` which matches T002's simple st
 
 ### C7 — T005/T009 Filter Logic Duplication with Conflicting Scope
 
-**Affected briefs:** T005 (lines 83–101, 335–336), T009 (lines 63–99)
-**Detail:** T005 instructs updating the filter logic in \`src/app/projects/page.tsx\` (change \`p.category ===\` to \`p.categories.includes()\`). T009 also instructs the same change to the same file (lines 63–70). Both tasks are in different waves (Wave 2 and Wave 3) and both claim ownership of this change in \`projects/page.tsx\`.
+**Affected briefs:** T005 (lines 83--101, 335--336), T009 (lines 63--99)
+**Detail:** T005 instructs updating the filter logic in \`src/app/projects/page.tsx\` (change \`p.category ===\` to \`p.categories.includes()\`). T009 also instructs the same change to the same file (lines 63--70). Both tasks are in different waves (Wave 2 and Wave 3) and both claim ownership of this change in \`projects/page.tsx\`.
 
 If T005 makes the change in Wave 2, T009 will find nothing to do (or will apply a redundant change). If T005 doesn't fully complete it, T009 won't know what state the file is in. The execution plan assigns them to different waves with T009 depending on T005 — but both briefs list \`projects/page.tsx\` as a file to modify for the same filter logic change.
 
-**Fix:** Explicitly scope T005 to **only** populating project data records in \`projects.ts\`, and move the filter logic update entirely to T009. T005's current brief has a filter logic section (Implementation Guidance, lines 380–405) that should be removed and owned solely by T009. This prevents conflicting edits.
+**Fix:** Explicitly scope T005 to **only** populating project data records in \`projects.ts\`, and move the filter logic update entirely to T009. T005's current brief has a filter logic section (Implementation Guidance, lines 380--405) that should be removed and owned solely by T009. This prevents conflicting edits.
 
 ---
 
 ### C8 — T015 Navigation Assumption: \`footerNavItems.theLab\` structure differs from brief
 
-**Affected brief:** T015 (lines 87–98)
-**Codebase evidence:** \`src/data/navigation.ts\` lines 27–31: \`footerNavItems.theLab\` contains \`[Blog, Playbooks, Free Assets, View All]\`. T015 says it should change \`"View All" href /templates → /lab\`. The actual "View All" entry exists and does point to \`/templates\` — this part is correct.
+**Affected brief:** T015 (lines 87--98)
+**Codebase evidence:** \`src/data/navigation.ts\` lines 27--31: \`footerNavItems.theLab\` contains \`[Blog, Playbooks, Free Assets, View All]\`. T015 says it should change \`"View All" href /templates -> /lab\`. The actual "View All" entry exists and does point to \`/templates\` — this part is correct.
 
 However, T015 also says the \`overlayNavItems\` "The Lab" href should change from \`/templates\` to \`/lab\`. The actual \`overlayNavItems\` array has \`The Lab\` children including \`{ label: "Resources", href: "/resources" }\` — not \`{ label: "Free Assets", href: "/free-assets" }\` as described. This is a minor discrepancy but could cause the agent to update the wrong entry or miss an entry.
 
@@ -1691,8 +1691,8 @@ Additionally, \`footerNavItems.theLab\` has a \`{ label: "Free Assets", href: "/
 
 ### W1 — T002 Instructs Removing Old BlogCategory Values But They May Still Be Used
 
-**Affected briefs:** T002 (line 94), T006 (line 321–323)
-**Detail:** T002 replaces BlogCategory with \`'Creative Philosophy' | 'About Us' | 'Digital Design' | 'Design Strategy' | 'Brand Identity'\`, removing \`"Design" | "AI" | "Process" | "Insights"\`. The existing 3 blog posts in \`blog.ts\` use \`"Design"\`, \`"AI"\`, and \`"Process"\`. T002 also instructs replacing the posts in \`blog.ts\` with the 4 real posts — but T006 shows the expected type still includes the old values \`"Design" | "AI" | "Process" | "Insights"\` in the "Expected BlogPost Type After T002" section (line 321–323). This suggests T006 thinks T002 keeps the old values, but T002 removes them entirely.
+**Affected briefs:** T002 (line 94), T006 (line 321--323)
+**Detail:** T002 replaces BlogCategory with \`'Creative Philosophy' | 'About Us' | 'Digital Design' | 'Design Strategy' | 'Brand Identity'\`, removing \`"Design" | "AI" | "Process" | "Insights"\`. The existing 3 blog posts in \`blog.ts\` use \`"Design"\`, \`"AI"\`, and \`"Process"\`. T002 also instructs replacing the posts in \`blog.ts\` with the 4 real posts — but T006 shows the expected type still includes the old values \`"Design" | "AI" | "Process" | "Insights"\` in the "Expected BlogPost Type After T002" section (line 321--323). This suggests T006 thinks T002 keeps the old values, but T002 removes them entirely.
 
 **Fix:** T006's "Expected BlogPost Type After T002" section should be updated to show only the new BlogCategory values from T002. The old values should not appear in T006's documentation.
 
@@ -1707,7 +1707,7 @@ Additionally, \`footerNavItems.theLab\` has a \`{ label: "Free Assets", href: "/
 
 ### W3 — T015 \`FreeResourcesGrid\` API Assumption May Conflict with T012
 
-**Affected briefs:** T015 (line 125), T012 (lines 107–123)
+**Affected briefs:** T015 (line 125), T012 (lines 107--123)
 **Detail:** T015's implementation example shows \`<FreeResourcesGrid resources={freeResources} />\` — passing a \`resources\` prop. T012 defines \`FreeResourcesGrid\` with no props (it imports \`freeResources\` directly from \`@/data/free-resources\`). If T012 ships without a \`resources\` prop, T015's usage will cause a TypeScript error.
 
 T015 does acknowledge this in the edge cases section ("If FreeResourcesGrid doesn't accept a resources prop, check the actual component signature") — but the example code will mislead the agent.
@@ -1718,8 +1718,8 @@ T015 does acknowledge this in the edge cases section ("If FreeResourcesGrid does
 
 ### W4 — T009 and T010 Both Modify \`project-detail.tsx\` with Overlapping Category Logic
 
-**Affected briefs:** T009 (line 75–79), T010 (line 52–53)
-**Detail:** T009 modifies \`project-detail.tsx\` line 54 to change \`{project.category}\` → joined category labels. T010 also modifies \`project-detail.tsx\` extensively. Both are Wave 3 tasks and both list \`project-detail.tsx\` as a file they touch. T009 makes the category display change, T010 makes the full enriched layout change. If run in parallel (both are Wave 3, run_order: 1), there will be a merge conflict on this file.
+**Affected briefs:** T009 (line 75--79), T010 (line 52--53)
+**Detail:** T009 modifies \`project-detail.tsx\` line 54 to change \`{project.category}\` -> joined category labels. T010 also modifies \`project-detail.tsx\` extensively. Both are Wave 3 tasks and both list \`project-detail.tsx\` as a file they touch. T009 makes the category display change, T010 makes the full enriched layout change. If run in parallel (both are Wave 3, run_order: 1), there will be a merge conflict on this file.
 
 **Fix:** T010 should note that \`project-detail.tsx\` also requires the category rendering change from T009, and include T009 as a blocking dependency (run T009 first, then T010). The current execution plan doesn't sequence them — add \`run_order: 1\` for T009 and \`run_order: 2\` for T010 in Wave 3.
 
@@ -1727,7 +1727,7 @@ T015 does acknowledge this in the edge cases section ("If FreeResourcesGrid does
 
 ### W5 — T019 Accesses \`src/data/blog.ts\` Already Claimed by T006
 
-**Affected briefs:** T019 (lines 158–166, 197), T006 (lines 283–287)
+**Affected briefs:** T019 (lines 158--166, 197), T006 (lines 283--287)
 **Detail:** T019 says "Update \`src/data/blog.ts\` thumbnail paths — verify or update". T006 already claims ownership of blog.ts and sets thumbnail paths as part of populating the 4 real posts. T019's modification is a verification/correction step but is listed as a file modification, which could create confusion about ownership.
 
 **Fix:** Change T019's action for \`src/data/blog.ts\` from "modify" to "verify only". If paths don't match, the fix should be applied in T006 not T019. This prevents T019 from accidentally overwriting T006's work.
@@ -1736,7 +1736,7 @@ T015 does acknowledge this in the edge cases section ("If FreeResourcesGrid does
 
 ### W6 — T001 Missing 4 Blog Thumbnails from Total Count
 
-**Affected brief:** T001 (line 151–166, overall count)
+**Affected brief:** T001 (line 151--166, overall count)
 **Detail:** T001's brief claims to download ~75 images. Counting the catalog: 40 project images + 6 homepage images (hero + 4 service + 1 team) + 7 about images + 4 blog thumbnails = 57 unique downloads. The 75 figure from the PRD includes the about BILTFOUR logo SVG and client logos already in \`/public/logos/\`. The script's catalog in T001 only lists 57 images, not 75. The MCP thumbnail (\`6zZWCJwMNLKAwcShUSZbwsO7prA.jpg\`) is listed correctly.
 
 The discrepancy is ~18 images. The success criteria say "~75 images downloaded" but the script will only produce ~57. The PRD count likely includes client logos already present locally.
@@ -2091,7 +2091,7 @@ This research was conducted **after full execution** of the framer-cms-migration
 
 1. **All content migrated to TypeScript data arrays** — 16 \`src/data/*.ts\` files hold every piece of site content, fully typed. No API calls, no CMS tokens at runtime.
 
-2. **All project images downloaded locally** — 5 projects × 8 images each (40 project images) plus blog, about, homepage, and resource images (~85 files total). \`next.config.ts\` explicitly removes \`framerusercontent.com\` from \`remotePatterns\`.
+2. **All project images downloaded locally** — 5 projects x 8 images each (40 project images) plus blog, about, homepage, and resource images (~85 files total). \`next.config.ts\` explicitly removes \`framerusercontent.com\` from \`remotePatterns\`.
 
 3. **MDX pipeline established** — \`next-mdx-remote/rsc\` + \`compileMDX\` powers the blog. 4 live posts in \`src/content/blog/\`. No frontmatter — metadata in \`src/data/blog.ts\`.
 
@@ -2099,7 +2099,7 @@ This research was conducted **after full execution** of the framer-cms-migration
 
 5. **Animation system centralized** — \`src/lib/motion.ts\` provides 20+ variant sets used across 47 components.
 
-6. **Old slug redirect in place** — \`next.config.ts\` redirects \`/projects/gemini-infinite-nature\` → \`/projects/google-gemini-infinite-nature\`.
+6. **Old slug redirect in place** — \`next.config.ts\` redirects \`/projects/gemini-infinite-nature\` -> \`/projects/google-gemini-infinite-nature\`.
 
 ---
 
@@ -2107,12 +2107,12 @@ This research was conducted **after full execution** of the framer-cms-migration
 
 \`\`\`
 Framer CMS (before)          Next.js 16 App Router (now)
-─────────────────────────    ──────────────────────────────
-Hosted CMS content     →     src/data/*.ts (typed arrays)
-framerusercontent CDN  →     public/images/** (local files)
-Framer page routing    →     src/app/**/page.tsx (App Router)
-Framer CMS rich text   →     src/content/**/*.mdx (no frontmatter)
-No version control     →     Git-tracked TypeScript source
+-------------------------    ------------------------------
+Hosted CMS content     ->     src/data/*.ts (typed arrays)
+framerusercontent CDN  ->     public/images/** (local files)
+Framer page routing    ->     src/app/**/page.tsx (App Router)
+Framer CMS rich text   ->     src/content/**/*.mdx (no frontmatter)
+No version control     ->     Git-tracked TypeScript source
 \`\`\`
 
 ---
@@ -2124,7 +2124,7 @@ No version control     →     Git-tracked TypeScript source
 | 1 | \`next-mdx-remote\` archived by HashiCorp | External | No future security patches; migrate to \`next-mdx-remote-client\` |
 | 2 | Missing \`public/images/templates/\` directory | Internal | 4 broken image refs on \`/templates\` page |
 | 3 | Blog card/post images commented out | Internal | Thumbnails exist but are not rendered |
-| 4 | \`/resources\` nav link → 404 | Internal | Dead link in overlay menu (should be \`/free-assets\`) |
+| 4 | \`/resources\` nav link -> 404 | Internal | Dead link in overlay menu (should be \`/free-assets\`) |
 
 ---
 
@@ -2136,9 +2136,9 @@ No version control     →     Git-tracked TypeScript source
 | 2 | Add \`priority\` prop to LCP hero images | Medium | External |
 | 3 | Add JSON-LD structured data (Article, CreativeWork, Organization) | Medium | External |
 | 4 | Increase \`minimumCacheTTL\` from 60s to 14400s | Low | External |
-| 5 | Plan \`framer-motion\` → \`motion/react\` migration | Low | External |
+| 5 | Plan \`framer-motion\` -> \`motion/react\` migration | Low | External |
 | 6 | Use \`LazyMotion\` to reduce initial JS by ~30 kB | Low | External |
-| 7 | Add \`blurDataURL\` to about page hero (7008×4672px) | Low | External |
+| 7 | Add \`blurDataURL\` to about page hero (7008x4672px) | Low | External |
 | 8 | Expand sitemap to include \`/free-assets\` and \`/playbooks\` | Low | External |
 | 9 | Wire up contact + newsletter form submission | Medium | Internal |
 | 10 | Move 11 inline interfaces to \`src/types/\` for consistency | Low | Internal |
@@ -2566,22 +2566,22 @@ interface Project {
 
 \`\`\`
 src/data/
-├── blog.ts            BlogPost[] (4 posts)
-├── categories.ts      Category slugs + labels + categoryLabel()
-├── clients.ts         Client[] (8 clients)
-├── faq.ts             FAQItem[] (5 items)
-├── free-resources.ts  FreeResource[] (5 resources)
-├── navigation.ts      NavItem[], SocialLink[], contactEmails, statusLines
-├── playbooks.ts       Playbook[] (empty — 0 items)
-├── process.ts         ProcessStep[] (4 steps)
-├── projects.ts        Project[] (5 projects) + featuredProjects
-├── services.ts        Service[] (4 services)
-├── stats.ts           Stat[] (4 stats)
-├── team.ts            TeamMember[] (1 in team) + showcase[] (2) + storyImages[]
-├── templates.ts       Template[] (4 templates — images missing)
-├── tools.ts           Tool[] (16 tools)
-├── values.ts          Value[] (4 values)
-└── what-we-do.ts      WhatWeDoItem[] (5 items)
+├-- blog.ts            BlogPost[] (4 posts)
+├-- categories.ts      Category slugs + labels + categoryLabel()
+├-- clients.ts         Client[] (8 clients)
+├-- faq.ts             FAQItem[] (5 items)
+├-- free-resources.ts  FreeResource[] (5 resources)
+├-- navigation.ts      NavItem[], SocialLink[], contactEmails, statusLines
+├-- playbooks.ts       Playbook[] (empty — 0 items)
+├-- process.ts         ProcessStep[] (4 steps)
+├-- projects.ts        Project[] (5 projects) + featuredProjects
+├-- services.ts        Service[] (4 services)
+├-- stats.ts           Stat[] (4 stats)
+├-- team.ts            TeamMember[] (1 in team) + showcase[] (2) + storyImages[]
+├-- templates.ts       Template[] (4 templates — images missing)
+├-- tools.ts           Tool[] (16 tools)
+├-- values.ts          Value[] (4 values)
+└-- what-we-do.ts      WhatWeDoItem[] (5 items)
 \`\`\`
 
 ---
@@ -2590,11 +2590,11 @@ src/data/
 
 \`\`\`
 src/types/
-├── index.ts           Barrel — re-exports all 4 type modules
-├── blog.ts            BlogPost, BlogCategory, blogCategories[]
-├── free-resources.ts  FreeResource, ResourceBadge, ResourceMedia
-├── playbook.ts        Playbook
-└── project.ts         Project, ProjectSection, ProjectImage, ProjectTestimonial, ViewMode
+├-- index.ts           Barrel — re-exports all 4 type modules
+├-- blog.ts            BlogPost, BlogCategory, blogCategories[]
+├-- free-resources.ts  FreeResource, ResourceBadge, ResourceMedia
+├-- playbook.ts        Playbook
+└-- project.ts         Project, ProjectSection, ProjectImage, ProjectTestimonial, ViewMode
 \`\`\`
 
 Note: 11 additional interfaces (TeamMember, NavItem, Client, Stat, etc.) are defined inline in their data files.
@@ -2605,20 +2605,20 @@ Note: 11 additional interfaces (TeamMember, NavItem, Client, Stat, etc.) are def
 
 \`\`\`
 src/content/
-├── blog/
-│   ├── .gitkeep
-│   ├── README.md
-│   ├── democratizing-fortune-500-design.mdx
-│   ├── ep01-creativity-over-compute.mdx
-│   ├── ep02-creative-ai-framework.mdx
-│   └── mcp-for-designers.mdx
-├── legal/
-│   ├── .gitkeep
-│   ├── privacy.mdx
-│   └── terms.mdx
-└── playbooks/
-    ├── .gitkeep
-    └── README.md            (stub — no MDX content yet)
+├-- blog/
+│   ├-- .gitkeep
+│   ├-- README.md
+│   ├-- democratizing-fortune-500-design.mdx
+│   ├-- ep01-creativity-over-compute.mdx
+│   ├-- ep02-creative-ai-framework.mdx
+│   └-- mcp-for-designers.mdx
+├-- legal/
+│   ├-- .gitkeep
+│   ├-- privacy.mdx
+│   └-- terms.mdx
+└-- playbooks/
+    ├-- .gitkeep
+    └-- README.md            (stub — no MDX content yet)
 \`\`\`
 
 ---
@@ -2627,47 +2627,47 @@ src/content/
 
 \`\`\`
 public/images/
-├── about/
-│   ├── HZHRFcDFfGNqJUjMRtKYNqSezcg.jpg     (Karim team photo)
-│   ├── Sj4TYZrc68BDHPXs5O5D19mVik.jpg       (hero — 7008x4672)
-│   ├── TgXt1wxY2v3DuvYWsEs5UJkYLW8.svg
-│   ├── TqpOzHSCxAEs7wnhiAD4SGGci4c.jpg
-│   ├── Zh4XMHMk3BgiZszy1fcQk5ZGueQ.webp     (Morgan team photo)
-│   ├── hAhO4qlpgRYUDxrvypSNiIK6ZE.jpg
-│   ├── qvzOeu5vdocdhOTq2yANNjMg0.jpg
-│   └── wKJt8b9CgcZCyP5NKky2RDcdQ.jpg
-├── blog/
-│   ├── 6zZWCJwMNLKAwcShUSZbwsO7prA.jpg      (mcp-for-designers)
-│   ├── KKSflaBzLhQtCCknGCHsQqbqU2s.jpg      (ep02)
-│   ├── c1JC3v6vQ3z0r5tG78dzNkn9iTI.jpg      (fortune-500)
-│   └── dAlZcH0hvoB0zkWQSH2BA5MJRY.jpg       (ep01)
-├── homepage/
-│   ├── 5tYWjZYwckbQWoi9rQ9mkhAoLG8.png      (hero)
-│   ├── CIdLigrNXaT82y2MrGUQ5vZgJ9c.jpg      (brand identity)
-│   ├── Kl75QrcWL7nXMDWTJy9SnCCpbPQ.jpg      (design systems)
-│   ├── XjqOKRycfg2fdjXcHMmUYeI4xLw.jpg      (content strategy)
-│   ├── nQ5h9VMZNz5knXmzATISCBWqakc.jpg      (context optimization)
-│   └── p9gXmNi8RoFZnjeP0zGW3fJ2M.jpg       (creative AI)
-├── projects/
-│   ├── biltfour/              (8 files: 7×.jpg + 1×.svg hero)
-│   ├── google-cloud-next/     (8 files: 7×.jpg + 1×.svg hero)
-│   ├── google-gemini-infinite-nature/  (8 files: 7×.jpg + 1×.svg hero)
-│   ├── iterra/                (8 files: 7×.jpg + 1×.svg hero)
-│   └── universal-audio/       (8 files: 6×.jpg + 1×.svg + 1×.gif)
-├── resources/
-│   ├── brand-design-system-01.jpg
-│   ├── brand-design-system-02.jpg
-│   ├── design-directory-01.mp4
-│   ├── design-directory-02.jpg
-│   ├── karimo-01.jpg
-│   ├── karimo-02.jpg
-│   ├── linktree-template-01.jpg
-│   ├── linktree-template-02.jpg
-│   ├── portfolio-01.jpg
-│   └── portfolio-02.jpg
-└── team/
-    ├── karim.webp
-    └── morgan.webp
+├-- about/
+│   ├-- HZHRFcDFfGNqJUjMRtKYNqSezcg.jpg     (Karim team photo)
+│   ├-- Sj4TYZrc68BDHPXs5O5D19mVik.jpg       (hero — 7008x4672)
+│   ├-- TgXt1wxY2v3DuvYWsEs5UJkYLW8.svg
+│   ├-- TqpOzHSCxAEs7wnhiAD4SGGci4c.jpg
+│   ├-- Zh4XMHMk3BgiZszy1fcQk5ZGueQ.webp     (Morgan team photo)
+│   ├-- hAhO4qlpgRYUDxrvypSNiIK6ZE.jpg
+│   ├-- qvzOeu5vdocdhOTq2yANNjMg0.jpg
+│   └-- wKJt8b9CgcZCyP5NKky2RDcdQ.jpg
+├-- blog/
+│   ├-- 6zZWCJwMNLKAwcShUSZbwsO7prA.jpg      (mcp-for-designers)
+│   ├-- KKSflaBzLhQtCCknGCHsQqbqU2s.jpg      (ep02)
+│   ├-- c1JC3v6vQ3z0r5tG78dzNkn9iTI.jpg      (fortune-500)
+│   └-- dAlZcH0hvoB0zkWQSH2BA5MJRY.jpg       (ep01)
+├-- homepage/
+│   ├-- 5tYWjZYwckbQWoi9rQ9mkhAoLG8.png      (hero)
+│   ├-- CIdLigrNXaT82y2MrGUQ5vZgJ9c.jpg      (brand identity)
+│   ├-- Kl75QrcWL7nXMDWTJy9SnCCpbPQ.jpg      (design systems)
+│   ├-- XjqOKRycfg2fdjXcHMmUYeI4xLw.jpg      (content strategy)
+│   ├-- nQ5h9VMZNz5knXmzATISCBWqakc.jpg      (context optimization)
+│   └-- p9gXmNi8RoFZnjeP0zGW3fJ2M.jpg       (creative AI)
+├-- projects/
+│   ├-- biltfour/              (8 files: 7x.jpg + 1x.svg hero)
+│   ├-- google-cloud-next/     (8 files: 7x.jpg + 1x.svg hero)
+│   ├-- google-gemini-infinite-nature/  (8 files: 7x.jpg + 1x.svg hero)
+│   ├-- iterra/                (8 files: 7x.jpg + 1x.svg hero)
+│   └-- universal-audio/       (8 files: 6x.jpg + 1x.svg + 1x.gif)
+├-- resources/
+│   ├-- brand-design-system-01.jpg
+│   ├-- brand-design-system-02.jpg
+│   ├-- design-directory-01.mp4
+│   ├-- design-directory-02.jpg
+│   ├-- karimo-01.jpg
+│   ├-- karimo-02.jpg
+│   ├-- linktree-template-01.jpg
+│   ├-- linktree-template-02.jpg
+│   ├-- portfolio-01.jpg
+│   └-- portfolio-02.jpg
+└-- team/
+    ├-- karim.webp
+    └-- morgan.webp
 \`\`\`
 
 **Missing directory:** \`public/images/templates/\` does not exist (4 broken refs in \`src/data/templates.ts\`).
@@ -2678,39 +2678,39 @@ public/images/
 
 \`\`\`
 src/app/
-├── favicon.ico
-├── globals.css
-├── layout.tsx             Root layout — ThemeProvider, Header, Footer, PageLoader, SkipLink
-├── loading.tsx            Global loading UI
-├── not-found.tsx          404 page
-├── page.tsx               / (home)
-├── template.tsx           Global page transition wrapper (framer-motion)
-├── robots.ts              robots.txt generation
-├── sitemap.ts             sitemap.xml generation
+├-- favicon.ico
+├-- globals.css
+├-- layout.tsx             Root layout — ThemeProvider, Header, Footer, PageLoader, SkipLink
+├-- loading.tsx            Global loading UI
+├-- not-found.tsx          404 page
+├-- page.tsx               / (home)
+├-- template.tsx           Global page transition wrapper (framer-motion)
+├-- robots.ts              robots.txt generation
+├-- sitemap.ts             sitemap.xml generation
 │
-├── about/page.tsx
-├── blog/
-│   ├── loading.tsx
-│   ├── page.tsx           /blog — BlogGrid with all posts
-│   └── [slug]/page.tsx    /blog/:slug — MDX blog post
-├── contact/page.tsx
-├── free-assets/page.tsx   /free-assets — FreeResourcesGrid
-├── lab/page.tsx           /lab — LabHero + resources + blog + playbooks
-├── legal/
-│   ├── layout.tsx         Legal layout (max-w-3xl, back link)
-│   ├── privacy/page.tsx   /legal/privacy — MDX via MDXRemote
-│   └── terms/page.tsx     /legal/terms — MDX via MDXRemote
-├── playbooks/
-│   ├── page.tsx           /playbooks — empty state
-│   └── [slug]/page.tsx    /playbooks/:slug — stub
-├── privacy/page.tsx       redirect → /legal/privacy
-├── projects/
-│   ├── layout.tsx
-│   ├── loading.tsx
-│   ├── page.tsx           /projects — carousel + grid + filter
-│   └── [slug]/page.tsx    /projects/:slug — scroll-driven ProjectDetail
-├── templates/page.tsx
-└── terms/page.tsx         redirect → /legal/terms
+├-- about/page.tsx
+├-- blog/
+│   ├-- loading.tsx
+│   ├-- page.tsx           /blog — BlogGrid with all posts
+│   └-- [slug]/page.tsx    /blog/:slug — MDX blog post
+├-- contact/page.tsx
+├-- free-assets/page.tsx   /free-assets — FreeResourcesGrid
+├-- lab/page.tsx           /lab — LabHero + resources + blog + playbooks
+├-- legal/
+│   ├-- layout.tsx         Legal layout (max-w-3xl, back link)
+│   ├-- privacy/page.tsx   /legal/privacy — MDX via MDXRemote
+│   └-- terms/page.tsx     /legal/terms — MDX via MDXRemote
+├-- playbooks/
+│   ├-- page.tsx           /playbooks — empty state
+│   └-- [slug]/page.tsx    /playbooks/:slug — stub
+├-- privacy/page.tsx       redirect -> /legal/privacy
+├-- projects/
+│   ├-- layout.tsx
+│   ├-- loading.tsx
+│   ├-- page.tsx           /projects — carousel + grid + filter
+│   └-- [slug]/page.tsx    /projects/:slug — scroll-driven ProjectDetail
+├-- templates/page.tsx
+└-- terms/page.tsx         redirect -> /legal/terms
 \`\`\`
 
 ---
@@ -2719,29 +2719,29 @@ src/app/
 
 \`\`\`
 src/
-├── app/           Next.js App Router pages + layouts (18 routes, 3 dynamic)
-├── components/
-│   ├── about/     AboutHero, TeamSection, TeamShowcase, ValuesSection
-│   ├── backgrounds/ FaultyTerminal (WebGL glitch effect)
-│   ├── blog/      BlogCard, BlogGrid, BlogPost, MDXComponents
-│   ├── contact/   ContactHero
-│   ├── home/      14 section components (Hero, ImpactSection, FeaturedWork, etc.)
-│   ├── lab/       LabHero
-│   ├── layout/    Footer, Header, Logo, OverlayMenu, PageTransition, ThemeToggle
-│   ├── projects/  11 project components (Card, Carousel, Detail, Filters, Grid, etc.)
-│   ├── providers/ ThemeProvider
-│   ├── resources/ FreeResourceCard, FreeResourcesGrid
-│   ├── shared/    14 reusable components (Button, ScrollReveal, SectionLabel, etc.)
-│   ├── three/     CRTScreenMaterial, CRTTVModel, CRTTVScene
-│   ├── ui/        DotPattern
-│   └── uui/       Full Untitled UI component library
-├── content/       MDX content (blog, legal, playbooks)
-├── data/          16 TypeScript data files (the migrated CMS content)
-├── hooks/         10 custom hooks
-├── lib/           mdx.ts, motion.ts, tv-channels.ts, utils.ts
-├── styles/        theme.css
-├── types/         4 type definition files + barrel index
-└── utils/         cx.ts, dev-props.ts, is-react-component.ts
+├-- app/           Next.js App Router pages + layouts (18 routes, 3 dynamic)
+├-- components/
+│   ├-- about/     AboutHero, TeamSection, TeamShowcase, ValuesSection
+│   ├-- backgrounds/ FaultyTerminal (WebGL glitch effect)
+│   ├-- blog/      BlogCard, BlogGrid, BlogPost, MDXComponents
+│   ├-- contact/   ContactHero
+│   ├-- home/      14 section components (Hero, ImpactSection, FeaturedWork, etc.)
+│   ├-- lab/       LabHero
+│   ├-- layout/    Footer, Header, Logo, OverlayMenu, PageTransition, ThemeToggle
+│   ├-- projects/  11 project components (Card, Carousel, Detail, Filters, Grid, etc.)
+│   ├-- providers/ ThemeProvider
+│   ├-- resources/ FreeResourceCard, FreeResourcesGrid
+│   ├-- shared/    14 reusable components (Button, ScrollReveal, SectionLabel, etc.)
+│   ├-- three/     CRTScreenMaterial, CRTTVModel, CRTTVScene
+│   ├-- ui/        DotPattern
+│   └-- uui/       Full Untitled UI component library
+├-- content/       MDX content (blog, legal, playbooks)
+├-- data/          16 TypeScript data files (the migrated CMS content)
+├-- hooks/         10 custom hooks
+├-- lib/           mdx.ts, motion.ts, tv-channels.ts, utils.ts
+├-- styles/        theme.css
+├-- types/         4 type definition files + barrel index
+└-- utils/         cx.ts, dev-props.ts, is-react-component.ts
 \`\`\``,
   },
 
@@ -2866,54 +2866,54 @@ Separate cx utility used within \`src/components/uui/\` component library only.
 
 ---
 
-## 4. Content File → Component Dependencies
+## 4. Content File -> Component Dependencies
 
 \`\`\`
 src/data/projects.ts
-  → src/components/projects/project-card.tsx
-  → src/components/projects/project-detail.tsx
-  → src/components/home/featured-work.tsx
-  → src/app/projects/page.tsx
-  → src/app/projects/[slug]/page.tsx
-  → src/app/sitemap.ts
+  -> src/components/projects/project-card.tsx
+  -> src/components/projects/project-detail.tsx
+  -> src/components/home/featured-work.tsx
+  -> src/app/projects/page.tsx
+  -> src/app/projects/[slug]/page.tsx
+  -> src/app/sitemap.ts
 
 src/data/blog.ts
-  → src/components/blog/blog-card.tsx
-  → src/components/blog/blog-post.tsx
-  → src/components/blog/blog-grid.tsx
-  → src/app/blog/page.tsx
-  → src/app/blog/[slug]/page.tsx
-  → src/app/lab/page.tsx
-  → src/app/sitemap.ts
+  -> src/components/blog/blog-card.tsx
+  -> src/components/blog/blog-post.tsx
+  -> src/components/blog/blog-grid.tsx
+  -> src/app/blog/page.tsx
+  -> src/app/blog/[slug]/page.tsx
+  -> src/app/lab/page.tsx
+  -> src/app/sitemap.ts
 
 src/data/free-resources.ts
-  → src/components/resources/free-resource-card.tsx
-  → src/components/resources/free-resources-grid.tsx
-  → src/app/free-assets/page.tsx
-  → src/app/lab/page.tsx
+  -> src/components/resources/free-resource-card.tsx
+  -> src/components/resources/free-resources-grid.tsx
+  -> src/app/free-assets/page.tsx
+  -> src/app/lab/page.tsx
 
 src/data/playbooks.ts
-  → src/app/playbooks/page.tsx
-  → src/app/playbooks/[slug]/page.tsx
-  → src/app/lab/page.tsx
+  -> src/app/playbooks/page.tsx
+  -> src/app/playbooks/[slug]/page.tsx
+  -> src/app/lab/page.tsx
 
 src/data/navigation.ts
-  → src/components/layout/header.tsx
-  → src/components/layout/footer.tsx
-  → src/components/layout/overlay-menu.tsx
+  -> src/components/layout/header.tsx
+  -> src/components/layout/footer.tsx
+  -> src/components/layout/overlay-menu.tsx
 
-src/data/clients.ts → src/components/home/logo-marquee.tsx
-src/data/what-we-do.ts → src/components/home/what-we-do-section.tsx
-src/data/stats.ts → src/components/home/stats-counter.tsx
-src/data/team.ts → src/components/about/team-showcase.tsx, team-section.tsx
-src/data/faq.ts → src/components/home/faq-section.tsx
-src/data/services.ts → src/components/home/services-section.tsx
-src/data/values.ts → src/components/about/values-section.tsx
-src/data/process.ts → src/components/home/process-section.tsx
-src/data/tools.ts → src/components/home/impact-section.tsx
+src/data/clients.ts -> src/components/home/logo-marquee.tsx
+src/data/what-we-do.ts -> src/components/home/what-we-do-section.tsx
+src/data/stats.ts -> src/components/home/stats-counter.tsx
+src/data/team.ts -> src/components/about/team-showcase.tsx, team-section.tsx
+src/data/faq.ts -> src/components/home/faq-section.tsx
+src/data/services.ts -> src/components/home/services-section.tsx
+src/data/values.ts -> src/components/about/values-section.tsx
+src/data/process.ts -> src/components/home/process-section.tsx
+src/data/tools.ts -> src/components/home/impact-section.tsx
 
-src/content/blog/*.mdx → src/lib/mdx.ts → src/app/blog/[slug]/page.tsx
-src/content/legal/*.mdx → src/app/legal/*/page.tsx (readFileSync)
+src/content/blog/*.mdx -> src/lib/mdx.ts -> src/app/blog/[slug]/page.tsx
+src/content/legal/*.mdx -> src/app/legal/*/page.tsx (readFileSync)
 \`\`\``,
   },
 
@@ -3091,24 +3091,24 @@ Next.js 16.2.1 App Router.
 
 ### Static routes
 \`\`\`
-/                  → src/app/page.tsx
-/about             → src/app/about/page.tsx
-/blog              → src/app/blog/page.tsx
-/contact           → src/app/contact/page.tsx
-/free-assets       → src/app/free-assets/page.tsx
-/lab               → src/app/lab/page.tsx
-/playbooks         → src/app/playbooks/page.tsx
-/projects          → src/app/projects/page.tsx
-/templates         → src/app/templates/page.tsx
-/legal/privacy     → src/app/legal/privacy/page.tsx
-/legal/terms       → src/app/legal/terms/page.tsx
+/                  -> src/app/page.tsx
+/about             -> src/app/about/page.tsx
+/blog              -> src/app/blog/page.tsx
+/contact           -> src/app/contact/page.tsx
+/free-assets       -> src/app/free-assets/page.tsx
+/lab               -> src/app/lab/page.tsx
+/playbooks         -> src/app/playbooks/page.tsx
+/projects          -> src/app/projects/page.tsx
+/templates         -> src/app/templates/page.tsx
+/legal/privacy     -> src/app/legal/privacy/page.tsx
+/legal/terms       -> src/app/legal/terms/page.tsx
 \`\`\`
 
 ### Dynamic routes with generateStaticParams
 \`\`\`
-/projects/[slug]   → src/app/projects/[slug]/page.tsx
-/blog/[slug]       → src/app/blog/[slug]/page.tsx
-/playbooks/[slug]  → src/app/playbooks/[slug]/page.tsx
+/projects/[slug]   -> src/app/projects/[slug]/page.tsx
+/blog/[slug]       -> src/app/blog/[slug]/page.tsx
+/playbooks/[slug]  -> src/app/playbooks/[slug]/page.tsx
 \`\`\`
 
 **Pattern:** \`generateStaticParams\` reads from the data arrays at build time:
@@ -3378,7 +3378,7 @@ The framer-cms-migration PRD successfully migrated all content from Framer CMS i
 - **Core:** next 16.2.1, react 19.2.4, framer-motion ^12.38.0, next-mdx-remote ^6.0.0
 - **3D:** three ^0.183.2, @react-three/fiber ^9.5.0, @react-three/drei ^10.7.7
 - **UI:** @untitledui/icons, react-aria, react-aria-components, tailwind-merge, clsx
-- **Cross-file:** 4 type modules → 16 data files → ~30 components → 18 route pages
+- **Cross-file:** 4 type modules -> 16 data files -> ~30 components -> 18 route pages
 
 ## Critical Issues Identified
 
@@ -3386,7 +3386,7 @@ The framer-cms-migration PRD successfully migrated all content from Framer CMS i
 |---|---|---|
 | 1 | Missing \`public/images/templates/\` — 4 broken image refs | High |
 | 2 | Blog card/post images commented out despite files existing | Medium |
-| 3 | \`/resources\` nav link → 404 (should be \`/free-assets\`) | Medium |
+| 3 | \`/resources\` nav link -> 404 (should be \`/free-assets\`) | Medium |
 | 4 | Contact + newsletter forms are stubs (no submission) | Medium |
 
 ## Minor Issues Identified
@@ -3406,7 +3406,7 @@ The framer-cms-migration PRD successfully migrated all content from Framer CMS i
 
 - [patterns.md](./patterns.md) — 7 pattern categories with code samples
 - [errors.md](./errors.md) — 7 error/gap categories
-- [dependencies.md](./dependencies.md) — NPM deps, type graph, utility map, content→component map
+- [dependencies.md](./dependencies.md) — NPM deps, type graph, utility map, content->component map
 - [structure.md](./structure.md) — Full directory trees for data, types, content, images, routes`,
   },
 
@@ -3448,7 +3448,7 @@ export const dynamicParams = false;
 The 16.2 release (March 2026) delivered two improvements that benefit content-heavy static sites:
 
 - **~87% faster \`next dev\` startup** compared to 16.1 on the default application template.
-- **25–60% faster Server Component rendering** via a React RSC payload deserialization fix (eliminated the C++/JS V8 boundary overhead in \`JSON.parse\`).
+- **25--60% faster Server Component rendering** via a React RSC payload deserialization fix (eliminated the C++/JS V8 boundary overhead in \`JSON.parse\`).
 
 For a site with ~75 images and ~10 project slugs, build times are already fast. The startup improvement matters more in development iteration.
 
@@ -3516,7 +3516,7 @@ const getProjects = unstable_cache(
 
 **This project's choice (\`next-mdx-remote/rsc\` + external metadata in \`data/blog.ts\`) is the correct architecture for a CMS migration pattern**, where content metadata (slug, title, date, thumbnail) lives in a TypeScript registry and MDX files contain only the narrative body. The metadata-in-code pattern is intentional: it enables TypeScript type safety on post metadata without coupling it to MDX frontmatter parsing.
 
-**Migration path:** Because \`next-mdx-remote\` was archived on April 9, 2026, the recommended migration path is \`next-mdx-remote-client\` (a maintained fork by ipikuka) or \`@next/mdx\`. For a blog with only 4–5 posts and content in \`.mdx\` files, the migration effort is low.
+**Migration path:** Because \`next-mdx-remote\` was archived on April 9, 2026, the recommended migration path is \`next-mdx-remote-client\` (a maintained fork by ipikuka) or \`@next/mdx\`. For a blog with only 4--5 posts and content in \`.mdx\` files, the migration effort is low.
 
 ### 2.2 \`compileMDX\` usage pattern (current implementation)
 
@@ -3563,8 +3563,8 @@ images: {
 
 The project's config specifies \`formats: ["image/avif", "image/webp"]\`. This is optimal:
 
-- **AVIF** is 40–50% smaller than JPEG at equivalent quality. Next.js will serve it to Chrome 85+, Firefox 93+, and Safari 16+.
-- **WebP** is 25–35% smaller than JPEG and is the fallback for older browsers.
+- **AVIF** is 40--50% smaller than JPEG at equivalent quality. Next.js will serve it to Chrome 85+, Firefox 93+, and Safari 16+.
+- **WebP** is 25--35% smaller than JPEG and is the fallback for older browsers.
 - Original formats (JPG, PNG, SVG, GIF) are served as-is if neither AVIF nor WebP is accepted.
 
 **SVG optimization note:** \`next/image\` does not optimize SVGs — it serves them as-is, bypassing the optimization pipeline. This is correct behavior since SVGs are already vector. The project uses SVG for the Iterra hero (\`vvl6xyIdUMskDBgstfyClKSxE8.svg\`) which will be served directly.
@@ -3645,7 +3645,7 @@ redirects() {
 
 ### 4.4 Content path conventions
 
-The \`contentPath\` field on \`BlogPost\` (e.g., \`"blog/ep02-creative-ai-framework.mdx"\`) stores a path relative to \`src/content/\`. This indirection layer (data → contentPath → MDX file) allows the blog post metadata to evolve independently of the MDX filename. If a file is renamed, only the \`data/blog.ts\` entry needs updating.
+The \`contentPath\` field on \`BlogPost\` (e.g., \`"blog/ep02-creative-ai-framework.mdx"\`) stores a path relative to \`src/content/\`. This indirection layer (data -> contentPath -> MDX file) allows the blog post metadata to evolve independently of the MDX filename. If a file is renamed, only the \`data/blog.ts\` entry needs updating.
 
 ---
 
@@ -3727,11 +3727,11 @@ For maximum social sharing preview quality:
 - For project and blog pages, use the item's \`thumbnail\` field as the OG image.
 - Consider generating OG images programmatically with \`ImageResponse\` from \`next/og\` for pages that don't have a dedicated thumbnail.
 
-Next.js 16.2 improved \`ImageResponse\` performance by 2–20x, making dynamic OG image generation more viable at scale.
+Next.js 16.2 improved \`ImageResponse\` performance by 2--20x, making dynamic OG image generation more viable at scale.
 
 ### 6.5 Structured data (JSON-LD)
 
-For portfolio and agency sites, JSON-LD structured data can improve CTR by 20–30% by enabling rich results. Relevant schemas:
+For portfolio and agency sites, JSON-LD structured data can improve CTR by 20--30% by enabling rich results. Relevant schemas:
 
 - \`Organization\` — for the agency homepage
 - \`Article\` — for blog posts
@@ -4015,7 +4015,7 @@ Utility-first CSS framework. In v4, configuration moved from \`tailwind.config.j
 | Config file | \`tailwind.config.js\` | \`@theme\` in CSS |
 | PostCSS plugin | \`tailwindcss\` package | \`@tailwindcss/postcss\` package |
 | \`@tailwind\` directives | \`@tailwind base; @tailwind components; @tailwind utilities\` | \`@import "tailwindcss"\` |
-| Performance | Baseline | 3–10x faster full builds, up to 100x faster incremental |
+| Performance | Baseline | 3--10x faster full builds, up to 100x faster incremental |
 | CSS variable syntax | bracket \`var()\` wrapping | \`bg-(--color)\` shorthand (still supports bracket) |
 
 ### This project's CSS convention
@@ -4035,7 +4035,7 @@ This avoids the legacy bracket var() syntax (e.g. wrapping CSS vars in square br
 | Pro | Con |
 |-----|-----|
 | CSS-first config is version-controllable alongside styles | Migration from v3 requires config rewrite |
-| 3–10x faster builds | Automated upgrade tool requires manual fixes |
+| 3--10x faster builds | Automated upgrade tool requires manual fixes |
 | Native CSS variables as first-class citizens | Breaking changes break PostCSS v3 configs |
 | No more \`tailwind.config.js\` maintenance | |
 
@@ -4238,7 +4238,7 @@ meta:
 
 sources:
 
-  # ─── Next.js Official ──────────────────────────────────────────────
+  # --- Next.js Official ----------------------------------------------
 
   - id: nextjs-16-release
     title: "Next.js 16 Release Blog"
@@ -4323,7 +4323,7 @@ sources:
     type: official-docs
     topics: [isr, caching]
 
-  # ─── MDX / next-mdx-remote ─────────────────────────────────────────
+  # --- MDX / next-mdx-remote -----------------------------------------
 
   - id: next-mdx-remote-github
     title: "next-mdx-remote GitHub"
@@ -4381,7 +4381,7 @@ sources:
     type: github-issue
     topics: [rsc, next-mdx-remote, nextjs-15]
 
-  # ─── Framer CMS / Migration ────────────────────────────────────────
+  # --- Framer CMS / Migration ----------------------------------------
 
   - id: framer-porting-data
     title: "Framer Help: Porting your data from Framer"
@@ -4404,7 +4404,7 @@ sources:
     type: blog
     topics: [framer, migration, static-site]
 
-  # ─── Tailwind CSS v4 ───────────────────────────────────────────────
+  # --- Tailwind CSS v4 -----------------------------------------------
 
   - id: tailwind-v4-upgrade-guide
     title: "Tailwind CSS Upgrade Guide"
@@ -4427,7 +4427,7 @@ sources:
     type: blog
     topics: [tailwind-v4, css-first, migration]
 
-  # ─── Framer Motion ─────────────────────────────────────────────────
+  # --- Framer Motion -------------------------------------------------
 
   - id: framer-motion-v12-vs-react-spring
     title: "Animating React UIs in 2025: Framer Motion 12 vs. React Spring 10"
@@ -4443,7 +4443,7 @@ sources:
     type: blog
     topics: [framer-motion, animation, portfolio]
 
-  # ─── Image Optimization ────────────────────────────────────────────
+  # --- Image Optimization --------------------------------------------
 
   - id: debugbear-nextjs-image
     title: "Next.js Image Optimization: The next/image Component"
@@ -4466,7 +4466,7 @@ sources:
     type: blog
     topics: [avif, webp, image-optimization]
 
-  # ─── SEO ────────────────────────────────────────────────────────────
+  # --- SEO ------------------------------------------------------------
 
   - id: nextjs-seo-guide-digital-applied
     title: "Next.js 15 SEO: Complete Guide to Metadata & Optimization"
@@ -4497,7 +4497,7 @@ sources:
     type: blog
     topics: [seo, structured-data, json-ld]
 
-  # ─── File-Based CMS / Content Architecture ─────────────────────────
+  # --- File-Based CMS / Content Architecture -------------------------
 
   - id: nextjs-cms-hygraph
     title: "10 best CMSs for Next.js in 2026"
@@ -4552,7 +4552,7 @@ External research validated the migration's architectural decisions (file-based 
 
 4. **Increase \`minimumCacheTTL\`** — Project uses 60s; Next.js 16 default is 14400s (4 hours). For a portfolio where images don't change between deploys, 60s causes unnecessary revalidation.
 
-5. **Plan \`framer-motion\` → \`motion/react\` import migration** — The canonical package is now \`motion\`. The \`framer-motion\` alias remains but will likely be deprecated.
+5. **Plan \`framer-motion\` -> \`motion/react\` import migration** — The canonical package is now \`motion\`. The \`framer-motion\` alias remains but will likely be deprecated.
 
 6. **Use \`LazyMotion\` for Core Web Vitals** — Full Framer Motion bundle is ~55 kB gzipped. \`LazyMotion\` with \`domAnimation\` reduces initial JS by ~30 kB.
 
@@ -4562,7 +4562,7 @@ External research validated the migration's architectural decisions (file-based 
 
 9. **Migrate \`next-mdx-remote\` before Next.js 17** — Archived package won't receive compatibility fixes.
 
-10. **Add \`blurDataURL\` to about page hero** — The 7008×4672px hero benefits most from a low-res blur placeholder.
+10. **Add \`blurDataURL\` to about page hero** — The 7008x4672px hero benefits most from a low-res blur placeholder.
 
 ---
 
@@ -4574,7 +4574,7 @@ External research validated the migration's architectural decisions (file-based 
 - Metadata in TypeScript + body in MDX — clean separation, no frontmatter parsing at runtime
 - \`compileMDX\` in Server Components — zero MDX runtime shipped to browser
 - \`remotePatterns: []\` — fully decoupled from Framer CDN
-- AVIF → WebP format chain — optimal format selection
+- AVIF -> WebP format chain — optimal format selection
 - Programmatic sitemap + canonical URLs — correct SEO hygiene
 - Permanent redirect for slug drift (\`gemini-infinite-nature\`)
 
@@ -4659,7 +4659,7 @@ All Wave 2 tasks can run in **parallel** once their specific Wave 1 dependencies
 - **T005** — Populates \`src/data/projects.ts\` with all 5 enriched project records from Framer CSV. Full section content (Challenge/Solution/Impact), image arrays, categories as \`string[]\`, testimonials (Iterra), results (BILTFOUR/NEXT/UA). Also updates filter logic in the projects page.
 - **T006** — Creates 4 MDX files in \`src/content/blog/\` (EP02, EP01, Democratizing, MCP for Designers). Replaces 3 stub posts in \`src/data/blog.ts\` with 4 real posts using \`contentPath\` field. Adds 4th post entirely missing from codebase.
 - **T007** — Creates \`src/data/free-resources.ts\` with 5 resource records. Copies 10 media files (9 images + 1 MP4) from the \`OS_our-links\` repo to \`public/images/resources/\`.
-- **T008** — Creates \`/legal/terms\` and \`/legal/privacy\` routes with shared layout. Converts Framer Legal.csv HTML to MDX. Updates footer navigation hrefs from \`/terms\` → \`/legal/terms\`.
+- **T008** — Creates \`/legal/terms\` and \`/legal/privacy\` routes with shared layout. Converts Framer Legal.csv HTML to MDX. Updates footer navigation hrefs from \`/terms\` -> \`/legal/terms\`.
 - **T013** — Creates empty \`src/data/playbooks.ts\`, \`src/app/playbooks/page.tsx\` (empty state), and \`src/app/playbooks/[slug]/page.tsx\` (shell with graceful empty \`generateStaticParams\`).
 
 ### Wave 3 — Component Updates (depends on Wave 2)
@@ -4696,7 +4696,7 @@ No file conflicts exist across Wave 2 tasks. All tasks touch disjoint files:
 | \`public/images/resources/\` | T007 (10 asset files) | Net-new directory |
 | \`src/content/legal/*.mdx\` | T008 (2 new files) | Net-new files |
 | \`src/app/legal/**\` | T008 (3 new files) | Net-new routes |
-| \`src/data/navigation.ts\` | T008 | Updates \`/terms\` → \`/legal/terms\` hrefs only |
+| \`src/data/navigation.ts\` | T008 | Updates \`/terms\` -> \`/legal/terms\` hrefs only |
 | \`src/data/playbooks.ts\` | T013 (creates) | Net-new file |
 | \`src/app/playbooks/**\` | T013 (2 new files) | Net-new routes |
 
@@ -4705,7 +4705,7 @@ No file conflicts exist across Wave 2 tasks. All tasks touch disjoint files:
 ## Wave 3 Execution Order
 
 \`\`\`
-T009  ──────────────►  T014
+T009  --------------►  T014
 T010  (independent of other Wave 3 tasks)
 T011  (independent of other Wave 3 tasks)
 T012  (independent of other Wave 3 tasks)
@@ -4720,20 +4720,20 @@ Only T014 has an intra-wave dependency (on T009). All other Wave 3 tasks can run
 ## Full Dependency Graph (All Waves)
 
 \`\`\`
-T001 ──────────────────────────────────────┐
-                                           ├──► T005 ──► T009 ──► T014
-T002 ──────────────────────────────────────┤     │
-      │                                    │     └──────────────► T010 ──► T016
-      │                                    ├──► T006 ──► T011 ──► T015 ──► T016
-      │                                    ├──► T007 ──► T012 ──► T015
-T003 ─┼────────────────────────────────────┤                               T016
-      │                                    ├──► T008
-      │                                    └──► T013 ──► T015
-T004 ─┘
-      └──► T019
-      └──► T020
+T001 --------------------------------------┐
+                                           ├--► T005 --► T009 --► T014
+T002 --------------------------------------┤     │
+      │                                    │     └--------------► T010 --► T016
+      │                                    ├--► T006 --► T011 --► T015 --► T016
+      │                                    ├--► T007 --► T012 --► T015
+T003 -┼------------------------------------┤                               T016
+      │                                    ├--► T008
+      │                                    └--► T013 --► T015
+T004 -┘
+      └--► T019
+      └--► T020
 
-T005 + T006 + T007 ──► T017 ──► T018
+T005 + T006 + T007 --► T017 --► T018
 \`\`\`
 
 ---
@@ -4800,7 +4800,7 @@ All source URLs use base: \`https://framerusercontent.com/images/{hash}.{ext}\` 
 
 #### Projects
 
-**Iterra** → \`/public/images/projects/iterra/\`
+**Iterra** -> \`/public/images/projects/iterra/\`
 - \`vvl6xyIdUMskDBgstfyClKSxE8.svg\` (hero)
 - \`i8dim26bhvu5qQR9wg3QosYwH30.jpg\`
 - \`dNN6V4QOZliCydifbZq9mZHgs.jpg\`
@@ -4810,7 +4810,7 @@ All source URLs use base: \`https://framerusercontent.com/images/{hash}.{ext}\` 
 - \`iKQP3E2D7UXucYJbubSRc3A7I.jpg\`
 - \`oWXlEebiIBfCcgSM59CKhTMqlsQ.jpg\`
 
-**BILTFOUR** → \`/public/images/projects/biltfour/\`
+**BILTFOUR** -> \`/public/images/projects/biltfour/\`
 - \`ZwDzuAZjuENRwaTtArVGJQsGc.svg\` (hero)
 - \`sjrpQHo4w4oBUX8dPQaGDaJkNZg.jpg\`
 - \`pYAJf9ADtTSPByh3d3XPiPaIdBw.jpg\`
@@ -4820,7 +4820,7 @@ All source URLs use base: \`https://framerusercontent.com/images/{hash}.{ext}\` 
 - \`rPlUBgrbosziZBcZfJfPe8sIHA.jpg\`
 - \`WUB4oauOJh26lOozw9rKdgUYRk.jpg\`
 
-**NEXT (Google Cloud)** → \`/public/images/projects/google-cloud-next/\`
+**NEXT (Google Cloud)** -> \`/public/images/projects/google-cloud-next/\`
 - \`zwWkHCt1g0HSk5r9elbNigK55dk.svg\` (hero)
 - \`EQmwXTadQPFruJbbhIOlHp8JcbQ.jpg\`
 - \`Zcgxim04ZIbn7CooJkyUahMgtU.jpg\`
@@ -4830,7 +4830,7 @@ All source URLs use base: \`https://framerusercontent.com/images/{hash}.{ext}\` 
 - \`1PeraZj4rwCBVywk3sEvPzcRvYw.jpg\`
 - \`kdIwpWfuzthCYLWztP0haNTzq0.jpg\`
 
-**Infinite Nature (Google Gemini)** → \`/public/images/projects/google-gemini-infinite-nature/\`
+**Infinite Nature (Google Gemini)** -> \`/public/images/projects/google-gemini-infinite-nature/\`
 (Canonical slug is \`google-gemini-infinite-nature\` per Framer CSV — see C3 note below)
 - \`enyu0AxPncALYsOKGqBz5dcGo.svg\` (hero)
 - \`0u9mpn2lZqvhWVHgtmYJo9S2ns.jpg\`
@@ -4841,7 +4841,7 @@ All source URLs use base: \`https://framerusercontent.com/images/{hash}.{ext}\` 
 - \`FhgyvB0QzTK3QC0aY40xLmw4K8.jpg\`
 - \`fEgHnqjSmKjGa0On2DRyNU9HTo.jpg\`
 
-**Universal Audio** → \`/public/images/projects/universal-audio/\`
+**Universal Audio** -> \`/public/images/projects/universal-audio/\`
 - \`Cy7GHb48xSXmwdDJCZ48qHDRFF0.svg\` (hero)
 - \`5rY7sMJWPqahP45iscJTiYEOw.jpg\`
 - \`gTZibYtZgjfGpZ3U3WDAunDmOn4.jpg\`
@@ -4851,7 +4851,7 @@ All source URLs use base: \`https://framerusercontent.com/images/{hash}.{ext}\` 
 - \`CJC7mcxaL9DGEYB4HGificxTbA.jpg\`
 - \`PWbwliRrvDvOr6Iw28xulNrFSc.jpg\`
 
-#### Homepage → \`/public/images/homepage/\`
+#### Homepage -> \`/public/images/homepage/\`
 - \`5tYWjZYwckbQWoi9rQ9mkhAoLG8.png\` (hero)
 - \`CIdLigrNXaT82y2MrGUQ5vZgJ9c.jpg\` (service 1)
 - \`Kl75QrcWL7nXMDWTJy9SnCCpbPQ.jpg\` (service 2)
@@ -4859,7 +4859,7 @@ All source URLs use base: \`https://framerusercontent.com/images/{hash}.{ext}\` 
 - \`p9gXmNi8RoFZnjeP0zGW3fJ2M.jpg\` (service 4)
 - \`nQ5h9VMZNz5knXmzATISCBWqakc.jpg\` (team photo)
 
-#### About → \`/public/images/about/\`
+#### About -> \`/public/images/about/\`
 - \`Sj4TYZrc68BDHPXs5O5D19mVik.jpg\` (main hero, 7008x4672)
 - \`HZHRFcDFfGNqJUjMRtKYNqSezcg.jpg\` (Karim photo)
 - \`Zh4XMHMk3BgiZszy1fcQk5ZGueQ.webp\` (Morgan photo)
@@ -4869,7 +4869,7 @@ All source URLs use base: \`https://framerusercontent.com/images/{hash}.{ext}\` 
 - \`qvzOeu5vdocdhOTq2yANNjMg0.jpg\` (story 4)
 - \`TgXt1wxY2v3DuvYWsEs5UJkYLW8.svg\` (BILTFOUR logo variant)
 
-#### Blog → \`/public/images/blog/\`
+#### Blog -> \`/public/images/blog/\`
 - \`KKSflaBzLhQtCCknGCHsQqbqU2s.jpg\` (EP02 thumbnail)
 - \`dAlZcH0hvoB0zkWQSH2BA5MJRY.jpg\` (EP01 thumbnail)
 - \`c1JC3v6vQ3z0r5tG78dzNkn9iTI.jpg\` (Democratizing thumbnail)
@@ -5209,7 +5209,7 @@ Search these locations for \`ProjectCategory\` or \`.category\` references befor
 
 ### Known Issues to Address
 
-- The \`category\` → \`categories\` rename is a breaking change across data files and components. Audit all usages before committing.
+- The \`category\` -> \`categories\` rename is a breaking change across data files and components. Audit all usages before committing.
 - \`BlogCategory\` values are being completely replaced — any component that hardcodes the old values (\`"Design"\`, \`"AI"\`, etc.) must be updated.
 - \`next-mdx-remote\` latest version as of 2026 should be compatible with Next.js 16. Verify by checking the npm page or README before installing.
 
@@ -5652,16 +5652,16 @@ The filter change from \`p.category === activeFilter\` to \`p.categories.include
 ### Canonical Category Slugs
 
 From \`Categories.csv\`:
-- \`art-direction\` → "Art Direction"
-- \`strategy\` → "Strategy"
-- \`digital-design\` → "Digital Design"
-- \`brand-identity\` → "Brand Identity"
-- \`web-design\` → "Web Design"
+- \`art-direction\` -> "Art Direction"
+- \`strategy\` -> "Strategy"
+- \`digital-design\` -> "Digital Design"
+- \`brand-identity\` -> "Brand Identity"
+- \`web-design\` -> "Web Design"
 
 ### Image Path Convention
 
 Images are downloaded by T001 to \`/public/images/projects/{slug}/\`. The filename convention matches the hash portion of the Framer URL (without query params), e.g.:
-- \`framerusercontent.com/images/vvl6xyIdUMskDBgstfyClKSxE8.svg\` → \`/images/projects/iterra/vvl6xyIdUMskDBgstfyClKSxE8.svg\`
+- \`framerusercontent.com/images/vvl6xyIdUMskDBgstfyClKSxE8.svg\` -> \`/images/projects/iterra/vvl6xyIdUMskDBgstfyClKSxE8.svg\`
 
 ---
 
@@ -5883,7 +5883,7 @@ Complete ALL criteria before marking task done:
 - [ ] BILTFOUR, NEXT, and Universal Audio projects have \`results[]\` with metrics
 - [ ] Infinite Nature project has no \`testimonials\` and no \`results\` fields (omit or set to undefined)
 - [ ] All image paths reference \`/images/projects/{slug}/\` (not \`framerusercontent.com\`)
-- [ ] A redirect rule from \`/projects/gemini-infinite-nature\` → \`/projects/google-gemini-infinite-nature\` is present in \`next.config.ts\`
+- [ ] A redirect rule from \`/projects/gemini-infinite-nature\` -> \`/projects/google-gemini-infinite-nature\` is present in \`next.config.ts\`
 - [ ] \`npm run build\` passes with TypeScript strict mode (no \`any\`, no type errors)
 - [ ] \`npm run lint\` passes with no errors
 
@@ -6386,7 +6386,7 @@ Thumbnails are downloaded by T001. Local paths (using the Framer hash filenames)
 }
 \`\`\`
 
-Apply this pattern to all 4 blog post records in \`blog.ts\`. The empty \`content\` field means existing blog detail pages render no visible body — that is acceptable during the Wave 2 → Wave 3 transition.
+Apply this pattern to all 4 blog post records in \`blog.ts\`. The empty \`content\` field means existing blog detail pages render no visible body — that is acceptable during the Wave 2 -> Wave 3 transition.
 
 **Note on BlogCategory values:** \`src/app/blog/[slug]/page.tsx\` line 53 uses \`p.category === post.category\` to find related posts. After T002 replaces the old \`BlogCategory\` values (\`"Design"\`, \`"AI"\`, \`"Process"\`, \`"Insights"\`) with new ones, this filter will produce empty related-posts arrays for posts that still use old category strings. Ensure all 4 blog.ts records use the new T002 \`BlogCategory\` values (\`"Creative Philosophy"\`, \`"About Us"\`, \`"Digital Design"\`) — which this brief already does. This is not a crash but a note for awareness.
 
@@ -6420,13 +6420,13 @@ No frontmatter (\`---\`) required unless the MDX renderer in T011 expects it. Ke
 ### HTML to Markdown Conversion Rules
 
 The Framer Blog.csv HTML content uses:
-- \`<p>\` → plain paragraph (remove tags)
-- \`<h2>\`, \`<h4>\`, \`<h5>\` → \`##\`, \`####\`, \`#####\`
-- \`<strong>\` → \`**text**\`
-- \`<ul>\` / \`<li>\` → \`- item\`
-- \`<a href="...">text</a>\` → \`[text](url)\`
+- \`<p>\` -> plain paragraph (remove tags)
+- \`<h2>\`, \`<h4>\`, \`<h5>\` -> \`##\`, \`####\`, \`#####\`
+- \`<strong>\` -> \`**text**\`
+- \`<ul>\` / \`<li>\` -> \`- item\`
+- \`<a href="...">text</a>\` -> \`[text](url)\`
 - Strip \`data-preset-tag=""\` attributes
-- Strip \`&amp;\` → \`&\`, \`&lt;\` → \`<\`, \`&gt;\` → \`>\`
+- Strip \`&amp;\` -> \`&\`, \`&lt;\` -> \`<\`, \`&gt;\` -> \`>\`
 
 The MDX content provided in this brief has already been converted. Use it as-is — do not re-parse the CSV HTML.
 
@@ -6657,7 +6657,7 @@ Complete ALL criteria before marking task done:
 
 ### File Ownership Notes
 
-\`project-detail.tsx\` is the only existing component touched here. The new sub-components are net-new files. T009 also touches \`project-detail.tsx\` to change \`{project.category}\` → joined category labels. **T010 should run after T009 completes** to avoid merge conflicts on this file. T009 owns the category rendering change; T010 owns the full layout enhancement. If T009 has already made the category change, T010 should incorporate it (not overwrite it).
+\`project-detail.tsx\` is the only existing component touched here. The new sub-components are net-new files. T009 also touches \`project-detail.tsx\` to change \`{project.category}\` -> joined category labels. **T010 should run after T009 completes** to avoid merge conflicts on this file. T009 owns the category rendering change; T010 owns the full layout enhancement. If T009 has already made the category change, T010 should incorporate it (not overwrite it).
 
 ---
 
@@ -6711,7 +6711,7 @@ Images in \`project.images\` have an optional \`section\` field:
 - \`context: 'gallery'\`, \`section: 'impact'\` — images for the Impact section
 - \`context: 'mockup'\` — may or may not have a section
 
-When rendering \`ProjectSection\`, filter images: \`images.filter(img => img.section === sectionKey)\` where \`sectionKey\` is derived from the section heading (e.g., "The Challenge" → "challenge").
+When rendering \`ProjectSection\`, filter images: \`images.filter(img => img.section === sectionKey)\` where \`sectionKey\` is derived from the section heading (e.g., "The Challenge" -> "challenge").
 
 ### Hero Image
 
@@ -7538,7 +7538,7 @@ All are in \`/public/images/about/\` after T001 runs. **Verify these files exist
 
 | Description | Filename (from framerusercontent hash) | Local path |
 |-------------|---------------------------------------|-----------|
-| About page hero | \`Sj4TYZrc68BDHPXs5O5D19mVik.jpg\` (7008×4672) | \`/public/images/about/Sj4TYZrc68BDHPXs5O5D19mVik.jpg\` |
+| About page hero | \`Sj4TYZrc68BDHPXs5O5D19mVik.jpg\` (7008x4672) | \`/public/images/about/Sj4TYZrc68BDHPXs5O5D19mVik.jpg\` |
 | Karim photo | \`HZHRFcDFfGNqJUjMRtKYNqSezcg.jpg\` | \`/public/images/about/HZHRFcDFfGNqJUjMRtKYNqSezcg.jpg\` |
 | Morgan photo | \`Zh4XMHMk3BgiZszy1fcQk5ZGueQ.webp\` | \`/public/images/about/Zh4XMHMk3BgiZszy1fcQk5ZGueQ.webp\` |
 | Story image 1 | \`TqpOzHSCxAEs7wnhiAD4SGGci4c.jpg\` | \`/public/images/about/TqpOzHSCxAEs7wnhiAD4SGGci4c.jpg\` |
@@ -7617,7 +7617,7 @@ The current \`AboutHero\` renders only text. Add the hero image below the text b
 </motion.div>
 \`\`\`
 
-The hero image is 7008×4672 (very large). Use \`quality={85}\` to reduce file size. Next.js Image optimization handles downscaling automatically — do NOT manually resize the source image.
+The hero image is 7008x4672 (very large). Use \`quality={85}\` to reduce file size. Next.js Image optimization handles downscaling automatically — do NOT manually resize the source image.
 
 Import \`Image\` from \`"next/image"\` at the top of \`about-hero.tsx\`.
 
@@ -7628,8 +7628,8 @@ The \`about-hero.tsx\` component is currently a client component (\`"use client"
 The \`TeamShowcase\` component reads from \`showcase\` data in \`src/data/team.ts\`. After updating \`team.ts\`, the new image paths flow automatically into \`HoverMaskReveal\`.
 
 **Check \`HoverMaskReveal\`:** Look at \`src/components/shared/hover-mask-reveal.tsx\`. If it:
-- Uses \`next/image\` internally → no changes needed to \`team-showcase.tsx\`
-- Uses raw \`<img>\` tag → it will work with local paths, but consider adding \`loading="lazy"\` if not present
+- Uses \`next/image\` internally -> no changes needed to \`team-showcase.tsx\`
+- Uses raw \`<img>\` tag -> it will work with local paths, but consider adding \`loading="lazy"\` if not present
 
 If \`HoverMaskReveal\` has a fixed size constraint that would crop the portrait photos poorly, consider adjusting the \`className\` passed from \`TeamShowcase\`:
 - Current: \`className="aspect-[3/4] w-full"\` — this is a 3:4 portrait ratio, which is correct for headshots.
@@ -7693,12 +7693,12 @@ Complete ALL criteria before marking task done:
 ### Check HoverMaskReveal first
 
 Before writing any code, read \`src/components/shared/hover-mask-reveal.tsx\`. If it:
-- Uses \`next/image\` with \`src={src}\` prop → team.ts path update is sufficient, no component changes needed
-- Uses \`<img src={src} />\` → local paths work fine; add \`loading="lazy"\` if missing
+- Uses \`next/image\` with \`src={src}\` prop -> team.ts path update is sufficient, no component changes needed
+- Uses \`<img src={src} />\` -> local paths work fine; add \`loading="lazy"\` if missing
 
 ### next/image for large images
 
-The about hero is 7008×4672 pixels. Use these settings:
+The about hero is 7008x4672 pixels. Use these settings:
 \`\`\`tsx
 <Image
   src="/images/about/Sj4TYZrc68BDHPXs5O5D19mVik.jpg"
@@ -7711,9 +7711,9 @@ The about hero is 7008×4672 pixels. Use these settings:
 />
 \`\`\`
 
-- \`fill\` + \`sizes="100vw"\` → Next.js generates optimized srcset
-- \`quality={85}\` → reduces output file size from the large original
-- \`priority\` → this is a visible on-page image, load it eagerly
+- \`fill\` + \`sizes="100vw"\` -> Next.js generates optimized srcset
+- \`quality={85}\` -> reduces output file size from the large original
+- \`priority\` -> this is a visible on-page image, load it eagerly
 
 ### Aspect ratio container for hero
 
@@ -7876,10 +7876,10 @@ _PRD: framer-cms-migration | Task: T020 | Wave: 3_`,
   },
 };
 
-// ─── Chat Script ──────────────────────────────────────────
+// --- Chat Script ------------------------------------------
 
 export const CHAT_SCRIPT: ChatMessage[] = [
-  // ── /karimo:research ───────────────────────────────
+  // -- /karimo:research -------------------------------
   {
     role: "system",
     content: "/karimo:research framer-cms-migration",
@@ -7908,7 +7908,7 @@ export const CHAT_SCRIPT: ChatMessage[] = [
     timestamp: 7000,
   },
 
-  // ── /karimo:plan (Interview & Planning) ────────────
+  // -- /karimo:plan (Interview & Planning) ------------
   {
     role: "system",
     content: "/karimo:plan framer-cms-migration",
@@ -7945,7 +7945,7 @@ export const CHAT_SCRIPT: ChatMessage[] = [
     timestamp: 13500,
   },
 
-  // ── /karimo:run (Review + Execution) ───────────────
+  // -- /karimo:run (Review + Execution) ---------------
   {
     role: "system",
     content: "/karimo:run framer-cms-migration",
@@ -8017,7 +8017,7 @@ export const CHAT_SCRIPT: ChatMessage[] = [
     timestamp: 31500,
   },
 
-  // ── /karimo:merge ──────────────────────────────────
+  // -- /karimo:merge ----------------------------------
   {
     role: "system",
     content: "/karimo:merge framer-cms-migration",
@@ -8043,13 +8043,13 @@ export const CHAT_SCRIPT: ChatMessage[] = [
   },
 ];
 
-// ─── Timeline Events ──────────────────────────────────────
+// --- Timeline Events --------------------------------------
 
 // Path prefix for tree-reveal events
 const P = "OS-Portfolio/.karimo/prds/001_framer-cms-migration";
 
 export const TIMELINE_EVENTS: TimelineEvent[] = [
-  // ── Research (/karimo:research) ────────────────────
+  // -- Research (/karimo:research) --------------------
   { time: 0, type: "chat", payload: "0" },
   // Expand the folder tree to the PRD
   { time: 300, type: "tree-reveal", payload: "OS-Portfolio/.karimo" },
@@ -8070,7 +8070,7 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
   { time: 6500, type: "editor-content", payload: "research-summary" },
   { time: 7000, type: "chat", payload: "4" },
 
-  // ── Plan (/karimo:plan — interview + PRD) ──────────
+  // -- Plan (/karimo:plan — interview + PRD) ----------
   { time: 8000, type: "chat", payload: "5" },
   { time: 8500, type: "chat", payload: "6" },
   { time: 9500, type: "chat", payload: "7" },
@@ -8084,7 +8084,7 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
   { time: 13200, type: "editor-content", payload: "tasks" },
   { time: 13500, type: "chat", payload: "10" },
 
-  // ── Run (/karimo:run — review then execution) ──────
+  // -- Run (/karimo:run — review then execution) ------
   { time: 14000, type: "chat", payload: "11" },
   { time: 14500, type: "tab-open", payload: "briefs-overview" },
   { time: 14500, type: "editor-content", payload: "briefs-overview" },
@@ -8118,7 +8118,7 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
   { time: 30000, type: "editor-content", payload: "findings" },
   { time: 31500, type: "chat", payload: "22" },
 
-  // ── Merge (/karimo:merge) ───────────────────────────
+  // -- Merge (/karimo:merge) ---------------------------
   { time: 32000, type: "chat", payload: "23" },
   { time: 33000, type: "chat", payload: "24" },
   { time: 33500, type: "tab-open", payload: "metrics" },
@@ -8131,7 +8131,7 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
 
 export const TIMELINE_DURATION = 40000;
 
-// ─── Helpers ──────────────────────────────────────────────
+// --- Helpers ----------------------------------------------
 
 export function getFileExtension(filename: string): string {
   return filename.split(".").pop() ?? "";
