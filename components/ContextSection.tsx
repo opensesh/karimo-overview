@@ -119,9 +119,9 @@ const chartPoints: ChartPoint[] = [
     id: "mythos",
     label: "KARIMO",
     modelLabel: "Mythos",
-    position: { x: 8, y: 9 },
-    durationRange: [8, 8],
-    shape: "dot",
+    position: { x: 7, y: 9 },
+    durationRange: [5, 9],
+    shape: "triangle",
     disabled: true,
     dotColor: "#ff7a38",
     gradientId: "grad-mythos",
@@ -781,15 +781,21 @@ function ComplexityDurationChart() {
               const baseY = CHART_AREA.y1;
               const isActive = point.id === activeId;
 
+              const activeOpacity = point.disabled ? 0.3 : 1;
+              const inactiveOpacity = point.disabled ? 0.15 : 0.4;
+
               return (
                 <motion.polygon
                   key={`tri-${point.id}`}
                   points={`${dotX},${dotY} ${leftX},${baseY} ${rightX},${baseY}`}
-                  fill={`url(#${point.gradientId})`}
-                  opacity={isActive ? 1 : 0.4}
+                  fill={point.disabled ? "none" : `url(#${point.gradientId})`}
+                  stroke={point.disabled ? point.dotColor : "none"}
+                  strokeWidth={point.disabled ? "1" : "0"}
+                  strokeDasharray={point.disabled ? "4 3" : "none"}
+                  opacity={isActive ? activeOpacity : inactiveOpacity}
                   style={{ transition: "opacity 0.3s" }}
                   initial={{ opacity: 0 }}
-                  whileInView={{ opacity: isActive ? 1 : 0.4 }}
+                  whileInView={{ opacity: isActive ? activeOpacity : inactiveOpacity }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: 0.3 + i * 0.3, ease: springEase }}
                 />
@@ -891,7 +897,7 @@ function ChartDetailPanel({ point }: { point: ChartPoint }) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -8 }}
       transition={{ duration: 0.3, ease: springEase }}
-      className="rounded-lg border border-border-secondary bg-bg-secondary p-5 h-full flex flex-col"
+      className="rounded-lg border border-border-secondary bg-bg-secondary p-5 h-full flex flex-col justify-center"
     >
       <span className="text-accent text-[10px] text-fg-tertiary uppercase tracking-wider">
         {detail.subtitle}
@@ -899,7 +905,7 @@ function ChartDetailPanel({ point }: { point: ChartPoint }) {
       <h4 className="text-display text-lg text-fg-primary mt-1">
         {detail.title}
       </h4>
-      <p className="text-body text-sm text-fg-secondary mt-3 leading-relaxed flex-1">
+      <p className="text-body text-sm text-fg-secondary mt-3 leading-relaxed">
         {detail.description}
       </p>
 
