@@ -36,13 +36,27 @@ export default async function Home() {
         <Navigation />
         <SideNav />
         <main className="min-h-screen">
-          <HeroSection version={version} />
-          <OverviewSection />
-          <LiveExampleSection />
-          <EncodingSection />
-          <ContextSection />
-          <AdoptionSection />
-          <CTASection />
+          <div className="relative" style={{ zIndex: 1 }}>
+            <HeroSection version={version} />
+          </div>
+          <div className="relative section-layer" style={{ zIndex: 2 }}>
+            <OverviewSection />
+          </div>
+          <div className="relative section-layer" style={{ zIndex: 3 }}>
+            <LiveExampleSection />
+          </div>
+          <div className="relative section-layer" style={{ zIndex: 4 }}>
+            <EncodingSection />
+          </div>
+          <div className="relative section-layer" style={{ zIndex: 5 }}>
+            <ContextSection />
+          </div>
+          <div className="relative section-layer" style={{ zIndex: 6 }}>
+            <AdoptionSection />
+          </div>
+          <div className="relative section-layer" style={{ zIndex: 7 }}>
+            <CTASection />
+          </div>
         </main>
 
         <Footer />

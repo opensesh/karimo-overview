@@ -292,21 +292,21 @@ body::-webkit-scrollbar {
    ============================================================================= */
 
 .section-padding {
-  padding-top: var(--section-padding-y);
-  padding-bottom: var(--section-padding-y);
+  padding-top: 8rem;
+  padding-bottom: 8rem;
 }
 
 @media (min-width: 768px) {
   .section-padding {
-    padding-top: 9rem;
-    padding-bottom: 9rem;
+    padding-top: 10rem;
+    padding-bottom: 10rem;
   }
 }
 
 @media (min-width: 1024px) {
   .section-padding {
-    padding-top: 11rem;
-    padding-bottom: 11rem;
+    padding-top: 12rem;
+    padding-bottom: 12rem;
   }
 }
 
@@ -386,6 +386,44 @@ body::-webkit-scrollbar {
 .prose pre code {
   background: transparent;
   padding: 0;
+}
+
+/* =============================================================================
+   Section Layer Stacking — paper-on-paper depth effect
+   Each section sits "on top" of the previous one with a subtle edge shadow.
+   ============================================================================= */
+
+.section-layer {
+  position: relative;
+}
+
+.section-layer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 250, 238, 0.05);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.section-layer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.15) 30%,
+    transparent 100%
+  );
+  z-index: 1;
+  pointer-events: none;
 }
 
 /* =============================================================================

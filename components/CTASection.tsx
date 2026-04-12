@@ -98,7 +98,7 @@ export function CTASection() {
   const scrambleDisplay = useTextScrambleCycle(ROTATING_WORDS);
 
   return (
-    <section ref={sectionRef} id="quickstart" className="min-h-screen flex items-center bg-bg-primary overflow-hidden">
+    <section ref={sectionRef} id="quickstart" className="min-h-screen flex items-center bg-bg-secondary overflow-hidden">
       <motion.div style={{ y }} className="w-full">
       <div className="max-w-5xl mx-auto px-6 w-full py-16">
         {/* Eyebrow */}
