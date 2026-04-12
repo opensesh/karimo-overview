@@ -1170,14 +1170,15 @@ function ContextMultiplicationViz() {
           isOpen={!!openModal}
           onClose={() => setOpenModal(null)}
           title={modalData.title}
-          maxWidth="max-w-4xl"
+          maxWidth="max-w-5xl"
+          allowFullscreen
         >
           <p className="text-body text-sm text-fg-secondary mb-4">
             {modalData.description}
           </p>
           <div
-            className="rounded-xl overflow-hidden border border-border-secondary grid grid-cols-1 md:grid-cols-[220px_1fr]"
-            style={{ height: "400px" }}
+            className="rounded-xl overflow-hidden border border-border-secondary grid grid-cols-1 md:grid-cols-[220px_1fr] flex-1"
+            style={{ minHeight: "500px", height: "clamp(500px, 60vh, 700px)" }}
           >
             <div className="overflow-hidden md:border-r md:border-border-secondary h-full max-h-[160px] md:max-h-none">
               <FileTree
