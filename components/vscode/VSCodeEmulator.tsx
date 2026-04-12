@@ -1,12 +1,14 @@
 "use client";
 
 import { VSCODE, FileNode, ChatMessage } from "@/lib/vscode-data";
+import { usePanelResize } from "@/hooks/usePanelResize";
 import { TitleBar } from "./TitleBar";
 import { ActivityBar } from "./ActivityBar";
 import { FileTree } from "./FileTree";
 import { EditorPanel } from "./EditorPanel";
 import { ChatPanel } from "./ChatPanel";
 import { StatusBar } from "./StatusBar";
+import { DragHandle } from "./DragHandle";
 import { getFileName } from "./EditorPanel";
 
 export type MobilePanel = "files" | "editor" | "chat";
@@ -82,33 +84,67 @@ function DesktopLayout({
   onTabClose,
 }: Omit<VSCodeEmulatorProps, "mobilePanel" | "onMobilePanelChange">) {
   const activeFileName = activeFile ? getFileName(activeFile) : null;
+  const {
+    explorerWidth,
+    chatWidth,
+    isDragging,
+    onExplorerDragStart,
+    onChatDragStart,
+    onDoubleClickExplorer,
+    onDoubleClickChat,
+    containerRef,
+  } = usePanelResize();
 
   return (
     <div
+      ref={containerRef}
       className="grid overflow-hidden rounded-xl shadow-2xl h-full"
       style={{
-        gridTemplateColumns: "48px 240px 1fr 320px",
+        gridTemplateColumns: "1fr",
         gridTemplateRows: "36px 1fr 24px",
         border: `1px solid ${VSCODE.border}`,
         background: VSCODE.bg,
       }}
     >
       <TitleBar />
-      <ActivityBar />
-      <FileTree
-        tree={tree}
-        activeFile={activeFile}
-        onFileSelect={onFileSelect}
-        revealedPaths={revealedPaths}
-        activeChapter={activeChapter}
-      />
-      <EditorPanel
-        activeFile={activeFile}
-        openTabs={openTabs}
-        onTabSelect={onTabSelect}
-        onTabClose={onTabClose}
-      />
-      <ChatPanel messages={visibleMessages} currentTime={currentTime} />
+      <div className="flex overflow-hidden min-w-0">
+        <ActivityBar />
+        <FileTree
+          tree={tree}
+          activeFile={activeFile}
+          onFileSelect={onFileSelect}
+          revealedPaths={revealedPaths}
+          activeChapter={activeChapter}
+          panelWidth={explorerWidth}
+          fillHeight
+        />
+        <DragHandle
+          onPointerDown={onExplorerDragStart}
+          onDoubleClick={onDoubleClickExplorer}
+          isDragging={isDragging}
+        />
+        <EditorPanel
+          activeFile={activeFile}
+          openTabs={openTabs}
+          onTabSelect={onTabSelect}
+          onTabClose={onTabClose}
+          fillHeight
+          flexGrow
+          isDragging={isDragging}
+        />
+        <DragHandle
+          onPointerDown={onChatDragStart}
+          onDoubleClick={onDoubleClickChat}
+          isDragging={isDragging}
+        />
+        <ChatPanel
+          messages={visibleMessages}
+          currentTime={currentTime}
+          panelWidth={chatWidth}
+          isDragging={isDragging}
+          fillHeight
+        />
+      </div>
       <StatusBar activeFile={activeFile} activeFileName={activeFileName} />
     </div>
   );

@@ -28,8 +28,8 @@ function ActivityIcon({
 export function ActivityBar() {
   return (
     <div
-      className="row-start-2 flex flex-col items-center pt-1"
-      style={{ background: VSCODE.activityBarBg }}
+      className="flex flex-col items-center pt-1 shrink-0"
+      style={{ background: VSCODE.activityBarBg, width: 48 }}
     >
       {/* Files (active) */}
       <ActivityIcon active>
