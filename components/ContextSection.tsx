@@ -687,12 +687,7 @@ function ComplexityDurationChart() {
           >
       <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px] gap-6 items-center px-6 pb-6 md:px-8 md:pb-8">
         {/* SVG Chart */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.6, ease: springEase }}
-        >
+        <div>
           <svg
             viewBox={`0 0 ${CHART.w} ${CHART.h}`}
             className="w-full h-auto"
@@ -792,10 +787,8 @@ function ComplexityDurationChart() {
               stroke="#ff7a38"
               strokeWidth="1"
               strokeDasharray="4 4"
-              opacity="0.3"
-              initial={{ pathLength: 0, opacity: 0 }}
-              whileInView={{ pathLength: 1, opacity: 0.3 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.3 }}
               transition={{ duration: 0.8, delay: 0.8, ease: springEase }}
             />
 
@@ -815,11 +808,8 @@ function ComplexityDurationChart() {
                 /* Disabled: two dashed side lines only (no bottom edge) */
                 <motion.g
                   key={`tri-${point.id}`}
-                  opacity={isActive ? activeOpacity : inactiveOpacity}
-                  style={{ transition: "opacity 0.3s" }}
                   initial={{ opacity: 0 }}
-                  whileInView={{ opacity: isActive ? activeOpacity : inactiveOpacity }}
-                  viewport={{ once: true }}
+                  animate={{ opacity: isActive ? activeOpacity : inactiveOpacity }}
                   transition={{ duration: 0.6, delay: 0.3 + i * 0.3, ease: springEase }}
                 >
                   <line x1={dotX} y1={dotY} x2={leftX} y2={baseY}
@@ -832,11 +822,8 @@ function ComplexityDurationChart() {
                   key={`tri-${point.id}`}
                   points={`${dotX},${dotY} ${leftX},${baseY} ${rightX},${baseY}`}
                   fill={`url(#${point.gradientId})`}
-                  opacity={isActive ? activeOpacity : inactiveOpacity}
-                  style={{ transition: "opacity 0.3s" }}
                   initial={{ opacity: 0 }}
-                  whileInView={{ opacity: isActive ? activeOpacity : inactiveOpacity }}
-                  viewport={{ once: true }}
+                  animate={{ opacity: isActive ? activeOpacity : inactiveOpacity }}
                   transition={{ duration: 0.6, delay: 0.3 + i * 0.3, ease: springEase }}
                 />
               );
@@ -853,8 +840,7 @@ function ComplexityDurationChart() {
                 <motion.g
                   key={point.id}
                   initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
+                  animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay, ease: springEase }}
                   style={{ cursor: "pointer" }}
                   onClick={() => setActiveId(point.id)}
@@ -916,7 +902,7 @@ function ComplexityDurationChart() {
               );
             })}
           </svg>
-        </motion.div>
+        </div>
 
         {/* Detail panel — fixed height for consistency */}
         <div className="h-[280px] md:h-[260px]">
