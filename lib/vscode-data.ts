@@ -261,10 +261,25 @@ export const FILE_TREE: FileNode = {
 
 // --- File Contents (carbon copies from real PRD) ------------
 
+// --- Browser Preview Data ---------------------------------
+
+export const BROWSER_PREVIEWS: Record<string, { url: string; imageSrc: string }> = {
+  "browser-before": {
+    url: "https://opensession.co/projects/biltfour",
+    imageSrc: "/screenshots/framer-before.png",
+  },
+  "browser-after": {
+    url: "http://localhost:3000/projects/biltfour",
+    imageSrc: "/screenshots/framer-after.png",
+  },
+};
+
 export const FILE_CONTENTS: Record<
   string,
   { content: string; language: string }
 > = {
+  "browser-before": { language: "browser", content: "" },
+  "browser-after": { language: "browser", content: "" },
   "prd": {
     language: "markdown",
     content: `# PRD: Framer CMS Migration
@@ -7883,163 +7898,163 @@ export const CHAT_SCRIPT: ChatMessage[] = [
   {
     role: "system",
     content: "/karimo:research framer-cms-migration",
-    timestamp: 0,
+    timestamp: 4000,
   },
   {
     role: "assistant",
     content:
       "Starting research phase. Scanning codebase for structure, patterns, and conventions...",
-    timestamp: 1500,
+    timestamp: 5500,
   },
   {
     role: "tool",
     content: "Scanned 847 files \u00b7 Next.js 16+ \u00b7 React 19 \u00b7 TypeScript \u00b7 Tailwind 4",
-    timestamp: 3500,
+    timestamp: 7500,
   },
   {
     role: "assistant",
     content:
       "Internal scan complete. Found 16 data files, 47 components, 20+ motion variants. Scanning external sources...",
-    timestamp: 5000,
+    timestamp: 9000,
   },
   {
     role: "tool",
     content: "Research complete \u00b7 75 image URLs cataloged \u00b7 4 content types \u00b7 7 schema gaps \u00b7 5 evidence files written",
-    timestamp: 7000,
+    timestamp: 11000,
   },
 
   // -- /karimo:plan (Interview & Planning) ------------
   {
     role: "system",
     content: "/karimo:plan framer-cms-migration",
-    timestamp: 8000,
+    timestamp: 12000,
   },
   {
     role: "assistant",
     content:
       "Starting PRD interview. What content are we migrating from Framer?",
-    timestamp: 8500,
+    timestamp: 12500,
   },
   {
     role: "assistant",
     content:
       "Understood. Scope: 5 projects, 4 blog posts, 5 free resources, 2 legal pages, ~75 images. Generating PRD...",
-    timestamp: 9500,
+    timestamp: 13500,
   },
   {
     role: "tool",
     content:
       "PRD_framer-cms-migration.md written \u00b7 20 tasks defined \u00b7 4 waves \u00b7 89 complexity points",
-    timestamp: 11500,
+    timestamp: 15500,
   },
   {
     role: "assistant",
     content:
       "Generating task briefs and execution plan. Wave 1: Foundation. Wave 2: Content Migration. Wave 3: Components. Wave 4: Integration.",
-    timestamp: 12500,
+    timestamp: 16500,
   },
   {
     role: "tool",
     content:
       "Generated: tasks.yaml \u00b7 execution_plan.yaml \u00b7 20 task briefs \u00b7 briefs.overview.md",
-    timestamp: 13500,
+    timestamp: 17500,
   },
 
   // -- /karimo:run (Review + Execution) ---------------
   {
     role: "system",
     content: "/karimo:run framer-cms-migration",
-    timestamp: 14000,
+    timestamp: 18000,
   },
   {
     role: "assistant",
     content:
       "Pre-execution review. Validating all 20 task briefs against codebase reality...",
-    timestamp: 15000,
+    timestamp: 19000,
   },
   {
     role: "tool",
     content:
       "Review complete \u00b7 8 critical issues \u00b7 7 warnings found across 20 briefs \u00b7 Auto-correcting...",
-    timestamp: 16500,
+    timestamp: 20500,
   },
   {
     role: "assistant",
     content: "8/8 critical issues auto-corrected. All briefs validated. Starting execution \u2014 4 waves, 20 tasks.",
-    timestamp: 17500,
+    timestamp: 21500,
   },
   {
     role: "assistant",
     content:
       "Spawning Wave 1 \u2014 Foundation: 4 parallel worktrees. T001 downloading 75 images, T002 enriching TypeScript schemas...",
-    timestamp: 19500,
+    timestamp: 23500,
   },
   {
     role: "tool",
     content:
       "Wave 1 complete \u00b7 4/4 tasks \u00b7 35 min \u00b7 75 images downloaded \u00b7 PR merged",
-    timestamp: 22000,
+    timestamp: 26000,
   },
   {
     role: "assistant",
     content:
       "Wave 2 \u2014 Content Migration: Populating 5 projects, converting 4 blog posts to MDX, migrating free resources...",
-    timestamp: 23000,
+    timestamp: 27000,
   },
   {
     role: "tool",
     content:
       "Wave 2 complete \u00b7 5/5 tasks \u00b7 55 min \u00b7 Slug redirect added for google-gemini-infinite-nature",
-    timestamp: 25500,
+    timestamp: 29500,
   },
   {
     role: "assistant",
     content:
       "Wave 3 \u2014 Component Updates: Category system, project detail page, blog MDX renderer, homepage/about images...",
-    timestamp: 26500,
+    timestamp: 30500,
   },
   {
     role: "tool",
     content:
       "Wave 3 complete \u00b7 7/7 tasks \u00b7 60 min \u00b7 All components rendering enriched data",
-    timestamp: 28500,
+    timestamp: 32500,
   },
   {
     role: "assistant",
     content:
       "Wave 4 \u2014 Integration & Polish: Lab page, SEO metadata, content validation, template stripping...",
-    timestamp: 29500,
+    timestamp: 33500,
   },
   {
     role: "tool",
     content:
       "Wave 4 complete \u00b7 4/4 tasks \u00b7 30 min \u00b7 All 20 tasks done \u00b7 0 failures \u00b7 0 escalations",
-    timestamp: 31500,
+    timestamp: 35500,
   },
 
   // -- /karimo:merge ----------------------------------
   {
     role: "system",
     content: "/karimo:merge framer-cms-migration",
-    timestamp: 32000,
+    timestamp: 36000,
   },
   {
     role: "assistant",
     content:
       "Feature branch feat/framer-cms-migration ready. Running Greptile-powered code review...",
-    timestamp: 33000,
+    timestamp: 37000,
   },
   {
     role: "tool",
     content:
       "Review passed \u00b7 39 files changed \u00b7 0 P1 issues \u00b7 2 P3 suggestions \u00b7 Score: 9.2/10",
-    timestamp: 35000,
+    timestamp: 39000,
   },
   {
     role: "assistant",
     content:
       "Merge complete. 20/20 tasks, 89 complexity points, 180 minutes. PRD execution finished.",
-    timestamp: 36000,
+    timestamp: 40000,
   },
 ];
 
@@ -8049,87 +8064,96 @@ export const CHAT_SCRIPT: ChatMessage[] = [
 const P = "OS-Portfolio/.karimo/prds/001_framer-cms-migration";
 
 export const TIMELINE_EVENTS: TimelineEvent[] = [
+  // -- Before (browser preview) --------------------
+  { time: 0, type: "tab-open", payload: "browser-before" },
+  { time: 0, type: "editor-content", payload: "browser-before" },
+
   // -- Research (/karimo:research) --------------------
-  { time: 0, type: "chat", payload: "0" },
+  { time: 4000, type: "chat", payload: "0" },
   // Expand the folder tree to the PRD
-  { time: 300, type: "tree-reveal", payload: "OS-Portfolio/.karimo" },
-  { time: 600, type: "tree-reveal", payload: "OS-Portfolio/.karimo/prds" },
-  { time: 900, type: "tree-reveal", payload: P },
-  { time: 1500, type: "chat", payload: "1" },
+  { time: 4300, type: "tree-reveal", payload: "OS-Portfolio/.karimo" },
+  { time: 4600, type: "tree-reveal", payload: "OS-Portfolio/.karimo/prds" },
+  { time: 4900, type: "tree-reveal", payload: P },
+  { time: 5500, type: "chat", payload: "1" },
   // Research folder appears with subfolders
-  { time: 2500, type: "tree-reveal", payload: `${P}/research` },
-  { time: 3000, type: "tree-reveal", payload: `${P}/research/internal` },
-  { time: 3500, type: "chat", payload: "2" },
-  { time: 4000, type: "tree-reveal", payload: `${P}/research/external` },
-  { time: 4500, type: "tab-open", payload: "internal-structure" },
-  { time: 4500, type: "editor-content", payload: "internal-structure" },
-  { time: 5000, type: "chat", payload: "3" },
-  { time: 5500, type: "tab-open", payload: "research-findings" },
-  { time: 5500, type: "editor-content", payload: "research-findings" },
-  { time: 6500, type: "tab-open", payload: "research-summary" },
-  { time: 6500, type: "editor-content", payload: "research-summary" },
-  { time: 7000, type: "chat", payload: "4" },
+  { time: 6500, type: "tree-reveal", payload: `${P}/research` },
+  { time: 7000, type: "tree-reveal", payload: `${P}/research/internal` },
+  { time: 7500, type: "chat", payload: "2" },
+  { time: 8000, type: "tree-reveal", payload: `${P}/research/external` },
+  { time: 8500, type: "tab-open", payload: "internal-structure" },
+  { time: 8500, type: "editor-content", payload: "internal-structure" },
+  { time: 9000, type: "chat", payload: "3" },
+  { time: 9500, type: "tab-open", payload: "research-findings" },
+  { time: 9500, type: "editor-content", payload: "research-findings" },
+  { time: 10500, type: "tab-open", payload: "research-summary" },
+  { time: 10500, type: "editor-content", payload: "research-summary" },
+  { time: 11000, type: "chat", payload: "4" },
 
   // -- Plan (/karimo:plan — interview + PRD) ----------
-  { time: 8000, type: "chat", payload: "5" },
-  { time: 8500, type: "chat", payload: "6" },
-  { time: 9500, type: "chat", payload: "7" },
-  { time: 10000, type: "tab-open", payload: "prd" },
-  { time: 10000, type: "editor-content", payload: "prd" },
-  { time: 11500, type: "chat", payload: "8" },
-  { time: 12500, type: "chat", payload: "9" },
+  { time: 12000, type: "chat", payload: "5" },
+  { time: 12500, type: "chat", payload: "6" },
+  { time: 13500, type: "chat", payload: "7" },
+  { time: 14000, type: "tab-open", payload: "prd" },
+  { time: 14000, type: "editor-content", payload: "prd" },
+  { time: 15500, type: "chat", payload: "8" },
+  { time: 16500, type: "chat", payload: "9" },
   // Briefs folder appears with all 20 briefs
-  { time: 13000, type: "tree-reveal", payload: `${P}/briefs` },
-  { time: 13200, type: "tab-open", payload: "tasks" },
-  { time: 13200, type: "editor-content", payload: "tasks" },
-  { time: 13500, type: "chat", payload: "10" },
+  { time: 17000, type: "tree-reveal", payload: `${P}/briefs` },
+  { time: 17200, type: "tab-open", payload: "tasks" },
+  { time: 17200, type: "editor-content", payload: "tasks" },
+  { time: 17500, type: "chat", payload: "10" },
 
   // -- Run (/karimo:run — review then execution) ------
-  { time: 14000, type: "chat", payload: "11" },
-  { time: 14500, type: "tab-open", payload: "briefs-overview" },
-  { time: 14500, type: "editor-content", payload: "briefs-overview" },
-  { time: 15000, type: "chat", payload: "12" },
-  { time: 16000, type: "tab-open", payload: "recommendations" },
-  { time: 16000, type: "editor-content", payload: "recommendations" },
-  { time: 16500, type: "chat", payload: "13" },
-  { time: 17500, type: "chat", payload: "14" },
+  { time: 18000, type: "chat", payload: "11" },
+  { time: 18500, type: "tab-open", payload: "briefs-overview" },
+  { time: 18500, type: "editor-content", payload: "briefs-overview" },
+  { time: 19000, type: "chat", payload: "12" },
+  { time: 20000, type: "tab-open", payload: "recommendations" },
+  { time: 20000, type: "editor-content", payload: "recommendations" },
+  { time: 20500, type: "chat", payload: "13" },
+  { time: 21500, type: "chat", payload: "14" },
   // Expand .claude/worktrees during execution
-  { time: 18200, type: "tree-reveal", payload: "OS-Portfolio/.claude" },
-  { time: 18500, type: "tab-open", payload: "execution" },
-  { time: 18500, type: "editor-content", payload: "execution" },
+  { time: 22200, type: "tree-reveal", payload: "OS-Portfolio/.claude" },
+  { time: 22500, type: "tab-open", payload: "execution" },
+  { time: 22500, type: "editor-content", payload: "execution" },
   // Wave 1
-  { time: 19500, type: "chat", payload: "15" },
-  { time: 20000, type: "tab-open", payload: "brief-t001" },
-  { time: 20000, type: "editor-content", payload: "brief-t001" },
-  { time: 22000, type: "chat", payload: "16" },
+  { time: 23500, type: "chat", payload: "15" },
+  { time: 24000, type: "tab-open", payload: "brief-t001" },
+  { time: 24000, type: "editor-content", payload: "brief-t001" },
+  { time: 26000, type: "chat", payload: "16" },
   // Wave 2
-  { time: 23000, type: "chat", payload: "17" },
-  { time: 23500, type: "tab-open", payload: "brief-t005" },
-  { time: 23500, type: "editor-content", payload: "brief-t005" },
-  { time: 25500, type: "chat", payload: "18" },
+  { time: 27000, type: "chat", payload: "17" },
+  { time: 27500, type: "tab-open", payload: "brief-t005" },
+  { time: 27500, type: "editor-content", payload: "brief-t005" },
+  { time: 29500, type: "chat", payload: "18" },
   // Wave 3
-  { time: 26500, type: "chat", payload: "19" },
-  { time: 27000, type: "tab-open", payload: "brief-t010" },
-  { time: 27000, type: "editor-content", payload: "brief-t010" },
-  { time: 28500, type: "chat", payload: "20" },
+  { time: 30500, type: "chat", payload: "19" },
+  { time: 31000, type: "tab-open", payload: "brief-t010" },
+  { time: 31000, type: "editor-content", payload: "brief-t010" },
+  { time: 32500, type: "chat", payload: "20" },
   // Wave 4
-  { time: 29500, type: "chat", payload: "21" },
-  { time: 30000, type: "tab-open", payload: "findings" },
-  { time: 30000, type: "editor-content", payload: "findings" },
-  { time: 31500, type: "chat", payload: "22" },
+  { time: 33500, type: "chat", payload: "21" },
+  { time: 34000, type: "tab-open", payload: "findings" },
+  { time: 34000, type: "editor-content", payload: "findings" },
+  { time: 35500, type: "chat", payload: "22" },
 
   // -- Merge (/karimo:merge) ---------------------------
-  { time: 32000, type: "chat", payload: "23" },
-  { time: 33000, type: "chat", payload: "24" },
-  { time: 33500, type: "tab-open", payload: "metrics" },
-  { time: 33500, type: "editor-content", payload: "metrics" },
-  { time: 35000, type: "chat", payload: "25" },
-  { time: 35500, type: "tab-open", payload: "status-complete" },
-  { time: 35500, type: "editor-content", payload: "status-complete" },
-  { time: 36000, type: "chat", payload: "26" },
+  { time: 36000, type: "chat", payload: "23" },
+  { time: 37000, type: "chat", payload: "24" },
+  { time: 37500, type: "tab-open", payload: "metrics" },
+  { time: 37500, type: "editor-content", payload: "metrics" },
+  { time: 39000, type: "chat", payload: "25" },
+  { time: 39500, type: "tab-open", payload: "status-complete" },
+  { time: 39500, type: "editor-content", payload: "status-complete" },
+  { time: 40000, type: "chat", payload: "26" },
+
+  // -- After (browser preview) ---------------------
+  { time: 44000, type: "tab-open", payload: "browser-after" },
+  { time: 44000, type: "editor-content", payload: "browser-after" },
+
 ];
 
-export const TIMELINE_DURATION = 40000;
+export const TIMELINE_DURATION = 48000;
 
 // --- Helpers ----------------------------------------------
 
