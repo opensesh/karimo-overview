@@ -115,7 +115,7 @@ function CodeView({ contentKey }: { contentKey: string }) {
 
   return (
     <div
-      className="flex-1 overflow-x-auto overflow-y-auto"
+      className="flex-1 overflow-y-auto overflow-x-hidden"
       data-vscode-scroll
       style={{ overscrollBehavior: "contain" }}
     >
@@ -127,7 +127,8 @@ function CodeView({ contentKey }: { contentKey: string }) {
               background: "transparent",
               margin: 0,
               fontFamily: "var(--font-mono, monospace)",
-              whiteSpace: "pre",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
             }}
           >
             {tokens.map((line, i) => {
