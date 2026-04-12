@@ -15,24 +15,29 @@ const sections = [
 ];
 
 const HEADER_HEIGHT = 56;
-const SCROLL_BREATHING = 16;
+const SCROLL_OFFSET = 64;
 
 export function SideNav() {
-  const { headerVisible } = useViewport();
+  const { headerVisible, lockHeader } = useViewport();
   const [activeSection, setActiveSection] = useState("overview");
 
   useEffect(() => {
     const handleScroll = () => {
-      const offsets = sections.map((s) => ({
-        id: s.id,
-        offset: s.id === "home" ? 0 : (document.getElementById(s.id)?.offsetTop || 0),
-      }));
+      const trigger = window.scrollY + HEADER_HEIGHT + 100;
 
-      const scrollPosition = window.scrollY + 200;
-
-      for (let i = offsets.length - 1; i >= 0; i--) {
-        if (scrollPosition >= offsets[i].offset) {
-          setActiveSection(offsets[i].id);
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const s = sections[i];
+        if (s.id === "home") {
+          if (trigger < (document.getElementById(sections[1].id)?.getBoundingClientRect().top ?? 0) + window.scrollY) {
+            setActiveSection("home");
+          }
+          continue;
+        }
+        const el = document.getElementById(s.id);
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top + window.scrollY;
+        if (trigger >= top) {
+          setActiveSection(s.id);
           break;
         }
       }
@@ -44,6 +49,7 @@ export function SideNav() {
   }, []);
 
   const scrollTo = (id: string) => {
+    lockHeader();
     if (id === "home") {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
@@ -53,7 +59,7 @@ export function SideNav() {
     const top =
       el.getBoundingClientRect().top +
       window.scrollY -
-      (HEADER_HEIGHT + SCROLL_BREATHING);
+      SCROLL_OFFSET;
     window.scrollTo({ top, behavior: "smooth" });
   };
 

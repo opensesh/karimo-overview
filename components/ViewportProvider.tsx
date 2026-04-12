@@ -6,16 +6,19 @@ import {
   useState,
   useEffect,
   useRef,
+  useCallback,
   type ReactNode,
 } from "react";
 import { useScroll, useMotionValueEvent } from "framer-motion";
 
 interface ViewportContextValue {
   headerVisible: boolean;
+  lockHeader: () => void;
 }
 
 const ViewportContext = createContext<ViewportContextValue>({
   headerVisible: true,
+  lockHeader: () => {},
 });
 
 export function useViewport() {
@@ -28,9 +31,26 @@ const DEAD_ZONE = 5;
 export function ViewportProvider({ children }: { children: ReactNode }) {
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const isLockedRef = useRef(false);
+  const lockTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const { scrollY } = useScroll();
 
+  const lockHeader = useCallback(() => {
+    isLockedRef.current = true;
+    setHeaderVisible(true);
+    clearTimeout(lockTimeoutRef.current);
+    lockTimeoutRef.current = setTimeout(() => {
+      isLockedRef.current = false;
+    }, 1200);
+  }, []);
+
   useMotionValueEvent(scrollY, "change", (latest) => {
+    // While locked (programmatic scroll from nav), keep header visible
+    if (isLockedRef.current) {
+      lastScrollY.current = latest;
+      return;
+    }
+
     const delta = latest - lastScrollY.current;
 
     // Always show at top of page
@@ -57,7 +77,7 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
   }, [headerVisible]);
 
   return (
-    <ViewportContext.Provider value={{ headerVisible }}>
+    <ViewportContext.Provider value={{ headerVisible, lockHeader }}>
       {children}
     </ViewportContext.Provider>
   );
