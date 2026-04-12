@@ -7,4 +7,4 @@ export { AdoptionPhases } from "./AdoptionPhases";
 export { KarimoPipeline } from "./KarimoPipeline";
 export { ProcessSection } from "./ProcessSection";
 export { EncodingSection } from "./EncodingSection";
-export { OptionSection } from "./OptionSection";
+export { AdoptionSection } from "./AdoptionSection";

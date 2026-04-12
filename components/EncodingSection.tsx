@@ -9,6 +9,7 @@ import { PhaseToggle } from "@/components/orchestration/PhaseToggle";
 import { GitGraph } from "@/components/orchestration/GitGraph";
 import { GitGraphMobile } from "@/components/orchestration/GitGraphMobile";
 import { PhaseDescription } from "@/components/orchestration/PhaseDescription";
+import { TimelineLegend } from "@/components/orchestration/TimelineLegend";
 const PHASE_ORDER: PhaseId[] = ["planning", "execution", "review"];
 
 export function EncodingSection() {
@@ -86,7 +87,9 @@ export function EncodingSection() {
           onReset={handleReset}
           canGoPrev={currentIndex > 0}
           canGoNext={currentIndex < PHASE_ORDER.length - 1}
-        />
+        >
+          <TimelineLegend />
+        </PhaseToggle>
       </div>
 
       {/* Graph + Description — wider container */}

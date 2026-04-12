@@ -33,11 +33,11 @@ export function PipelineAnimation() {
       {/* Pipeline visualization */}
       <div className="relative max-w-4xl mx-auto">
         {/* Connection line */}
-        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-[var(--color-black70)] -translate-y-1/2" />
+        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-(--color-black70) -translate-y-1/2" />
 
         {/* Progress line */}
         <div
-          className="absolute top-1/2 left-0 h-0.5 bg-[var(--color-aperol)] -translate-y-1/2 transition-all duration-500"
+          className="absolute top-1/2 left-0 h-0.5 bg-(--color-aperol) -translate-y-1/2 transition-all duration-500"
           style={{
             width: `${(activeStage / (pipelineStages.length - 1)) * 100}%`,
           }}
@@ -62,10 +62,10 @@ export function PipelineAnimation() {
                     transition-all duration-300 cursor-pointer
                     ${
                       isActive
-                        ? "bg-[var(--color-aperol)] scale-110 shadow-lg shadow-[var(--color-aperol)]/30"
+                        ? "bg-(--color-aperol) scale-110 shadow-lg shadow-(--color-aperol)/30"
                         : isPast
-                        ? "bg-[var(--color-black60)]"
-                        : "bg-[var(--color-black80)] group-hover:bg-[var(--color-black70)]"
+                        ? "bg-(--color-black60)"
+                        : "bg-(--color-black80) group-hover:bg-(--color-black70)"
                     }
                   `}
                 >
@@ -73,7 +73,7 @@ export function PipelineAnimation() {
 
                   {/* Pulse ring for active */}
                   {isActive && (
-                    <div className="absolute inset-0 rounded-full border-2 border-[var(--color-aperol)] animate-ping opacity-50" />
+                    <div className="absolute inset-0 rounded-full border-2 border-(--color-aperol) animate-ping opacity-50" />
                   )}
                 </div>
 
@@ -82,7 +82,7 @@ export function PipelineAnimation() {
                   <span
                     className={`
                       font-semibold text-sm md:text-base transition-colors
-                      ${isActive ? "text-[var(--color-vanilla)]" : "text-[var(--color-black50)]"}
+                      ${isActive ? "text-(--color-vanilla)" : "text-(--color-black50)"}
                     `}
                   >
                     {stage.label}
@@ -92,8 +92,8 @@ export function PipelineAnimation() {
                       text-xs font-mono px-2 py-0.5 rounded
                       ${
                         isActive
-                          ? "bg-[var(--color-aperol)]/20 text-[var(--color-aperol)]"
-                          : "text-[var(--color-black60)]"
+                          ? "bg-(--color-aperol)/20 text-(--color-aperol)"
+                          : "text-(--color-black60)"
                       }
                     `}
                   >
@@ -108,14 +108,14 @@ export function PipelineAnimation() {
 
       {/* Stage details */}
       <div className="mt-12 max-w-2xl mx-auto text-center">
-        <div className="p-6 rounded-xl bg-[var(--color-black80)] border border-[var(--color-black70)]">
+        <div className="p-6 rounded-xl bg-(--color-black80) border border-(--color-black70)">
           <StageDetails stage={pipelineStages[activeStage]} />
         </div>
       </div>
 
       {/* Auto-play indicator */}
       <div className="mt-6 flex justify-center">
-        <span className="text-xs text-[var(--color-black50)] font-mono">
+        <span className="text-xs text-(--color-black50) font-mono">
           {isAnimating ? "Auto-playing • Hover to pause" : "Paused • Move away to resume"}
         </span>
       </div>
@@ -151,12 +151,12 @@ function StageDetails({ stage }: { stage: (typeof pipelineStages)[number] }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-[var(--color-vanilla)] text-lg">{info.description}</p>
+      <p className="text-(--color-vanilla) text-lg">{info.description}</p>
       <div className="flex flex-wrap justify-center gap-2">
         {info.agents.map((agent) => (
           <span
             key={agent}
-            className="px-3 py-1 text-sm font-mono rounded-full bg-[var(--color-black70)] text-[var(--color-black30)]"
+            className="px-3 py-1 text-sm font-mono rounded-full bg-(--color-black70) text-(--color-black30)"
           >
             {agent}
           </span>

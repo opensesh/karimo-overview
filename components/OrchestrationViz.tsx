@@ -40,7 +40,7 @@ export function OrchestrationViz() {
   ];
 
   return (
-    <section className="py-24 px-6 md:px-12 lg:px-24 bg-[var(--color-charcoal)]">
+    <section className="py-24 px-6 md:px-12 lg:px-24 bg-(--color-charcoal)">
       <div className="max-w-5xl mx-auto">
         <SectionHeader
           number="03"
@@ -51,7 +51,7 @@ export function OrchestrationViz() {
         {/* Wave visualization */}
         <div className="relative">
           {/* Main branch line */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 bg-[var(--color-black60)]" />
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 bg-(--color-black60)" />
 
           {/* Waves */}
           <div className="space-y-8">
@@ -73,8 +73,8 @@ export function OrchestrationViz() {
                         transition-all duration-300 cursor-pointer
                         ${
                           isExpanded
-                            ? "bg-[var(--color-aperol)] text-[var(--color-vanilla)]"
-                            : "bg-[var(--color-black80)] text-[var(--color-black30)] hover:bg-[var(--color-black70)]"
+                            ? "bg-(--color-aperol) text-(--color-vanilla)"
+                            : "bg-(--color-black80) text-(--color-black30) hover:bg-(--color-black70)"
                         }
                       `}
                     >
@@ -118,7 +118,7 @@ export function OrchestrationViz() {
 
                       {/* Parallel indicator */}
                       <div className="flex justify-center mt-4">
-                        <span className="text-xs font-mono text-[var(--color-black50)] px-3 py-1 rounded-full bg-[var(--color-black80)]">
+                        <span className="text-xs font-mono text-(--color-black50) px-3 py-1 rounded-full bg-(--color-black80)">
                           Parallel execution → PRs to main
                         </span>
                       </div>
@@ -129,7 +129,7 @@ export function OrchestrationViz() {
                   {waveIndex < waveData.length - 1 && (
                     <div className="flex justify-center my-4">
                       <svg
-                        className="w-6 h-6 text-[var(--color-black50)]"
+                        className="w-6 h-6 text-(--color-black50)"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -151,7 +151,7 @@ export function OrchestrationViz() {
 
         {/* Feature highlights */}
         <div className="mt-16">
-          <h4 className="text-lg font-semibold text-[var(--color-vanilla)] mb-6 text-center">
+          <h4 className="text-lg font-semibold text-(--color-vanilla) mb-6 text-center">
             Key Features
           </h4>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -165,8 +165,8 @@ export function OrchestrationViz() {
                   p-4 rounded-xl text-left transition-all duration-300
                   ${
                     showFeature === feature.id
-                      ? "bg-[var(--color-aperol)] text-[var(--color-vanilla)]"
-                      : "bg-[var(--color-black80)] text-[var(--color-vanilla)] hover:bg-[var(--color-black70)]"
+                      ? "bg-(--color-aperol) text-(--color-vanilla)"
+                      : "bg-(--color-black80) text-(--color-vanilla) hover:bg-(--color-black70)"
                   }
                 `}
               >
@@ -175,8 +175,8 @@ export function OrchestrationViz() {
                 <p
                   className={`text-sm mt-1 ${
                     showFeature === feature.id
-                      ? "text-[var(--color-vanilla)]/80"
-                      : "text-[var(--color-black30)]"
+                      ? "text-(--color-vanilla)/80"
+                      : "text-(--color-black30)"
                   }`}
                 >
                   {feature.description}
@@ -201,8 +201,8 @@ function TaskCard({
 }) {
   const statusColors = {
     complete: "bg-green-500/20 text-green-400 border-green-500/30",
-    active: "bg-[var(--color-aperol)]/20 text-[var(--color-aperol)] border-[var(--color-aperol)]/30",
-    pending: "bg-[var(--color-black70)] text-[var(--color-black30)] border-[var(--color-black60)]",
+    active: "bg-(--color-aperol)/20 text-(--color-aperol) border-(--color-aperol)/30",
+    pending: "bg-(--color-black70) text-(--color-black30) border-(--color-black60)",
   };
 
   const statusLabels = {

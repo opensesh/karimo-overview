@@ -8,7 +8,7 @@ export function ProcessTimeline() {
   const [expandedStep, setExpandedStep] = useState<string | null>("research");
 
   return (
-    <section className="py-24 px-6 md:px-12 lg:px-24 bg-[var(--color-black)]">
+    <section className="py-24 px-6 md:px-12 lg:px-24 bg-(--color-black)">
       <div className="max-w-5xl mx-auto">
         <SectionHeader
           number="02"
@@ -18,7 +18,7 @@ export function ProcessTimeline() {
 
         <div className="relative">
           {/* Vertical line */}
-          <div className="absolute left-6 md:left-8 top-0 bottom-0 w-px bg-[var(--color-black70)]" />
+          <div className="absolute left-6 md:left-8 top-0 bottom-0 w-px bg-(--color-black70)" />
 
           {/* Steps */}
           <div className="space-y-6">
@@ -36,8 +36,8 @@ export function ProcessTimeline() {
                       transition-all duration-300 cursor-pointer
                       ${
                         isExpanded
-                          ? "bg-[var(--color-aperol)] text-[var(--color-vanilla)] scale-110"
-                          : "bg-[var(--color-black80)] text-[var(--color-black50)] hover:bg-[var(--color-black70)]"
+                          ? "bg-(--color-aperol) text-(--color-vanilla) scale-110"
+                          : "bg-(--color-black80) text-(--color-black50) hover:bg-(--color-black70)"
                       }
                     `}
                   >
@@ -50,8 +50,8 @@ export function ProcessTimeline() {
                       rounded-xl border transition-all duration-300 overflow-hidden
                       ${
                         isExpanded
-                          ? "bg-[var(--color-black80)] border-[var(--color-aperol)]/30"
-                          : "bg-[var(--color-charcoal)] border-[var(--color-black70)] hover:border-[var(--color-black50)]"
+                          ? "bg-(--color-black80) border-(--color-aperol)/30"
+                          : "bg-(--color-charcoal) border-(--color-black70) hover:border-(--color-black50)"
                       }
                     `}
                   >
@@ -61,15 +61,15 @@ export function ProcessTimeline() {
                       className="w-full p-5 text-left flex items-center justify-between gap-4"
                     >
                       <div>
-                        <h3 className="text-xl font-semibold text-[var(--color-vanilla)]">
+                        <h3 className="text-xl font-semibold text-(--color-vanilla)">
                           {step.title}
                         </h3>
-                        <code className="text-sm font-mono text-[var(--color-aperol)]">
+                        <code className="text-sm font-mono text-(--color-aperol)">
                           {step.command}
                         </code>
                       </div>
                       <svg
-                        className={`w-5 h-5 text-[var(--color-black50)] transition-transform ${
+                        className={`w-5 h-5 text-(--color-black50) transition-transform ${
                           isExpanded ? "rotate-180" : ""
                         }`}
                         fill="none"
@@ -93,8 +93,8 @@ export function ProcessTimeline() {
                       `}
                     >
                       <div className="overflow-hidden">
-                        <div className="px-5 pb-5 border-t border-[var(--color-black70)] pt-4">
-                          <p className="text-[var(--color-black30)] mb-4">
+                        <div className="px-5 pb-5 border-t border-(--color-black70) pt-4">
+                          <p className="text-(--color-black30) mb-4">
                             {step.description}
                           </p>
                           <ul className="space-y-2">
@@ -103,10 +103,10 @@ export function ProcessTimeline() {
                                 key={i}
                                 className="flex items-start gap-3 text-sm"
                               >
-                                <span className="text-[var(--color-aperol)] mt-0.5">
+                                <span className="text-(--color-aperol) mt-0.5">
                                   →
                                 </span>
-                                <span className="text-[var(--color-vanilla)]">
+                                <span className="text-(--color-vanilla)">
                                   {detail}
                                 </span>
                               </li>
@@ -123,9 +123,9 @@ export function ProcessTimeline() {
         </div>
 
         {/* Loop indicator */}
-        <div className="mt-12 p-6 rounded-xl bg-[var(--color-black80)] border border-[var(--color-black70)]">
-          <h4 className="text-lg font-semibold text-[var(--color-vanilla)] mb-4 flex items-center gap-2">
-            <span className="text-[var(--color-aperol)]">↻</span>
+        <div className="mt-12 p-6 rounded-xl bg-(--color-black80) border border-(--color-black70)">
+          <h4 className="text-lg font-semibold text-(--color-vanilla) mb-4 flex items-center gap-2">
+            <span className="text-(--color-aperol)">↻</span>
             Strategic Looping
           </h4>
           <div className="grid md:grid-cols-3 gap-4">
@@ -161,10 +161,10 @@ function LoopCard({
   description: string;
 }) {
   return (
-    <div className="p-4 rounded-lg bg-[var(--color-black70)]">
-      <span className="text-xs font-mono text-[var(--color-aperol)]">{loop}</span>
-      <h5 className="font-medium text-[var(--color-vanilla)] mt-1">{title}</h5>
-      <p className="text-sm text-[var(--color-black30)] mt-1">{description}</p>
+    <div className="p-4 rounded-lg bg-(--color-black70)">
+      <span className="text-xs font-mono text-(--color-aperol)">{loop}</span>
+      <h5 className="font-medium text-(--color-vanilla) mt-1">{title}</h5>
+      <p className="text-sm text-(--color-black30) mt-1">{description}</p>
     </div>
   );
 }

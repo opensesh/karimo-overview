@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { pipelinePhases } from "@/lib/constants";
 import { smoothTransition } from "@/lib/motion";
@@ -10,27 +10,134 @@ import { useParallax } from "@/components/ui/ParallaxSection";
 // ─── Types ─────────────────────────────────────────────────
 type PipelinePhase = (typeof pipelinePhases)[number];
 
+// ─── Animation Step Map ────────────────────────────────────
+const STEP_MAP = [
+  { phase: "loop1", chip: -1, loop: false, bookend: "configure" as const, cmdIdx: undefined },
+  { phase: "loop1", chip: 0,  loop: false, bookend: null, cmdIdx: 0 },
+  { phase: "loop1", chip: 1,  loop: false, bookend: null, cmdIdx: 1 },
+  { phase: "loop1", chip: -1, loop: true,  bookend: null, cmdIdx: 2 },
+  { phase: "loop2", chip: 0,  loop: false, bookend: null, cmdIdx: 0 },
+  { phase: "loop2", chip: 1,  loop: false, bookend: null, cmdIdx: 1 },
+  { phase: "loop2", chip: -1, loop: true,  bookend: null, cmdIdx: undefined },
+  { phase: "loop3", chip: 0,  loop: false, bookend: null, cmdIdx: 0 },
+  { phase: "loop3", chip: 1,  loop: false, bookend: null, cmdIdx: 1 },
+  { phase: "loop3", chip: -1, loop: true,  bookend: null, cmdIdx: 2 },
+  { phase: "loop3", chip: -1, loop: false, bookend: "merge" as const, cmdIdx: undefined },
+] as const;
+
+const STEP_DURATION = 1200;
+
+// ─── Bookend Label (Configure / Merge) ────────────────────
+function BookendLabel({
+  label,
+  description,
+  side = "left",
+  active = false,
+}: {
+  label: string;
+  description: string;
+  side?: "left" | "right";
+  active?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const close = useCallback(() => setOpen(false), []);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) close();
+    }
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [open, close]);
+
+  const tooltipPosition = side === "left" ? "left-0" : "right-0";
+
+  return (
+    <div ref={ref} className="relative flex items-center gap-1 shrink-0">
+      <span
+        className="text-accent text-[10px] tracking-[0.16em] transition-colors duration-200"
+        style={{
+          color: active ? "var(--bg-brand-solid)" : "var(--fg-tertiary)",
+          animation: active ? "chip-pulse 1.2s ease-in-out" : "none",
+        }}
+      >
+        {label}
+      </span>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((prev) => !prev);
+        }}
+        className="w-3.5 h-3.5 rounded-full border border-border-secondary flex items-center justify-center text-fg-tertiary hover:text-fg-secondary hover:border-border-primary transition-colors cursor-pointer"
+        aria-label={`About ${label}`}
+      >
+        <svg width="7" height="7" viewBox="0 0 7 7" fill="none">
+          <path
+            d="M3.5 1.5V1.5M3.5 3V5.5"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2 }}
+            className={`absolute top-full mt-2 ${tooltipPosition} w-52 rounded-lg border border-border-secondary bg-bg-secondary px-3 py-2.5 shadow-lg z-50`}
+          >
+            <p className="text-body text-xs text-fg-secondary leading-relaxed">
+              {description}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ─── Step Chip ─────────────────────────────────────────────
 function StepChip({
   label,
   dimmed,
   compact,
+  active,
 }: {
   label: string;
   dimmed: boolean;
   compact?: boolean;
+  active?: boolean;
 }) {
+  const isActive = active && !dimmed;
+
   return (
     <div
       className="text-heading whitespace-nowrap"
       style={{
         padding: compact ? "6px 10px" : "8px 16px",
-        border: `1px solid ${dimmed ? "var(--border-tertiary)" : "var(--fg-primary)"}`,
+        border: `1px solid ${
+          isActive
+            ? "var(--bg-brand-solid)"
+            : dimmed
+              ? "var(--border-tertiary)"
+              : "var(--fg-primary)"
+        }`,
         borderRadius: "4px",
         fontSize: compact ? "11px" : "13px",
         letterSpacing: "0.12em",
-        color: dimmed ? "var(--fg-tertiary)" : "var(--fg-primary)",
+        color: isActive
+          ? "var(--bg-brand-solid)"
+          : dimmed
+            ? "var(--fg-tertiary)"
+            : "var(--fg-primary)",
         transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
+        animation: isActive ? "chip-pulse 1.2s ease-in-out" : "none",
       }}
     >
       {label}
@@ -75,7 +182,7 @@ function PhaseArrow({ dimmed }: { dimmed: boolean }) {
         transition: "opacity 0.3s ease",
         flexShrink: 0,
         alignSelf: "flex-start",
-        marginTop: "34px",
+        marginTop: "72px",
       }}
     >
       <line
@@ -97,13 +204,17 @@ function PhaseArrow({ dimmed }: { dimmed: boolean }) {
   );
 }
 
-// ─── Angular Loop SVG (always visible, static) ─────────────
+// ─── Angular Loop SVG ──────────────────────────────────────
 function AngularLoop({
   width,
   dimmed,
+  className,
+  animating,
 }: {
   width: number;
   dimmed: boolean;
+  className?: string;
+  animating?: boolean;
 }) {
   const h = 24;
   const inset = 16;
@@ -115,25 +226,56 @@ function AngularLoop({
       width={w}
       height={h + 6}
       viewBox={`0 -3 ${w} ${h + 9}`}
-      className="hidden md:block"
+      className={className}
       style={{
         opacity: dimmed ? 0.15 : 0.35,
         transition: "opacity 0.35s ease",
         overflow: "visible",
       }}
     >
+      {/* Base gray path */}
       <path
         d={pathD}
         fill="none"
         stroke="var(--fg-tertiary)"
         strokeWidth="1.5"
       />
+
+      {/* Orange animated overlay */}
+      {animating && (
+        <motion.path
+          d={pathD}
+          fill="none"
+          stroke="var(--bg-brand-solid)"
+          strokeWidth="2"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+          style={{ opacity: 1 }}
+        />
+      )}
+
+      {/* Base arrowhead */}
       <polyline
         points={`${inset - 3.5},5 ${inset},-1 ${inset + 3.5},5`}
         fill="none"
         stroke="var(--fg-tertiary)"
         strokeWidth="1.5"
       />
+
+      {/* Orange arrowhead — appears at end of trace */}
+      {animating && (
+        <motion.polyline
+          points={`${inset - 3.5},5 ${inset},-1 ${inset + 3.5},5`}
+          fill="none"
+          stroke="var(--bg-brand-solid)"
+          strokeWidth="2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.85, duration: 0.15 }}
+          style={{ opacity: 0 }}
+        />
+      )}
     </svg>
   );
 }
@@ -144,15 +286,18 @@ function PhaseCard({
   focused,
   otherFocused,
   onFocus,
+  activeChipIndex = -1,
+  loopAnimating = false,
 }: {
   phase: PipelinePhase;
   focused: boolean;
   otherFocused: boolean;
   onFocus: (id: string) => void;
+  activeChipIndex?: number;
+  loopAnimating?: boolean;
 }) {
   const chipCount = phase.steps.length;
-  const arrowCount = chipCount - 1;
-  const estW = chipCount * 88 + arrowCount * 24;
+  const estW = chipCount * 88 + (chipCount - 1) * 24;
   const loopNum = phase.id.replace("loop", "");
 
   return (
@@ -160,7 +305,7 @@ function PhaseCard({
       data-interactive
       onClick={() => !focused && onFocus(phase.id)}
       className={`
-        relative flex flex-col items-center gap-1 cursor-pointer
+        relative flex flex-col items-center gap-1 cursor-pointer w-full
         ${focused ? "z-10" : "z-[1]"}
       `}
       style={{
@@ -169,30 +314,33 @@ function PhaseCard({
           : otherFocused
             ? "scale(0.88)"
             : "scale(1)",
-        opacity: otherFocused ? 0.45 : 1,
+        opacity: otherFocused ? 0.55 : 1,
         transition:
           "transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease",
       }}
     >
       <div
         className={`
-          rounded-lg p-4 pb-3 transition-all duration-300
+          w-full rounded-lg p-4 pb-3 transition-all duration-300
           ${
             focused
-              ? "border border-border-primary bg-bg-secondary/50"
+              ? "bg-bg-secondary/50"
               : "border border-border-secondary hover:border-border-primary hover:bg-bg-secondary/30"
           }
         `}
+        style={focused ? { border: "1px solid var(--bg-brand-solid)" } : undefined}
       >
         {/* Tag + Title */}
-        <div className="flex items-center justify-center gap-2 mb-3">
+        <div className="flex flex-col items-center mb-3">
           <span
-            className={`
-              text-accent text-xs font-bold px-2 py-0.5 rounded transition-colors duration-200
-              ${focused ? "bg-bg-brand-solid text-fg-primary" : "bg-bg-secondary text-fg-tertiary"}
-            `}
+            className="text-accent text-[10px] tracking-[0.2em] mb-1 transition-colors duration-200"
+            style={{
+              color: focused
+                ? 'var(--bg-brand-solid)'
+                : 'var(--fg-tertiary)',
+            }}
           >
-            L{loopNum}
+            LOOP {loopNum}
           </span>
           <span className="text-heading text-xl tracking-wide text-fg-primary">
             {phase.label}
@@ -203,7 +351,11 @@ function PhaseCard({
         <div className="flex items-center gap-1.5 justify-center">
           {phase.steps.map((step, i) => (
             <div key={step} className="flex items-center gap-1.5">
-              <StepChip label={step} dimmed={otherFocused} />
+              <StepChip
+                label={step}
+                dimmed={otherFocused}
+                active={activeChipIndex === i}
+              />
               {i < chipCount - 1 && <SmallArrow dimmed={otherFocused} />}
             </div>
           ))}
@@ -211,74 +363,121 @@ function PhaseCard({
 
         {/* Angular loop */}
         <div className="flex justify-center mt-0.5">
-          <AngularLoop width={estW} dimmed={otherFocused} />
+          <AngularLoop
+            width={estW}
+            dimmed={otherFocused}
+            className="hidden md:block"
+            animating={loopAnimating}
+          />
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Mobile Loop Tab (collapsed) ─────────────────────────
-function MobileLoopTab({
+// ─── Mobile Loop Item (animated accordion) ──────────────
+function MobileLoopItem({
   phase,
-  onClick,
+  isActive,
+  onSelect,
+  activeChipIndex = -1,
+  loopAnimating = false,
 }: {
   phase: PipelinePhase;
-  onClick: () => void;
+  isActive: boolean;
+  onSelect: () => void;
+  activeChipIndex?: number;
+  loopAnimating?: boolean;
 }) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center justify-between px-5 py-3.5 rounded-lg border border-border-secondary bg-bg-tertiary hover:border-border-primary transition-colors cursor-pointer"
-    >
-      <div className="flex items-center gap-2">
-        <span className="text-accent text-xs font-bold px-2 py-0.5 rounded bg-bg-secondary text-fg-tertiary">
-          L{phase.id.replace("loop", "")}
-        </span>
-        <span className="text-heading text-sm text-fg-primary">
-          {phase.label}
-        </span>
-      </div>
-      <svg
-        className="w-4 h-4 text-fg-tertiary"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M19 9l-7 7-7-7"
-        />
-      </svg>
-    </button>
-  );
-}
-
-// ─── Mobile Expanded Card ────────────────────────────────
-function MobileExpandedCard({ phase }: { phase: PipelinePhase }) {
   const chipCount = phase.steps.length;
 
   return (
-    <div className="rounded-lg border border-border-primary bg-bg-secondary/50 px-5 py-6">
-      <div className="flex items-center justify-center gap-2 mb-4">
-        <span className="text-accent text-xs font-bold px-2 py-0.5 rounded bg-bg-brand-solid text-fg-primary">
-          L{phase.id.replace("loop", "")}
-        </span>
-        <span className="text-heading text-xl tracking-wide text-fg-primary">
-          {phase.label}
-        </span>
+    <motion.div
+      layout
+      className={`
+        rounded-lg overflow-hidden cursor-pointer
+        ${isActive
+          ? "bg-bg-secondary/50"
+          : "border border-border-secondary bg-bg-tertiary hover:border-border-primary"
+        }
+      `}
+      style={isActive ? { border: "1px solid var(--bg-brand-solid)" } : undefined}
+      transition={{ layout: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
+      onClick={() => !isActive && onSelect()}
+    >
+      {/* Header — always visible */}
+      <div className="flex items-center justify-between px-5 py-3.5">
+        <div className="flex items-center gap-2">
+          <motion.span
+            className="text-accent text-[10px] tracking-[0.16em]"
+            animate={{ color: isActive ? "var(--bg-brand-solid)" : "var(--fg-tertiary)" }}
+            transition={{ duration: 0.25 }}
+          >
+            LOOP {phase.id.replace("loop", "")}
+          </motion.span>
+          <span className="text-heading text-sm text-fg-primary">
+            {phase.label}
+          </span>
+        </div>
+        <motion.svg
+          className="w-4 h-4 text-fg-tertiary"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          animate={{ rotate: isActive ? 180 : 0 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </motion.svg>
       </div>
-      <div className="flex flex-wrap items-center gap-2 justify-center">
-        {phase.steps.map((step, i) => (
-          <div key={step} className="flex items-center gap-2">
-            <StepChip label={step} dimmed={false} compact />
-            {i < chipCount - 1 && <SmallArrow dimmed={false} />}
-          </div>
-        ))}
-      </div>
-    </div>
+
+      {/* Expanded content */}
+      <AnimatePresence initial={false}>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-5 pb-5 pt-1">
+              <div className="flex flex-col items-center">
+                <div className="flex items-center justify-center gap-1.5 flex-nowrap">
+                  {phase.steps.flatMap((step, i) => {
+                    const els = [
+                      <StepChip
+                        key={step}
+                        label={step}
+                        dimmed={false}
+                        compact
+                        active={activeChipIndex === i}
+                      />,
+                    ];
+                    if (i < chipCount - 1) {
+                      els.push(<SmallArrow key={`arrow-${i}`} dimmed={false} />);
+                    }
+                    return els;
+                  })}
+                </div>
+                <div className="mt-0.5">
+                  <AngularLoop
+                    width={chipCount * 72 + (chipCount - 1) * 24}
+                    dimmed={false}
+                    animating={loopAnimating}
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
@@ -286,26 +485,49 @@ function MobileExpandedCard({ phase }: { phase: PipelinePhase }) {
 function MobileLoopCarousel({
   activePhase,
   onSelectPhase,
+  configureActive,
+  mergeActive,
+  activeChipIndex,
+  loopAnimating,
+  animatingPhase,
 }: {
   activePhase: string;
   onSelectPhase: (id: string) => void;
+  configureActive?: boolean;
+  mergeActive?: boolean;
+  activeChipIndex?: number;
+  loopAnimating?: boolean;
+  animatingPhase?: string | null;
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      {pipelinePhases.map((phase) => {
-        const isActive = phase.id === activePhase;
-        if (isActive) {
-          return <MobileExpandedCard key={phase.id} phase={phase} />;
-        }
-        return (
-          <MobileLoopTab
-            key={phase.id}
-            phase={phase}
-            onClick={() => onSelectPhase(phase.id)}
-          />
-        );
-      })}
-    </div>
+    <motion.div layout className="flex flex-col gap-2">
+      {/* Configure bookend */}
+      <BookendLabel
+        label="CONFIGURE"
+        side="left"
+        active={configureActive}
+        description="Auto-detects your stack, sets build/test/lint commands, and generates .karimo/config.yaml before the first loop begins."
+      />
+
+      {pipelinePhases.map((phase) => (
+        <MobileLoopItem
+          key={phase.id}
+          phase={phase}
+          isActive={phase.id === activePhase}
+          onSelect={() => onSelectPhase(phase.id)}
+          activeChipIndex={animatingPhase === phase.id ? activeChipIndex : -1}
+          loopAnimating={animatingPhase === phase.id && loopAnimating}
+        />
+      ))}
+
+      {/* Merge bookend */}
+      <BookendLabel
+        label="MERGE"
+        side="left"
+        active={mergeActive}
+        description="Validates the feature branch, runs your full test suite, and creates a single consolidated PR to main with a complete audit trail."
+      />
+    </motion.div>
   );
 }
 
@@ -437,7 +659,13 @@ function InlineTerminal({
 }
 
 // ─── Phase Detail Panel ────────────────────────────────────
-function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
+function PhaseDetailPanel({
+  phaseId,
+  syncedCommandIndex,
+}: {
+  phaseId: string | null;
+  syncedCommandIndex?: number;
+}) {
   const phase = pipelinePhases.find((p) => p.id === phaseId);
   const [activeCommandIdx, setActiveCommandIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -448,8 +676,16 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
     setIsAutoPlaying(true);
   }, [phaseId]);
 
+  // Sync from parent animation when playing
   useEffect(() => {
-    if (!phase || !isAutoPlaying) {
+    if (syncedCommandIndex !== undefined) {
+      setActiveCommandIdx(syncedCommandIndex);
+      setIsAutoPlaying(false);
+    }
+  }, [syncedCommandIndex]);
+
+  useEffect(() => {
+    if (!phase || !isAutoPlaying || syncedCommandIndex !== undefined) {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
       return;
     }
@@ -461,7 +697,7 @@ function PhaseDetailPanel({ phaseId }: { phaseId: string | null }) {
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
-  }, [phase, isAutoPlaying]);
+  }, [phase, isAutoPlaying, syncedCommandIndex]);
 
   const handleCommandToggle = (idx: number) => {
     setIsAutoPlaying(false);
@@ -613,41 +849,61 @@ function PlaybackControls({
 // ─── Main Section ──────────────────────────────────────────
 export function OverviewSection() {
   const { ref: sectionRef, y } = useParallax(30);
-  const [focusedPhase, setFocusedPhase] = useState<string>("loop1");
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Auto-play cycles through loops every 6s
+  // Animation state
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [animationStep, setAnimationStep] = useState(-1);
+  const [manualPhase, setManualPhase] = useState("loop1");
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Derive everything from animationStep
+  const currentStep = animationStep >= 0 ? STEP_MAP[animationStep] : null;
+  const focusedPhase = currentStep?.phase ?? manualPhase;
+  const activeChipIndex = currentStep?.chip ?? -1;
+  const loopAnimating = currentStep?.loop ?? false;
+  const configureActive = currentStep?.bookend === "configure";
+  const mergeActive = currentStep?.bookend === "merge";
+  const syncedCommandIdx = isPlaying && currentStep?.cmdIdx !== undefined
+    ? currentStep.cmdIdx
+    : undefined;
+
+  // Animation timer — recursive setTimeout
   useEffect(() => {
-    if (!isAutoPlaying) {
-      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+    if (!isPlaying) {
+      if (timerRef.current) clearTimeout(timerRef.current);
       return;
     }
 
-    autoPlayRef.current = setInterval(() => {
-      setFocusedPhase((prev) => {
-        const idx = pipelinePhases.findIndex((p) => p.id === prev);
-        return pipelinePhases[(idx + 1) % pipelinePhases.length].id;
-      });
-    }, 6000);
+    timerRef.current = setTimeout(() => {
+      setAnimationStep((prev) => (prev + 1) % STEP_MAP.length);
+    }, STEP_DURATION);
 
     return () => {
-      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [isAutoPlaying]);
+  }, [isPlaying, animationStep]);
 
   const handleFocus = (id: string) => {
-    setIsAutoPlaying(false);
-    setFocusedPhase(id);
+    setIsPlaying(false);
+    setAnimationStep(-1);
+    setManualPhase(id);
   };
 
   const handleTogglePlay = () => {
-    setIsAutoPlaying((prev) => !prev);
+    setIsPlaying((prev) => {
+      if (!prev) {
+        // Starting playback
+        if (animationStep < 0) setAnimationStep(0);
+        return true;
+      }
+      return false;
+    });
   };
 
   const handleRestart = () => {
-    setFocusedPhase("loop1");
-    setIsAutoPlaying(true);
+    setAnimationStep(0);
+    setManualPhase("loop1");
+    setIsPlaying(true);
   };
 
   return (
@@ -668,29 +924,48 @@ export function OverviewSection() {
       <motion.div style={{ y }} className="relative">
       <div className="max-w-5xl mx-auto px-6">
         {/* Header with playback controls */}
-        <div className="mb-14">
+        <div className="mb-6">
           <SectionLabel>OVERVIEW</SectionLabel>
           <div className="flex items-center justify-between mt-4">
             <h2 className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary">
               Code Sequence
             </h2>
             <PlaybackControls
-              isPlaying={isAutoPlaying}
+              isPlaying={isPlaying}
               onTogglePlay={handleTogglePlay}
               onRestart={handleRestart}
             />
           </div>
         </div>
 
-        {/* Desktop: horizontal pipeline */}
-        <div className="hidden md:flex md:items-start md:justify-center md:gap-6 max-w-5xl mx-auto">
+        {/* Hint text */}
+        <div className="text-center mb-8">
+          <span className="text-body text-sm text-fg-tertiary">
+            Click a loop to explore its commands
+          </span>
+        </div>
+
+        {/* Desktop: horizontal pipeline with bookend labels */}
+        <div className="hidden md:flex md:items-start md:justify-center md:gap-4 max-w-5xl mx-auto">
+          {/* Configure bookend */}
+          <div className="shrink-0 mr-2" style={{ alignSelf: "flex-start", marginTop: "72px" }}>
+            <BookendLabel
+              label="CONFIGURE"
+              side="left"
+              active={configureActive}
+              description="Auto-detects your stack, sets build/test/lint commands, and generates .karimo/config.yaml before the first loop begins."
+            />
+          </div>
+
           {pipelinePhases.map((phase, i) => (
-            <div key={phase.id} className="flex items-start gap-6">
+            <div key={phase.id} className="flex items-start gap-4" style={{ flex: "1 1 0" }}>
               <PhaseCard
                 phase={phase}
                 focused={focusedPhase === phase.id}
                 otherFocused={focusedPhase !== phase.id}
                 onFocus={handleFocus}
+                activeChipIndex={currentStep?.phase === phase.id ? activeChipIndex : -1}
+                loopAnimating={currentStep?.phase === phase.id && loopAnimating}
               />
               {i < pipelinePhases.length - 1 && (
                 <PhaseArrow
@@ -699,6 +974,16 @@ export function OverviewSection() {
               )}
             </div>
           ))}
+
+          {/* Merge bookend */}
+          <div className="shrink-0 ml-2" style={{ alignSelf: "flex-start", marginTop: "72px" }}>
+            <BookendLabel
+              label="MERGE"
+              side="right"
+              active={mergeActive}
+              description="Validates the feature branch, runs your full test suite, and creates a single consolidated PR to main with a complete audit trail."
+            />
+          </div>
         </div>
 
         {/* Mobile: carousel */}
@@ -706,18 +991,19 @@ export function OverviewSection() {
           <MobileLoopCarousel
             activePhase={focusedPhase}
             onSelectPhase={handleFocus}
+            configureActive={configureActive}
+            mergeActive={mergeActive}
+            activeChipIndex={activeChipIndex}
+            loopAnimating={loopAnimating}
+            animatingPhase={currentStep?.phase ?? null}
           />
         </div>
 
-        {/* Hint text */}
-        <div className="text-center mt-8">
-          <span className="text-body text-sm text-fg-tertiary">
-            Click a loop to explore its commands
-          </span>
-        </div>
-
         {/* Detail panel */}
-        <PhaseDetailPanel phaseId={focusedPhase} />
+        <PhaseDetailPanel
+          phaseId={focusedPhase}
+          syncedCommandIndex={syncedCommandIdx}
+        />
       </div>
       </motion.div>
     </section>

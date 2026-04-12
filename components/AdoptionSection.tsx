@@ -13,78 +13,68 @@ import { useParallax } from "@/components/ui/ParallaxSection";
 
 const terminalPreviews: Record<number, { command: string; lines: string[] }> = {
   1: {
-    command: "/karimo:run --prd framer-cms-migration",
+    command: "/karimo:configure",
     lines: [
-      "◆ Loading PRD: framer-cms-migration",
-      "  20 tasks across 4 waves",
+      "◆ Auto-detecting project...",
+      "  Config:   .karimo/config.yaml ✓",
       "",
-      "Wave 1 — Foundation (4 tasks, 13 complexity)",
-      "├─ T001  Image download script      ████████████ done",
-      "├─ T002  TypeScript schemas          ████████████ done",
-      "├─ T003  Content directory structure  ████████████ done",
-      "└─ T004  next.config.ts update       ████████████ done",
+      "$ /karimo:research",
       "",
-      "Wave 2 — Content Migration (5 tasks)",
-      "├─ T005  Migrate 5 projects          ██████░░░░░░ running",
-      "├─ T006  Convert blog HTML→MDX       ░░░░░░░░░░░░ queued",
-      "├─ T007  Free resources + assets     ░░░░░░░░░░░░ queued",
-      "├─ T008  Legal pages                 ░░░░░░░░░░░░ queued",
-      "└─ T013  Playbook scaffolding        ░░░░░░░░░░░░ queued",
+      "◆ Scanning 847 files...",
+      "  8 documents generated ✓",
       "",
-      "✓ 4/20 tasks complete · Wave 1 PR merged",
+      "$ /karimo:plan",
+      "",
+      "◆ Interview complete",
+      "  PRD: auth-system",
+      "  12 tasks across 4 waves",
+      "  → Ready to run",
     ],
   },
   2: {
-    command: "/karimo:run --prd framer-cms-migration --review",
+    command: "/karimo:run --prd auth-system",
     lines: [
-      "◆ Review gate enabled (Greptile + Claude)",
+      "◆ Brief Review (auto) — 12 briefs",
+      "  0 Critical  2 Warnings",
+      "  W: task-2b may conflict w/ 2a",
+      "  → Looping model... fixed ✓",
       "",
-      "T005  Migrate 5 projects  ·  PR #42",
-      "├─ Greptile review ········· 3 findings (1 P1, 2 P3)",
-      "│  P1: Missing alt text on hero images",
-      "│  → Auto-fix applied (revision 1/3)",
-      "├─ Claude review ··········· approved",
-      "├─ Revision loop ··········· 1 revision, passed",
-      "└─ Status: ✓ merged",
+      "$ /karimo:merge --prd auth-system",
       "",
-      "T006  Convert blog HTML→MDX  ·  PR #43",
-      "├─ Greptile review ········· 5 findings (2 P1, 3 P2)",
-      "│  P1: Unclosed JSX tags in post-3.mdx",
-      "│  P1: Missing frontmatter fields",
-      "│  → Escalating Sonnet → Opus",
-      "├─ Revision loop ··········· 2 revisions, passed",
-      "└─ Status: ✓ merged",
+      "◆ Greptile Review — PR #42",
+      "  Score: 3/5 → looping...",
+      "  Score: 4/5 → looping...",
+      "  Score: 5/5 ✓",
+      "  → Ready for merge to main",
+      "  → User approved ✓",
     ],
   },
   3: {
-    command: "/karimo:dashboard --prd framer-cms-migration",
+    command: "/karimo:dashboard",
     lines: [
-      "┌─────────────────────────────────────────┐",
-      "│  KARIMO Dashboard · framer-cms-migration │",
-      "├─────────────────────────────────────────┤",
-      "│  Status:    COMPLETE                     │",
-      "│  Progress:  20/20 tasks (100%)           │",
-      "│  Waves:     4/4 complete                 │",
-      "│  Branch:    feat/framer-cms-migration    │",
-      "├─────────────────────────────────────────┤",
-      "│  Wave 1  ████████████████  4/4  ✓       │",
-      "│  Wave 2  ████████████████  5/5  ✓       │",
-      "│  Wave 3  ████████████████  7/7  ✓       │",
-      "│  Wave 4  ████████████████  4/4  ✓       │",
-      "├─────────────────────────────────────────┤",
-      "│  Reviews:   12 passed, 0 blocked         │",
-      "│  Revisions: 8 total (avg 0.4/task)       │",
-      "│  Escalations: 2 (Sonnet → Opus)          │",
-      "└─────────────────────────────────────────┘",
+      "◆ Recent Tasks",
+      "  T009  i18n string extraction  ✓",
+      "  T010  locale switcher UI      ✓",
+      "  T011  user settings page      running",
+      "",
+      "◆ Active PRD: user-settings",
+      "  Wave 1  ████████████████  4/4 ✓",
+      "  Wave 2  ██████░░░░░░░░░░  3/5",
+      "  Wave 3  ░░░░░░░░░░░░░░░░  0/3",
+      "",
+      "  Features    3 shipped",
+      "  Task Rate   4.2/day",
+      "  Model       Sonnet (auto)",
+      "  Escalations 1 (Sonnet → Opus)",
     ],
   },
 };
 
 // ---------------------------------------------------------------------------
-// OptionSection
+// AdoptionSection
 // ---------------------------------------------------------------------------
 
-export function OptionSection() {
+export function AdoptionSection() {
   const { ref: sectionRef, y } = useParallax(30);
   const [expandedPhase, setExpandedPhase] = useState(1);
 
@@ -101,7 +91,7 @@ export function OptionSection() {
       <div className="max-w-5xl mx-auto px-6">
         {/* Header */}
         <div className="mb-16 md:mb-20">
-          <SectionLabel>OPTION</SectionLabel>
+          <SectionLabel>ADOPTION</SectionLabel>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -109,7 +99,7 @@ export function OptionSection() {
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
           >
-            Three-Phased Approach
+            Three Simple Steps
           </motion.h2>
         </div>
 
@@ -248,12 +238,12 @@ function TerminalPreview({
           <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
         </div>
         <span className="text-accent text-xs text-fg-tertiary ml-2">
-          Phase {phase}
+          Step {phase}
         </span>
       </div>
 
       {/* Terminal body */}
-      <div className="bg-[#0a0a0a] p-4 sm:p-5 font-mono text-[11px] sm:text-xs leading-relaxed overflow-hidden flex-1">
+      <div className="bg-[#0a0a0a] p-4 sm:p-5 font-mono text-[11px] sm:text-xs leading-relaxed overflow-hidden flex-1 min-h-[340px]">
         {/* Command prompt */}
         <div className="mb-3 break-all">
           <span className="text-fg-brand">$</span>{" "}
@@ -288,6 +278,9 @@ function TerminalPreview({
 }
 
 function getLineColor(line: string): string {
+  if (line.startsWith("$")) {
+    return "text-fg-primary";
+  }
   if (line.startsWith("✓") || line.includes("done") || line.includes("✓")) {
     return "text-[#27c93f]";
   }
@@ -299,6 +292,9 @@ function getLineColor(line: string): string {
   }
   if (line.startsWith("◆") || line.startsWith("│") || line.startsWith("┌") || line.startsWith("├") || line.startsWith("└")) {
     return "text-fg-secondary";
+  }
+  if (line.includes("W:") || line.includes("Warning")) {
+    return "text-[#ffbd2e]";
   }
   if (line.includes("P1:") || line.includes("→")) {
     return "text-fg-secondary";

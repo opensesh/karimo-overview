@@ -8,7 +8,7 @@ export function AdoptionPhases() {
   const [activePhase, setActivePhase] = useState(1);
 
   return (
-    <section className="py-24 px-6 md:px-12 lg:px-24 bg-[var(--color-black)]">
+    <section className="py-24 px-6 md:px-12 lg:px-24 bg-(--color-black)">
       <div className="max-w-5xl mx-auto">
         <SectionHeader
           number="04"
@@ -27,13 +27,13 @@ export function AdoptionPhases() {
                 transition-all duration-300
                 ${
                   activePhase === phase.phase
-                    ? "bg-[var(--color-aperol)] text-[var(--color-vanilla)]"
-                    : "bg-[var(--color-black80)] text-[var(--color-black50)] hover:text-[var(--color-vanilla)]"
+                    ? "bg-(--color-aperol) text-(--color-vanilla)"
+                    : "bg-(--color-black80) text-(--color-black50) hover:text-(--color-vanilla)"
                 }
               `}
             >
               <span className="block text-lg font-bold">Phase {phase.phase}</span>
-              <span className="block text-xs opacity-70">{phase.subtitle}</span>
+              <span className="block text-xs opacity-70">{phase.title}</span>
             </button>
           ))}
         </div>
@@ -50,23 +50,23 @@ export function AdoptionPhases() {
                   ${activePhase === phase.phase ? "opacity-100" : "opacity-0 hidden"}
                 `}
               >
-                <h3 className="text-2xl font-bold text-[var(--color-vanilla)] mb-4">
+                <h3 className="text-2xl font-bold text-(--color-vanilla) mb-4">
                   {phase.title}
                 </h3>
                 <ul className="space-y-3">
                   {phase.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <span className="text-[var(--color-aperol)] mt-1">✓</span>
-                      <span className="text-[var(--color-vanilla)]">{feature}</span>
+                      <span className="text-(--color-aperol) mt-1">✓</span>
+                      <span className="text-(--color-vanilla)">{feature}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="mt-6 p-4 rounded-lg bg-[var(--color-black80)] border border-[var(--color-black70)]">
-                  <span className="text-xs font-mono text-[var(--color-black50)]">
+                <div className="mt-6 p-4 rounded-lg bg-(--color-black80) border border-(--color-black70)">
+                  <span className="text-xs font-mono text-(--color-black50)">
                     REQUIREMENT
                   </span>
-                  <p className="text-[var(--color-vanilla)] mt-1">
-                    {phase.requirement}
+                  <p className="text-(--color-vanilla) mt-1">
+                    {phase.objective}
                   </p>
                 </div>
               </div>
@@ -74,8 +74,8 @@ export function AdoptionPhases() {
           </div>
 
           {/* Context architecture diagram */}
-          <div className="bg-[var(--color-black80)] rounded-xl p-6 border border-[var(--color-black70)]">
-            <h4 className="text-lg font-semibold text-[var(--color-vanilla)] mb-6">
+          <div className="bg-(--color-black80) rounded-xl p-6 border border-(--color-black70)">
+            <h4 className="text-lg font-semibold text-(--color-vanilla) mb-6">
               Context Architecture
             </h4>
             <ContextDiagram activePhase={activePhase} />
@@ -88,7 +88,7 @@ export function AdoptionPhases() {
             href="https://github.com/opensesh/KARIMO"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-[var(--color-aperol)] text-[var(--color-vanilla)] font-semibold hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-(--color-aperol) text-(--color-vanilla) font-semibold hover:opacity-90 transition-opacity"
           >
             <svg
               className="w-5 h-5"
@@ -99,9 +99,9 @@ export function AdoptionPhases() {
             </svg>
             Get Started with KARIMO
           </a>
-          <p className="mt-4 text-[var(--color-black50)] text-sm">
+          <p className="mt-4 text-(--color-black50) text-sm">
             Run the install script and start with{" "}
-            <code className="px-2 py-0.5 bg-[var(--color-black80)] rounded">
+            <code className="px-2 py-0.5 bg-(--color-black80) rounded">
               /karimo:research
             </code>
           </p>
@@ -152,15 +152,15 @@ function ContextDiagram({ activePhase }: { activePhase: number }) {
               p-4 rounded-lg transition-all duration-300
               ${
                 isActive
-                  ? "bg-[var(--color-black70)] border border-[var(--color-black60)]"
-                  : "bg-[var(--color-black80)] border border-[var(--color-black70)] opacity-40"
+                  ? "bg-(--color-black70) border border-(--color-black60)"
+                  : "bg-(--color-black80) border border-(--color-black70) opacity-40"
               }
             `}
           >
             <div className="flex items-center justify-between mb-2">
               <span
                 className={`font-mono text-sm ${
-                  isActive ? "text-[var(--color-aperol)]" : "text-[var(--color-black50)]"
+                  isActive ? "text-(--color-aperol)" : "text-(--color-black50)"
                 }`}
               >
                 {layer.label}
@@ -169,8 +169,8 @@ function ContextDiagram({ activePhase }: { activePhase: number }) {
                 <span
                   className={`text-xs font-mono px-2 py-0.5 rounded ${
                     isActive
-                      ? "bg-[var(--color-aperol)]/20 text-[var(--color-aperol)]"
-                      : "bg-[var(--color-black60)] text-[var(--color-black50)]"
+                      ? "bg-(--color-aperol)/20 text-(--color-aperol)"
+                      : "bg-(--color-black60) text-(--color-black50)"
                   }`}
                 >
                   Phase {layer.requiredPhase}+
@@ -183,8 +183,8 @@ function ContextDiagram({ activePhase }: { activePhase: number }) {
                   key={item}
                   className={`text-xs px-2 py-1 rounded ${
                     isActive
-                      ? "bg-[var(--color-black60)] text-[var(--color-vanilla)]"
-                      : "bg-[var(--color-black70)] text-[var(--color-black50)]"
+                      ? "bg-(--color-black60) text-(--color-vanilla)"
+                      : "bg-(--color-black70) text-(--color-black50)"
                   }`}
                 >
                   {item}
