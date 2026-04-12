@@ -15,12 +15,14 @@ import {
 // ─── Chapters ─────────────────────────────────────────────
 
 const CHAPTERS = [
-  { label: "Research", time: 0 },
-  { label: "Plan", time: 8000 },
-  { label: "Review", time: 14000 },
-  { label: "Run", time: 18000 },
-  { label: "Merge", time: 32000 },
-  { label: "Complete", time: 36000 },
+  { label: "Before", time: 0, icon: "before" as const },
+  { label: "Research", time: 2000 },
+  { label: "Plan", time: 10000 },
+  { label: "Review", time: 16000 },
+  { label: "Run", time: 20000 },
+  { label: "Merge", time: 34000 },
+  { label: "Complete", time: 38000 },
+  { label: "After", time: 42000, icon: "after" as const },
 ];
 
 function getActiveChapter(currentTime: number): number {
@@ -117,23 +119,83 @@ function ControlBar({
         >
           {CHAPTERS.map((ch, i) => {
             const isActive = hasStarted && i === activeChapter;
+            const isBookend = "icon" in ch;
+            const isLast = i === CHAPTERS.length - 1;
+
+            // Bookend chapters (Before/After) get a distinct blue-gray tint
+            const bookendActiveBg = "rgba(120, 160, 200, 0.15)";
+            const bookendActiveColor = "#8ab4d6";
+            const bookendActiveBorder = "rgba(120, 160, 200, 0.3)";
+
             return (
-              <button
-                key={ch.label}
-                onClick={() => onChapterClick(ch.time)}
-                className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md text-[11px] sm:text-xs transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0"
-                style={{
-                  background: isActive
-                    ? "rgba(254, 81, 2, 0.15)"
-                    : "transparent",
-                  color: isActive ? "#ff7a38" : "#78716c",
-                  border: `1px solid ${
-                    isActive ? "rgba(254, 81, 2, 0.3)" : "transparent"
-                  }`,
-                }}
-              >
-                {ch.label}
-              </button>
+              <div key={ch.label} className="flex items-center shrink-0">
+                {/* Separator between bookends and workflow phases */}
+                {i === 1 || isLast ? (
+                  <div
+                    className="w-px h-4 mx-1 sm:mx-1.5"
+                    style={{ background: "#444" }}
+                  />
+                ) : null}
+                <button
+                  onClick={() => onChapterClick(ch.time)}
+                  className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md text-[11px] sm:text-xs transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0"
+                  style={{
+                    background: isActive
+                      ? isBookend
+                        ? bookendActiveBg
+                        : "rgba(254, 81, 2, 0.15)"
+                      : "transparent",
+                    color: isActive
+                      ? isBookend
+                        ? bookendActiveColor
+                        : "#ff7a38"
+                      : "#78716c",
+                    border: `1px solid ${
+                      isActive
+                        ? isBookend
+                          ? bookendActiveBorder
+                          : "rgba(254, 81, 2, 0.3)"
+                        : "transparent"
+                    }`,
+                    borderStyle:
+                      isBookend && isActive ? "dashed" : "solid",
+                  }}
+                >
+                  {/* Before icon: eye */}
+                  {"icon" in ch && ch.icon === "before" && (
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                  {/* After icon: check circle */}
+                  {"icon" in ch && ch.icon === "after" && (
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                      <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                  )}
+                  {ch.label}
+                </button>
+              </div>
             );
           })}
         </div>
@@ -406,7 +468,7 @@ export function LiveExampleSection() {
   return (
     <section
       id="live-example"
-      className="bg-bg-primary relative overflow-hidden"
+      className="bg-bg-secondary relative overflow-hidden"
       style={{ minHeight: "100dvh", scrollMarginTop: "56px" }}
     >
       {/* Noise texture */}
@@ -447,8 +509,7 @@ export function LiveExampleSection() {
             className="text-body text-sm sm:text-base text-fg-secondary mt-2 sm:mt-3 max-w-2xl"
           >
             An entire Framer website migrated into a custom Next.js codebase.
-            20 tasks, 4 waves, 39 files changed &mdash; all from a single plan
-            mode session.
+            20 tasks, 4 waves, 39 files changed &mdash; all from a single KARIMO feature plan.
           </motion.p>
         </div>
 
