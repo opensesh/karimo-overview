@@ -364,35 +364,15 @@ export function ContextSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-body text-fg-secondary mt-4 max-w-2xl text-lg"
+            className="text-body text-fg-secondary mt-4 max-w-2xl text-lg leading-relaxed"
           >
             In plan mode, you get a single 1M-token session — static, flat, and isolated.
-            KARIMO expands that single window into progressive, compounding context that
-            grows across every session. There are three ways we achieve this:
+            KARIMO expands that into progressive, compounding context that grows across
+            every session through progressive disclosure, context multiplication, and
+            compound learning — distilling knowledge at each stage so agents only load
+            what they need, every session builds on the last, and feedback persists
+            across every future PRD.
           </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-4 space-y-2.5 max-w-2xl"
-          >
-            {[
-              { name: "Progressive Disclosure", desc: "load only what's needed, when it's needed" },
-              { name: "Context Multiplication", desc: "structure workflows so every session builds on the last" },
-              { name: "Compound Learning", desc: "capture feedback that persists across every future PRD" },
-            ].map((item, i) => (
-              <div key={item.name} className="flex items-baseline gap-3">
-                <span className="text-accent text-[10px] font-bold px-1.5 py-0.5 rounded bg-bg-brand-solid text-fg-primary shrink-0">
-                  {i + 1}
-                </span>
-                <p className="text-body text-base text-fg-secondary">
-                  <span className="text-fg-primary font-medium">{item.name}</span>
-                  {" — "}{item.desc}
-                </p>
-              </div>
-            ))}
-          </motion.div>
         </div>
 
         {/* Complexity vs Duration chart */}
@@ -405,6 +385,11 @@ export function ContextSection() {
         >
           <ComplexityDurationChart />
         </motion.div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 mb-16 md:mb-20">
+          <div className="flex-1 h-px bg-border-secondary" />
+        </div>
 
         {/* ── PART 1: Progressive Disclosure ── */}
         <motion.div
@@ -436,7 +421,7 @@ export function ContextSection() {
         </motion.div>
 
         {/* Layer explorer — terminal LEFT, accordion RIGHT */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch mb-32 md:mb-40">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch mb-16 md:mb-20">
           {/* Left: Terminal preview */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -539,6 +524,11 @@ export function ContextSection() {
           </motion.div>
         </div>
 
+        {/* Divider */}
+        <div className="flex items-center gap-4 mb-16 md:mb-20">
+          <div className="flex-1 h-px bg-border-secondary" />
+        </div>
+
         {/* ── PART 2: Context Multiplication ── */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -563,8 +553,13 @@ export function ContextSection() {
 
         <ContextMultiplicationViz />
 
+        {/* Divider */}
+        <div className="flex items-center gap-4 mt-16 md:mt-20">
+          <div className="flex-1 h-px bg-border-secondary" />
+        </div>
+
         {/* ── PART 3: Compound Learning ── */}
-        <div className="mt-32 md:mt-40">
+        <div className="mt-16 md:mt-20">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
