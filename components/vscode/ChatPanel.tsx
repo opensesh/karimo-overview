@@ -23,14 +23,16 @@ function ClaudeLogo({ size = 14 }: { size?: number }) {
 // ─── Session Tabs ─────────────────────────────────────────
 
 const SESSION_TABS = [
+  { id: "research", label: "/karimo:research" },
   { id: "plan", label: "/karimo:plan" },
   { id: "run", label: "/karimo:run" },
   { id: "merge", label: "/karimo:merge" },
 ] as const;
 
 const PHASE_START_TIMES: Record<string, number> = {
-  plan: 0,
-  run: 18000,
+  research: 0,
+  plan: 8000,
+  run: 14000,
   merge: 32000,
 };
 
@@ -134,9 +136,10 @@ function MessageBubble({
 // ─── Active Phase Helper ──────────────────────────────────
 
 function getActivePhase(currentTime: number): string {
-  if (currentTime < 18000) return "plan"; // research + planning + review
-  if (currentTime < 32000) return "run"; // execution waves 1-4
-  return "merge"; // merge + review
+  if (currentTime < 8000) return "research";
+  if (currentTime < 14000) return "plan";
+  if (currentTime < 32000) return "run";
+  return "merge";
 }
 
 // ─── Chat Panel ───────────────────────────────────────────

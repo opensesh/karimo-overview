@@ -40,6 +40,9 @@ const CONTENT_KEY_TO_FILENAME: Record<string, string> = {
   "external-libs": "libraries.md",
   "external-refs": "references.md",
   "external-sources": "sources.yaml",
+  "external-findings": "findings.md",
+  "internal-findings": "findings.md",
+  "assets-json": "assets.json",
 };
 
 export function getFileName(contentKey: string): string {
@@ -114,7 +117,7 @@ function CodeView({ contentKey }: { contentKey: string }) {
       {({ tokens, getLineProps, getTokenProps }) => (
         <pre
           className="flex-1 overflow-auto text-[13px] leading-5 py-2"
-          style={{ background: "transparent", margin: 0, fontFamily: "var(--font-mono, monospace)" }}
+          style={{ background: "transparent", margin: 0, fontFamily: "var(--font-mono, monospace)", whiteSpace: "pre" }}
         >
           {tokens.map((line, i) => {
             const lineProps = getLineProps({ line });
@@ -126,7 +129,7 @@ function CodeView({ contentKey }: { contentKey: string }) {
                 >
                   {i + 1}
                 </span>
-                <span className="flex-1">
+                <span className="flex-1 min-w-0">
                   {line.map((token, key) => (
                     <span key={key} {...getTokenProps({ token })} />
                   ))}
@@ -186,26 +189,26 @@ export const EditorPanel = memo(function EditorPanel({
       className={`flex flex-col min-w-0 overflow-hidden ${fillHeight ? "h-full" : "row-start-2"}`}
       style={{ background: VSCODE.bg }}
     >
-      {/* Tab bar */}
-      {openTabs.length > 0 && (
-        <div
-          className="flex overflow-x-auto shrink-0"
-          style={{
-            background: VSCODE.sidebarBg,
-            borderBottom: `1px solid ${VSCODE.border}`,
-          }}
-        >
-          {openTabs.map((key) => (
-            <Tab
-              key={key}
-              contentKey={key}
-              active={key === activeFile}
-              onSelect={() => onTabSelect(key)}
-              onClose={() => onTabClose(key)}
-            />
-          ))}
-        </div>
-      )}
+      {/* Tab bar — always rendered to prevent layout jump */}
+      <div
+        className="flex overflow-x-auto shrink-0"
+        style={{
+          background: VSCODE.sidebarBg,
+          borderBottom: `1px solid ${VSCODE.border}`,
+          minHeight: "35px",
+          scrollbarWidth: "none",
+        }}
+      >
+        {openTabs.map((key) => (
+          <Tab
+            key={key}
+            contentKey={key}
+            active={key === activeFile}
+            onSelect={() => onTabSelect(key)}
+            onClose={() => onTabClose(key)}
+          />
+        ))}
+      </div>
 
       {/* Content area */}
       <div className="flex-1 overflow-hidden flex flex-col">
@@ -227,7 +230,7 @@ export const EditorPanel = memo(function EditorPanel({
               key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex-1"
+              className="flex-1 flex flex-col"
             >
               <EmptyEditor />
             </motion.div>

@@ -4038,7 +4038,7 @@ Utility-first CSS framework. In v4, configuration moved from \`tailwind.config.j
 | PostCSS plugin | \`tailwindcss\` package | \`@tailwindcss/postcss\` package |
 | \`@tailwind\` directives | \`@tailwind base; @tailwind components; @tailwind utilities\` | \`@import "tailwindcss"\` |
 | Performance | Baseline | 3–10x faster full builds, up to 100x faster incremental |
-| CSS variable syntax | \`bg-[var(--color)]\` | \`bg-(--color)\` shorthand (still supports bracket) |
+| CSS variable syntax | bracket \`var()\` wrapping | \`bg-(--color)\` shorthand (still supports bracket) |
 
 ### This project's CSS convention
 
@@ -4050,7 +4050,7 @@ The project uses a **mapped Tailwind class** convention where CSS variables are 
 --fg-primary: ...; /* exposed as text-fg-primary */
 \`\`\`
 
-This avoids the \`bg-[var(--bg-primary)]\` bracket syntax, which does not support opacity modifiers (\`/30\`, \`/50\`). The mapped class approach is the correct v4 pattern and aligns with the project's CLAUDE.md conventions.
+This avoids the legacy bracket var() syntax (e.g. wrapping CSS vars in square brackets), which does not support opacity modifiers (\`/30\`, \`/50\`). The mapped class approach is the correct v4 pattern and aligns with the project's CLAUDE.md conventions.
 
 ### Trade-offs
 
@@ -6702,7 +6702,7 @@ Complete ALL criteria before marking task done:
 
 - Kebab-case filenames: \`project-section.tsx\`, \`project-gallery.tsx\`, etc.
 - Use semantic Tailwind classes: \`bg-bg-secondary\`, \`text-fg-primary\`, \`border-border-secondary\`
-- No raw \`bg-[var(--...)]\` or opacity modifiers like \`/30\` on CSS vars
+- No raw bracket var() syntax or opacity modifiers like \`/30\` on CSS vars
 - Component props interfaces are co-located in the same file
 
 ### Graceful Fallback Pattern
@@ -7861,10 +7861,10 @@ _PRD: framer-cms-migration | Task: T020 | Wave: 3_`,
 // ─── Chat Script ──────────────────────────────────────────
 
 export const CHAT_SCRIPT: ChatMessage[] = [
-  // ── /karimo:plan (Research) ────────────────────────
+  // ── /karimo:research ───────────────────────────────
   {
     role: "system",
-    content: "/karimo:plan framer-cms-migration",
+    content: "/karimo:research framer-cms-migration",
     timestamp: 0,
   },
   {
@@ -7892,10 +7892,15 @@ export const CHAT_SCRIPT: ChatMessage[] = [
 
   // ── /karimo:plan (Interview & Planning) ────────────
   {
+    role: "system",
+    content: "/karimo:plan framer-cms-migration",
+    timestamp: 8000,
+  },
+  {
     role: "assistant",
     content:
       "Starting PRD interview. What content are we migrating from Framer?",
-    timestamp: 8000,
+    timestamp: 8500,
   },
   {
     role: "assistant",
@@ -7922,30 +7927,28 @@ export const CHAT_SCRIPT: ChatMessage[] = [
     timestamp: 13500,
   },
 
-  // ── Auto Review ─────────────────────────────────────
+  // ── /karimo:run (Review + Execution) ───────────────
+  {
+    role: "system",
+    content: "/karimo:run framer-cms-migration",
+    timestamp: 14000,
+  },
   {
     role: "assistant",
     content:
-      "Running pre-execution review. Validating all 20 briefs against codebase reality...",
-    timestamp: 14000,
+      "Pre-execution review. Validating all 20 task briefs against codebase reality...",
+    timestamp: 15000,
   },
   {
     role: "tool",
     content:
-      "Review complete \u00b7 2 critical issues found \u00b7 C1: build break in T006 \u00b7 C2: schema conflict across T002/T007/T012 \u00b7 Auto-corrected",
+      "Review complete \u00b7 8 critical issues \u00b7 7 warnings found across 20 briefs \u00b7 Auto-correcting...",
     timestamp: 16500,
   },
   {
     role: "assistant",
-    content: "Corrections applied to recommendations.md. All briefs validated. Ready for execution.",
+    content: "8/8 critical issues auto-corrected. All briefs validated. Starting execution \u2014 4 waves, 20 tasks.",
     timestamp: 17500,
-  },
-
-  // ── /karimo:run (Execution) ─────────────────────────
-  {
-    role: "system",
-    content: "/karimo:run framer-cms-migration",
-    timestamp: 18000,
   },
   {
     role: "assistant",
@@ -8028,7 +8031,7 @@ export const CHAT_SCRIPT: ChatMessage[] = [
 const P = "OS-Portfolio/.karimo/prds/001_framer-cms-migration";
 
 export const TIMELINE_EVENTS: TimelineEvent[] = [
-  // ── Research (/karimo:plan — research phase) ────────
+  // ── Research (/karimo:research) ────────────────────
   { time: 0, type: "chat", payload: "0" },
   // Expand the folder tree to the PRD
   { time: 300, type: "tree-reveal", payload: "OS-Portfolio/.karimo" },
@@ -8049,64 +8052,63 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
   { time: 6500, type: "editor-content", payload: "research-summary" },
   { time: 7000, type: "chat", payload: "4" },
 
-  // ── Plan (interview + PRD generation) ───────────────
+  // ── Plan (/karimo:plan — interview + PRD) ──────────
   { time: 8000, type: "chat", payload: "5" },
-  { time: 9500, type: "chat", payload: "6" },
+  { time: 8500, type: "chat", payload: "6" },
+  { time: 9500, type: "chat", payload: "7" },
   { time: 10000, type: "tab-open", payload: "prd" },
   { time: 10000, type: "editor-content", payload: "prd" },
-  { time: 11500, type: "chat", payload: "7" },
-  { time: 12500, type: "chat", payload: "8" },
+  { time: 11500, type: "chat", payload: "8" },
+  { time: 12500, type: "chat", payload: "9" },
   // Briefs folder appears with all 20 briefs
   { time: 13000, type: "tree-reveal", payload: `${P}/briefs` },
   { time: 13200, type: "tab-open", payload: "tasks" },
   { time: 13200, type: "editor-content", payload: "tasks" },
-  { time: 13500, type: "chat", payload: "9" },
+  { time: 13500, type: "chat", payload: "10" },
 
-  // ── Review (auto-review) ────────────────────────────
-  { time: 14000, type: "chat", payload: "10" },
+  // ── Run (/karimo:run — review then execution) ──────
+  { time: 14000, type: "chat", payload: "11" },
   { time: 14500, type: "tab-open", payload: "briefs-overview" },
   { time: 14500, type: "editor-content", payload: "briefs-overview" },
+  { time: 15000, type: "chat", payload: "12" },
   { time: 16000, type: "tab-open", payload: "recommendations" },
   { time: 16000, type: "editor-content", payload: "recommendations" },
-  { time: 16500, type: "chat", payload: "11" },
-  { time: 17500, type: "chat", payload: "12" },
-
-  // ── Run (/karimo:run — execution) ───────────────────
-  { time: 18000, type: "chat", payload: "13" },
+  { time: 16500, type: "chat", payload: "13" },
+  { time: 17500, type: "chat", payload: "14" },
   // Expand .claude/worktrees during execution
   { time: 18200, type: "tree-reveal", payload: "OS-Portfolio/.claude" },
   { time: 18500, type: "tab-open", payload: "execution" },
   { time: 18500, type: "editor-content", payload: "execution" },
   // Wave 1
-  { time: 19500, type: "chat", payload: "14" },
+  { time: 19500, type: "chat", payload: "15" },
   { time: 20000, type: "tab-open", payload: "brief-t001" },
   { time: 20000, type: "editor-content", payload: "brief-t001" },
-  { time: 22000, type: "chat", payload: "15" },
+  { time: 22000, type: "chat", payload: "16" },
   // Wave 2
-  { time: 23000, type: "chat", payload: "16" },
+  { time: 23000, type: "chat", payload: "17" },
   { time: 23500, type: "tab-open", payload: "brief-t005" },
   { time: 23500, type: "editor-content", payload: "brief-t005" },
-  { time: 25500, type: "chat", payload: "17" },
+  { time: 25500, type: "chat", payload: "18" },
   // Wave 3
-  { time: 26500, type: "chat", payload: "18" },
+  { time: 26500, type: "chat", payload: "19" },
   { time: 27000, type: "tab-open", payload: "brief-t010" },
   { time: 27000, type: "editor-content", payload: "brief-t010" },
-  { time: 28500, type: "chat", payload: "19" },
+  { time: 28500, type: "chat", payload: "20" },
   // Wave 4
-  { time: 29500, type: "chat", payload: "20" },
+  { time: 29500, type: "chat", payload: "21" },
   { time: 30000, type: "tab-open", payload: "findings" },
   { time: 30000, type: "editor-content", payload: "findings" },
-  { time: 31500, type: "chat", payload: "21" },
+  { time: 31500, type: "chat", payload: "22" },
 
   // ── Merge (/karimo:merge) ───────────────────────────
-  { time: 32000, type: "chat", payload: "22" },
-  { time: 33000, type: "chat", payload: "23" },
+  { time: 32000, type: "chat", payload: "23" },
+  { time: 33000, type: "chat", payload: "24" },
   { time: 33500, type: "tab-open", payload: "metrics" },
   { time: 33500, type: "editor-content", payload: "metrics" },
-  { time: 35000, type: "chat", payload: "24" },
+  { time: 35000, type: "chat", payload: "25" },
   { time: 35500, type: "tab-open", payload: "status" },
   { time: 35500, type: "editor-content", payload: "status" },
-  { time: 36000, type: "chat", payload: "25" },
+  { time: 36000, type: "chat", payload: "26" },
 ];
 
 export const TIMELINE_DURATION = 40000;
