@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useViewport } from "./ViewportProvider";
 
@@ -19,11 +19,14 @@ const HEADER_HEIGHT = 56;
 export function SideNav() {
   const { headerVisible, lockHeader } = useViewport();
   const [activeSection, setActiveSection] = useState("home");
+  const isScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Simple approach: iterate top→bottom, last section whose top
-      // is near or above the viewport top wins.
+      // Skip scroll-based detection while a programmatic scroll is in progress
+      if (isScrollingRef.current) return;
+
       let active = "home";
       for (const s of sections) {
         if (s.id === "home") continue;
@@ -42,6 +45,14 @@ export function SideNav() {
   }, []);
 
   const scrollTo = (id: string) => {
+    // Immediately update active state and lock scroll detection
+    setActiveSection(id);
+    isScrollingRef.current = true;
+    clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      isScrollingRef.current = false;
+    }, 1000);
+
     lockHeader();
     if (id === "home") {
       window.scrollTo({ top: 0, behavior: "smooth" });

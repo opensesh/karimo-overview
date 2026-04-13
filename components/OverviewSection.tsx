@@ -719,7 +719,7 @@ function PhaseDetailPanel({
           className="w-full max-w-5xl mx-auto mt-10"
         >
           {/* 3-column grid — fixed height to prevent jumping between loops */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:h-[420px] md:items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-stretch">
             {/* LEFT: Explanation + Input/Output */}
             <div className="order-1 flex flex-col gap-3 md:overflow-y-auto">
               <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-4">
