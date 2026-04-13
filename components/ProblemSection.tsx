@@ -51,10 +51,12 @@ const PROBLEM_CARDS = [
 
 function ProblemAccordion({
   card,
+  index,
   isOpen,
   onToggle,
 }: {
   card: (typeof PROBLEM_CARDS)[number];
+  index: number;
   isOpen: boolean;
   onToggle: () => void;
 }) {
@@ -64,6 +66,9 @@ function ProblemAccordion({
         onClick={onToggle}
         className="w-full flex items-center gap-3 p-4 text-left"
       >
+        <span className="text-heading text-xs text-fg-tertiary shrink-0 w-5 text-center">
+          {String(index + 1).padStart(2, "0")}
+        </span>
         <card.icon className="w-5 h-5 text-fg-brand shrink-0" />
         <h3 className="text-heading text-sm text-fg-primary flex-1">
           {card.title}
@@ -180,12 +185,13 @@ export function ProblemSection() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            className="flex flex-col gap-2"
+            className="grid grid-cols-1 md:grid-cols-2 gap-2"
           >
             {PROBLEM_CARDS.map((card, i) => (
               <motion.div key={card.title} variants={fadeInUp}>
                 <ProblemAccordion
                   card={card}
+                  index={i}
                   isOpen={openIndex === i}
                   onToggle={() =>
                     setOpenIndex(openIndex === i ? null : i)
