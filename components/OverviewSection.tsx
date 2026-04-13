@@ -670,6 +670,19 @@ function PhaseDetailPanel({
   const [activeCommandIdx, setActiveCommandIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [lockedHeight, setLockedHeight] = useState<number | undefined>(undefined);
+
+  // Measure grid after each phase renders and lock to the tallest observed
+  useEffect(() => {
+    if (!gridRef.current) return;
+    const frame = requestAnimationFrame(() => {
+      if (!gridRef.current) return;
+      const h = gridRef.current.scrollHeight;
+      setLockedHeight((prev) => (prev === undefined ? h : Math.max(prev, h)));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [phaseId, activeCommandIdx]);
 
   useEffect(() => {
     setActiveCommandIdx(0);
@@ -718,10 +731,14 @@ function PhaseDetailPanel({
           transition={smoothTransition}
           className="w-full max-w-5xl mx-auto mt-10"
         >
-          {/* 3-column grid — fixed height on desktop to prevent jumping between loops */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:h-[320px] md:items-stretch">
+          {/* 3-column grid — height locks to tallest observed loop */}
+          <div
+            ref={gridRef}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-stretch"
+            style={lockedHeight ? { minHeight: `${lockedHeight}px` } : undefined}
+          >
             {/* LEFT: Explanation + Input/Output */}
-            <div className="order-1 flex flex-col gap-3 md:overflow-y-auto">
+            <div className="order-1 flex flex-col gap-3">
               <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-4">
                 <span
                   className="text-xs text-fg-brand uppercase tracking-widest"
@@ -782,8 +799,8 @@ function PhaseDetailPanel({
               />
             </div>
 
-            {/* RIGHT: Command dropdowns — scrolls if needed */}
-            <div className="order-3 space-y-2 md:overflow-y-auto">
+            {/* RIGHT: Command dropdowns */}
+            <div className="order-3 space-y-2">
               {phase.commands.map((cmd, i) => (
                 <CompactCommandDropdown
                   key={cmd.id}
