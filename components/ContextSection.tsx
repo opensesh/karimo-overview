@@ -107,7 +107,7 @@ const chartPoints: ChartPoint[] = [
       title: "Context Compression",
       subtitle: "KARIMO",
       description:
-        "Each stage distills context into artifacts optimized for the next session. A 1M token window gets injected with the right information at the right time, building on itself the way a PRD moves through the product management process.",
+        "Each stage distills context into artifacts optimized for the next session. A 1M token window becomes a building block across multiple sessions with shared information and objectives.",
       context: {
         label: "10–100M effective",
         formula: "1M × tasks × research depth",
@@ -551,9 +551,8 @@ export function ContextSection() {
           </h3>
           <p className="text-body text-fg-secondary mt-2 max-w-xl">
             Each stage distills context into artifacts optimized for the next
-            session. A 1M token context window gets injected with the right
-            information at the right time, slowly building on itself similar to
-            a PRD moving through the product management process.
+            session. A 1M token window becomes a building block across multiple
+            sessions with shared information and objectives.
           </p>
         </motion.div>
 
