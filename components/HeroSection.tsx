@@ -1,26 +1,28 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { KARIMO_ASCII_ART } from "@/lib/constants";
 import { ClaudeFeatures } from "@/components/orchestration/ClaudeFeatures";
 import { BackgroundPlus } from "@/components/ui/BackgroundPlus";
 
-function useMeshGradient(sectionRef: React.RefObject<HTMLElement | null>) {
+function useMeshGradient(sectionRef: React.RefObject<HTMLElement | null>, isInView: boolean) {
   const meshRef = useRef<HTMLDivElement>(null);
   const mouse = useRef({ x: 50, y: 50 });
   const current = useRef({ x: 50, y: 50 });
   const raf = useRef<number>(0);
+  const frameCount = useRef(0);
 
   const lerp = useCallback(() => {
     const ease = 0.04;
     current.current.x += (mouse.current.x - current.current.x) * ease;
     current.current.y += (mouse.current.y - current.current.y) * ease;
 
-    const cx = current.current.x;
-    const cy = current.current.y;
-
-    if (meshRef.current) {
+    // Throttle DOM writes to ~30fps
+    frameCount.current++;
+    if (frameCount.current % 2 === 0 && meshRef.current) {
+      const cx = current.current.x;
+      const cy = current.current.y;
       meshRef.current.style.background = [
         `radial-gradient(ellipse 80% 60% at ${cx}% ${cy}%, var(--bg-brand-subtle) 0%, transparent 70%)`,
         `radial-gradient(ellipse 60% 50% at ${100 - cx}% ${100 - cy}%, var(--bg-tertiary) 0%, transparent 60%)`,
@@ -33,7 +35,7 @@ function useMeshGradient(sectionRef: React.RefObject<HTMLElement | null>) {
 
   useEffect(() => {
     const section = sectionRef.current;
-    if (!section) return;
+    if (!section || !isInView) return;
 
     const onMove = (e: MouseEvent) => {
       const rect = section.getBoundingClientRect();
@@ -55,7 +57,7 @@ function useMeshGradient(sectionRef: React.RefObject<HTMLElement | null>) {
       section.removeEventListener("mouseleave", onLeave);
       cancelAnimationFrame(raf.current);
     };
-  }, [sectionRef, lerp]);
+  }, [sectionRef, lerp, isInView]);
 
   return meshRef;
 }
@@ -106,7 +108,19 @@ const ease = [0.16, 1, 0.3, 1] as const;
 export function HeroSection({ version: serverVersion }: HeroSectionProps) {
   const { version, stars, loading } = useGitHubMeta(serverVersion);
   const sectionRef = useRef<HTMLElement>(null);
-  const meshRef = useMeshGradient(sectionRef);
+  const heroInView = useInView(sectionRef, { margin: "100px" });
+  const meshRef = useMeshGradient(sectionRef, heroInView);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Pause/play CRT overlay video based on viewport visibility
+  useEffect(() => {
+    if (!videoRef.current) return;
+    if (heroInView) {
+      videoRef.current.play().catch(() => {});
+    } else {
+      videoRef.current.pause();
+    }
+  }, [heroInView]);
   return (
     <section
       ref={sectionRef}
@@ -115,6 +129,7 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
     >
       {/* Layer 0: CRT video overlay — far background */}
       <video
+        ref={videoRef}
         autoPlay
         loop
         muted
@@ -233,10 +248,7 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
           transition={{ duration: 0.5, delay: 1.4, ease }}
           className="max-w-lg text-fg-secondary font-body leading-relaxed relative text-center"
         >
-          An open source Claude Code plugin using Anthropic&apos;s latest innovations
-          <br className="hidden sm:block" />{" "}
-          for PRD-driven autonomous development. Think of it as plan mode on
-          steroids, through context and agent orchestration.
+          Advanced Claude Code plugin that turns PRDs (product requirements documents) into autonomous development. Think of it as plan mode on steroids, powered by context and agent orchestration.
         </motion.p>
 
       </div>
