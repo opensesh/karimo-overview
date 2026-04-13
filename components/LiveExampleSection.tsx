@@ -90,11 +90,11 @@ function useTextScrambleReveal(
 // Ordered impressive-first for carousel
 
 const MIGRATION_STATS = [
-  { value: "~4,000", label: "Lines Added" },
-  { value: "~2.5", label: "Hours" },
-  { value: "39", label: "Files Changed" },
   { value: "67", label: "Images" },
   { value: "20", label: "Tasks" },
+  { value: "39", label: "Files Changed" },
+  { value: "~4,000", label: "Lines Added" },
+  { value: "~2.5", label: "Hours" },
   { value: "4", label: "Waves" },
 ];
 
@@ -117,13 +117,13 @@ function StatItem({
     <div className="flex flex-col items-center gap-0.5" style={{ width: "5.5rem" }}>
       <span
         className="text-brand-500 text-xl md:text-2xl font-bold text-center w-full"
-        style={{ fontFamily: "var(--font-accent)" }}
+        style={{ fontFamily: "var(--font-accent)", minHeight: "1.75rem" }}
       >
         {display}
       </span>
       <span
         className="text-[10px] text-fg-tertiary uppercase tracking-wider whitespace-nowrap"
-        style={{ fontFamily: "var(--font-accent)" }}
+        style={{ fontFamily: "var(--font-accent)", minHeight: "0.875rem" }}
       >
         {label}
       </span>
@@ -241,13 +241,13 @@ function KeyStatisticsCarousel() {
                   <div key={stat.label} className="flex flex-col items-center gap-0.5" style={{ width: "5.5rem" }}>
                     <span
                       className="text-xl md:text-2xl font-bold"
-                      style={{ fontFamily: "var(--font-accent)" }}
+                      style={{ fontFamily: "var(--font-accent)", minHeight: "1.75rem" }}
                     >
                       {stat.value}
                     </span>
                     <span
                       className="text-[10px] sm:text-[11px] uppercase tracking-wider whitespace-nowrap"
-                      style={{ fontFamily: "var(--font-accent)" }}
+                      style={{ fontFamily: "var(--font-accent)", minHeight: "0.875rem" }}
                     >
                       {stat.label}
                     </span>
