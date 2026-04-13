@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { useTimeline } from "@/hooks/useTimeline";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { VSCodeEmulator, type MobilePanel } from "@/components/vscode/VSCodeEmulator";
+import { VSCodeEmulator } from "@/components/vscode/VSCodeEmulator";
 import {
   FILE_TREE,
   CHAT_SCRIPT,
@@ -146,7 +146,7 @@ function KeyStatisticsCarousel() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-xl border border-border-secondary bg-bg-secondary/30 px-4 py-3 sm:px-5 sm:py-4 shrink-0 w-full md:w-[280px]"
+      className="rounded-xl border border-border-secondary bg-bg-secondary/30 px-4 py-3 sm:px-5 sm:py-4 shrink-0 w-full md:w-[280px] overflow-hidden"
       style={{ backdropFilter: "blur(8px)" }}
     >
       {/* Header row with title + arrows */}
@@ -574,7 +574,7 @@ function ControlBar({
   );
 }
 
-// ─── Blur Overlay ─────────────────────────────────────────
+// ─── Blur Overlay (desktop only) ─────────────────────────
 
 function BlurOverlay({ onPlay }: { onPlay: () => void }) {
   return (
@@ -620,6 +620,165 @@ function BlurOverlay({ onPlay }: { onPlay: () => void }) {
   );
 }
 
+// ─── Mobile Desktop-Redirect Modal ───────────────────────
+
+function MobileDesktopModal({ onClose }: { onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    const url = typeof window !== "undefined" ? window.location.href.split("#")[0] + "#live-example" : "";
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center px-6"
+      style={{ background: "rgba(0, 0, 0, 0.7)", backdropFilter: "blur(8px)" }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.2, delay: 0.05 }}
+        className="rounded-2xl border border-border-secondary bg-bg-secondary p-6 max-w-sm w-full text-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Monitor icon */}
+        <div className="flex justify-center mb-4">
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center"
+            style={{ background: "rgba(254, 81, 2, 0.1)", border: "1px solid rgba(254, 81, 2, 0.2)" }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fe5102" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+          </div>
+        </div>
+
+        <h3
+          className="text-fg-primary text-lg font-semibold mb-2"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Best on Desktop
+        </h3>
+        <p className="text-fg-secondary text-sm mb-5 leading-relaxed">
+          This interactive migration replay is built for larger screens. Send yourself the link to watch on desktop.
+        </p>
+
+        {/* Copy link button */}
+        <button
+          onClick={handleCopy}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer"
+          style={{
+            background: copied ? "rgba(34, 197, 94, 0.15)" : "rgba(254, 81, 2, 0.15)",
+            color: copied ? "#22c55e" : "#ff7a38",
+            border: `1px solid ${copied ? "rgba(34, 197, 94, 0.3)" : "rgba(254, 81, 2, 0.3)"}`,
+          }}
+        >
+          {copied ? (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Copied!
+            </>
+          ) : (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              Copy Link
+            </>
+          )}
+        </button>
+
+        {/* Dismiss */}
+        <button
+          onClick={onClose}
+          className="mt-3 text-xs text-fg-tertiary hover:text-fg-secondary transition-colors cursor-pointer"
+        >
+          Dismiss
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── Mobile Thumbnail Card ───────────────────────────────
+
+function MobileThumbnail({ onTap }: { onTap: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="rounded-xl border border-border-secondary overflow-hidden cursor-pointer group"
+      style={{ background: "#0a0a0a" }}
+      onClick={onTap}
+    >
+      {/* Faux editor chrome */}
+      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border-secondary">
+        <div className="w-2 h-2 rounded-full" style={{ background: "#ff5f57" }} />
+        <div className="w-2 h-2 rounded-full" style={{ background: "#febc2e" }} />
+        <div className="w-2 h-2 rounded-full" style={{ background: "#28c840" }} />
+        <span className="text-[10px] text-fg-tertiary ml-2" style={{ fontFamily: "var(--font-mono)" }}>
+          KARIMO Migration Replay
+        </span>
+      </div>
+
+      {/* Thumbnail body */}
+      <div className="relative flex flex-col items-center justify-center py-12 px-6">
+        {/* Decorative code lines */}
+        <div className="absolute inset-0 opacity-[0.06] overflow-hidden pointer-events-none">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-2.5 rounded-sm mb-2 ml-4"
+              style={{
+                background: "#fff",
+                width: `${30 + Math.random() * 50}%`,
+                marginLeft: `${(i % 3) * 12 + 16}px`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Play button */}
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 mb-4"
+          style={{
+            background: "rgba(254, 81, 2, 0.9)",
+            boxShadow: "0 0 40px rgba(254, 81, 2, 0.25)",
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" className="ml-0.5">
+            <path d="M6 4v16l14-8L6 4z" />
+          </svg>
+        </div>
+
+        <span className="text-sm text-fg-secondary text-center">
+          Watch the full experience on desktop
+        </span>
+        <span className="text-[11px] text-fg-tertiary mt-1">
+          Tap to copy link
+        </span>
+      </div>
+    </motion.div>
+  );
+}
+
 // ─── Main Section ─────────────────────────────────────────
 
 export function LiveExampleSection() {
@@ -627,7 +786,7 @@ export function LiveExampleSection() {
   const sectionInView = useInView(sectionRef, { margin: "100px" });
   const wasPlayingRef = useRef(false);
   const [hasStarted, setHasStarted] = useState(false);
-  const [mobilePanel, setMobilePanel] = useState<MobilePanel>("chat");
+  const [showMobileModal, setShowMobileModal] = useState(false);
 
   const timeline = useTimeline({
     duration: TIMELINE_DURATION,
@@ -696,8 +855,6 @@ export function LiveExampleSection() {
         prev.includes(contentKey) ? prev : [...prev, contentKey].slice(-5)
       );
       timeline.pause();
-      // On mobile, switch to editor panel when file is selected
-      setMobilePanel("editor");
     },
     [timeline]
   );
@@ -807,43 +964,48 @@ export function LiveExampleSection() {
         </div>
 
 
-        {/* Control bar */}
-        <ControlBar
-          progress={timeline.progress}
-          currentTime={timeline.currentTime}
-          isPlaying={timeline.isPlaying}
-          speed={timeline.speed}
-          hasStarted={hasStarted}
-          onSeek={handleChapterSeek}
-          onTogglePlay={handleTogglePlay}
-          onRestart={handleRestart}
-          onSetSpeed={timeline.setSpeed}
-          onChapterClick={handleChapterSeek}
-        />
+        {/* ── Mobile: thumbnail + modal ── */}
+        <div className="lg:hidden pb-4">
+          <MobileThumbnail onTap={() => setShowMobileModal(true)} />
+        </div>
 
-        {/* Mobile navigation hint */}
-        <p className="sm:hidden text-[10px] text-fg-tertiary text-center -mt-1 mb-2 shrink-0">
-          Tap chapters to navigate &middot; Swipe Files, Editor, Chat below
-        </p>
+        <AnimatePresence>
+          {showMobileModal && (
+            <MobileDesktopModal onClose={() => setShowMobileModal(false)} />
+          )}
+        </AnimatePresence>
 
-        {/* VS Code Emulator — fills remaining space */}
-        <div
-          className="relative flex-1 min-h-0 overflow-hidden pb-4 sm:pb-10 lg:max-h-[60vh]"
-          onWheel={(e) => {
-            const target = e.target as HTMLElement;
-            const scrollable = target.closest("[data-vscode-scroll]");
-            if (scrollable) {
-              e.stopPropagation();
-            }
-          }}
-        >
-          {/* Blur overlay before play */}
-          <AnimatePresence>
-            {!hasStarted && <BlurOverlay onPlay={handlePlay} />}
-          </AnimatePresence>
+        {/* ── Desktop: control bar + emulator ── */}
+        <div className="hidden lg:flex lg:flex-col lg:flex-1 lg:min-h-0">
+          <ControlBar
+            progress={timeline.progress}
+            currentTime={timeline.currentTime}
+            isPlaying={timeline.isPlaying}
+            speed={timeline.speed}
+            hasStarted={hasStarted}
+            onSeek={handleChapterSeek}
+            onTogglePlay={handleTogglePlay}
+            onRestart={handleRestart}
+            onSetSpeed={timeline.setSpeed}
+            onChapterClick={handleChapterSeek}
+          />
 
-          {/* Desktop emulator */}
-          <div className="hidden lg:block h-full">
+          {/* VS Code Emulator — fills remaining space */}
+          <div
+            className="relative flex-1 min-h-0 overflow-hidden pb-10 max-h-[60vh]"
+            onWheel={(e) => {
+              const target = e.target as HTMLElement;
+              const scrollable = target.closest("[data-vscode-scroll]");
+              if (scrollable) {
+                e.stopPropagation();
+              }
+            }}
+          >
+            {/* Blur overlay before play */}
+            <AnimatePresence>
+              {!hasStarted && <BlurOverlay onPlay={handlePlay} />}
+            </AnimatePresence>
+
             <VSCodeEmulator
               tree={FILE_TREE}
               activeFile={activeFile}
@@ -855,24 +1017,6 @@ export function LiveExampleSection() {
               onFileSelect={handleFileSelect}
               onTabSelect={handleTabSelect}
               onTabClose={handleTabClose}
-            />
-          </div>
-
-          {/* Mobile/tablet emulator */}
-          <div className="lg:hidden h-full">
-            <VSCodeEmulator
-              tree={FILE_TREE}
-              activeFile={activeFile}
-              openTabs={openTabs}
-              visibleMessages={visibleMessages}
-              revealedPaths={revealedPaths}
-              currentTime={timeline.currentTime}
-              activeChapter={activeChapter}
-              onFileSelect={handleFileSelect}
-              onTabSelect={handleTabSelect}
-              onTabClose={handleTabClose}
-              mobilePanel={mobilePanel}
-              onMobilePanelChange={setMobilePanel}
             />
           </div>
         </div>
