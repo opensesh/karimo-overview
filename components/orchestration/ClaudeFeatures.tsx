@@ -15,6 +15,7 @@ interface ClaudeFeature {
   description: string;
   href: string;
   date: string;
+  isCustom?: boolean;
 }
 
 const DOCS_BASE = "https://code.claude.com/docs/en";
@@ -83,6 +84,7 @@ const claudeFeatures: ClaudeFeature[] = [
       "PM Agent verifies branch state before and after each operation.",
     href: `${DOCS_BASE}/common-workflows`,
     date: "Sep 2025",
+    isCustom: true,
   },
   {
     id: "loop",
@@ -91,6 +93,7 @@ const claudeFeatures: ClaudeFeature[] = [
       "Automatic detection of revision loops prevents infinite cycles.",
     href: `${DOCS_BASE}/common-workflows`,
     date: "Sep 2025",
+    isCustom: true,
   },
   {
     id: "crash",
@@ -99,6 +102,7 @@ const claudeFeatures: ClaudeFeature[] = [
       "Execution state reconstructed from git. Resume exactly where you left off.",
     href: `${DOCS_BASE}/common-workflows`,
     date: "Sep 2025",
+    isCustom: true,
   },
 ];
 
@@ -165,6 +169,7 @@ function FeatureCard({
           alt=""
           width={56}
           height={56}
+          unoptimized
           draggable={false}
           className="w-12 h-12 sm:w-14 sm:h-14 opacity-90 pointer-events-none
                      group-hover:scale-110 transition-transform duration-500"
@@ -176,6 +181,9 @@ function FeatureCard({
         <div className="flex items-start justify-between gap-2">
           <h5 className="text-fg-primary text-sm font-semibold">
             {feature.title}
+            {feature.isCustom && (
+              <span className="text-fg-brand ml-0.5" aria-hidden="true">*</span>
+            )}
           </h5>
           <LinkExternal01
             width={14}
@@ -431,14 +439,8 @@ export function ClaudeFeatures() {
           </h4>
         </div>
 
-        {/* Right: count chip + progress bar */}
+        {/* Right: progress bar, count chip, info tooltip */}
         <div className="flex items-center gap-3">
-          <span className="text-xs font-mono text-fg-secondary px-2.5 py-1 rounded-md
-                           bg-bg-tertiary border border-border-secondary">
-            <span className="text-fg-brand font-semibold">{TOTAL}</span>
-            <span className="text-fg-tertiary"> total</span>
-          </span>
-
           {/* Progress bar — thumb shows visible window within total */}
           <div className="w-16 sm:w-24 h-1.5 rounded-full bg-border-secondary relative overflow-hidden">
             <motion.div
@@ -449,6 +451,42 @@ export function ClaudeFeatures() {
                 backgroundColor: "var(--fg-brand)",
               }}
             />
+          </div>
+
+          <span className="text-xs font-mono text-fg-secondary px-2.5 py-1 rounded-md
+                           bg-bg-tertiary border border-border-secondary">
+            <span className="text-fg-brand font-semibold">{TOTAL}</span>
+            <span className="text-fg-tertiary"> total</span>
+          </span>
+
+          {/* Info tooltip for KARIMO-custom features */}
+          <div className="relative group/tip">
+            <button
+              type="button"
+              aria-label="Info about KARIMO-custom features"
+              className="flex items-center justify-center w-6 h-6 rounded-full
+                         bg-bg-tertiary border border-border-secondary
+                         text-fg-tertiary hover:text-fg-secondary hover:border-border-primary
+                         transition-colors duration-200"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="8" cy="8" r="6.5" />
+                <path d="M8 11V7.5" />
+                <circle cx="8" cy="5.25" r="0.5" fill="currentColor" stroke="none" />
+              </svg>
+            </button>
+            <div
+              className="pointer-events-none opacity-0 group-hover/tip:pointer-events-auto group-hover/tip:opacity-100
+                         focus-within:pointer-events-auto focus-within:opacity-100
+                         absolute right-0 top-full mt-2 z-50
+                         w-64 px-3 py-2.5 rounded-lg
+                         bg-bg-secondary border border-border-secondary shadow-lg
+                         text-xs text-fg-secondary leading-relaxed
+                         transition-opacity duration-200"
+              role="tooltip"
+            >
+              <span className="text-fg-brand">*</span> KARIMO extends these native Claude Code features with additional orchestration logic for wave-ordered execution.
+            </div>
           </div>
         </div>
       </motion.div>
