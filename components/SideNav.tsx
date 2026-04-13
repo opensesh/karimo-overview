@@ -51,8 +51,7 @@ export function SideNav() {
     if (!el) return;
     const top =
       el.getBoundingClientRect().top +
-      window.scrollY -
-      HEADER_HEIGHT;
+      window.scrollY;
     window.scrollTo({ top, behavior: "smooth" });
   };
 
