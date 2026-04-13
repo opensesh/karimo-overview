@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { pipelinePhases } from "@/lib/constants";
 import { smoothTransition } from "@/lib/motion";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -851,12 +851,27 @@ function PlaybackControls({
 // ─── Main Section ──────────────────────────────────────────
 export function SolutionSection() {
   const { ref: sectionRef, y } = useParallax(30);
+  const sectionInView = useInView(sectionRef, { margin: "100px" });
+  const wasPlayingRef = useRef(false);
 
   // Animation state
   const [isPlaying, setIsPlaying] = useState(false);
   const [animationStep, setAnimationStep] = useState(-1);
   const [manualPhase, setManualPhase] = useState("loop1");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Pause/resume when scrolling out of / back into view
+  useEffect(() => {
+    if (!sectionInView) {
+      if (isPlaying) {
+        wasPlayingRef.current = true;
+        setIsPlaying(false);
+      }
+    } else if (wasPlayingRef.current) {
+      wasPlayingRef.current = false;
+      setIsPlaying(true);
+    }
+  }, [sectionInView]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Derive everything from animationStep
   const currentStep = animationStep >= 0 ? STEP_MAP[animationStep] : null;
@@ -912,7 +927,7 @@ export function SolutionSection() {
     <section
       ref={sectionRef}
       id="pipeline"
-      className="bg-bg-secondary relative overflow-hidden pt-16 md:pt-20 lg:pt-24 pb-16 md:pb-20 lg:pb-24 min-h-screen flex flex-col justify-center"
+      className="section-padding bg-bg-secondary relative overflow-hidden min-h-screen flex flex-col justify-center"
     >
       {/* Noise texture */}
       <div
