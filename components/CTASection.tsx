@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { useParallax } from "@/components/ui/ParallaxSection";
 
@@ -13,6 +13,7 @@ const SCRAMBLE_CHARS = "█▓▒░▮▯▰▱▣▤▥▦@#$%^&*_+[]{}|;:<>?~
 
 function useTextScrambleCycle(
   words: string[],
+  isActive: boolean,
   {
     typeDuration = 600,
     pauseDuration = 2000,
@@ -24,6 +25,8 @@ function useTextScrambleCycle(
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
+    if (!isActive) return;
+
     let timeout: ReturnType<typeof setTimeout>;
 
     function scrambleTo(target: string, duration: number, onDone: () => void) {
@@ -78,7 +81,7 @@ function useTextScrambleCycle(
       clearTimeout(timeout);
       cancelAnimationFrame(rafRef.current);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isActive]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return display;
 }
@@ -95,7 +98,8 @@ const ROTATING_WORDS = ["today", "right now", "vibe coding", "building", "shippi
 
 export function CTASection() {
   const { ref: sectionRef, y } = useParallax(30);
-  const scrambleDisplay = useTextScrambleCycle(ROTATING_WORDS);
+  const ctaInView = useInView(sectionRef, { margin: "100px" });
+  const scrambleDisplay = useTextScrambleCycle(ROTATING_WORDS, ctaInView);
 
   return (
     <section ref={sectionRef} id="quickstart" className="min-h-screen flex items-center bg-bg-primary overflow-hidden">

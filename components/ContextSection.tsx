@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { useParallax } from "@/components/ui/ParallaxSection";
 import { Modal } from "@/components/ui/Modal";
@@ -975,6 +975,8 @@ function ChartDetailPanel({ point }: { point: ChartPoint }) {
 // ---------------------------------------------------------------------------
 
 function ContextMultiplicationViz() {
+  const vizRef = useRef<HTMLDivElement>(null);
+  const vizInView = useInView(vizRef, { margin: "100px" });
   const [expandedStage, setExpandedStage] = useState(0);
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [activeModalFile, setActiveModalFile] = useState<string | null>(null);
@@ -983,8 +985,22 @@ function ContextMultiplicationViz() {
   const [stageProgress, setStageProgress] = useState(0);
   const rafRef = useRef<number | null>(null);
   const stageStartRef = useRef(Date.now());
+  const wasPlayingRef = useRef(false);
 
   const STAGE_DURATION = 3000; // ms per stage
+
+  // Pause/resume auto-advance when scrolling out of / back into view
+  useEffect(() => {
+    if (!vizInView) {
+      if (playing) {
+        wasPlayingRef.current = true;
+        setPlaying(false);
+      }
+    } else if (wasPlayingRef.current) {
+      wasPlayingRef.current = false;
+      setPlaying(true);
+    }
+  }, [vizInView]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Smooth timer using rAF
   useEffect(() => {
@@ -1051,6 +1067,7 @@ function ContextMultiplicationViz() {
 
   return (
     <motion.div
+      ref={vizRef}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
@@ -1064,6 +1081,7 @@ function ContextMultiplicationViz() {
         onStageChange={handleStageSelect}
         playing={playing}
         onTogglePlay={handleTogglePlay}
+        paused={!vizInView}
       />
 
       {/* Desktop: 4-column grid */}

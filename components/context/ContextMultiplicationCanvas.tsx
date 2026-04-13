@@ -871,10 +871,11 @@ interface ContextMultiplicationCanvasProps {
   onStageChange: (stage: number) => void;
   playing: boolean;
   onTogglePlay: () => void;
+  paused?: boolean;
 }
 
 export function ContextMultiplicationCanvas({
-  activeStage, stageProgress, onStageChange, playing, onTogglePlay,
+  activeStage, stageProgress, onStageChange, playing, onTogglePlay, paused = false,
 }: ContextMultiplicationCanvasProps) {
   return (
     <div className="w-full">
@@ -892,7 +893,8 @@ export function ContextMultiplicationCanvas({
         <Canvas
           orthographic
           camera={{ zoom: 60, position: [0, 0.3, 10], near: 0.1, far: 100 }}
-          dpr={[1, 2]}
+          frameloop={paused ? "never" : "always"}
+          dpr={[1, 1.5]}
           style={{ background: "transparent" }}
           gl={{ antialias: true, alpha: true }}
           onPointerMissed={() => { document.body.style.cursor = "auto"; }}

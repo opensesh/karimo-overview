@@ -622,6 +622,9 @@ function BlurOverlay({ onPlay }: { onPlay: () => void }) {
 // ─── Main Section ─────────────────────────────────────────
 
 export function LiveExampleSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const sectionInView = useInView(sectionRef, { margin: "100px" });
+  const wasPlayingRef = useRef(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>("chat");
 
@@ -630,6 +633,19 @@ export function LiveExampleSection() {
     loop: true,
     autoPlay: false,
   });
+
+  // Pause timeline when section leaves viewport; resume when it returns
+  useEffect(() => {
+    if (!sectionInView) {
+      if (timeline.isPlaying) {
+        wasPlayingRef.current = true;
+        timeline.pause();
+      }
+    } else if (wasPlayingRef.current) {
+      wasPlayingRef.current = false;
+      timeline.play();
+    }
+  }, [sectionInView]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // User interaction state
   const [userActiveFile, setUserActiveFile] = useState<string | null>(null);
@@ -735,6 +751,7 @@ export function LiveExampleSection() {
 
   return (
     <section
+      ref={sectionRef}
       id="live-example"
       className="bg-bg-primary relative overflow-hidden"
       style={{ minHeight: "100dvh" }}
