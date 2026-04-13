@@ -2,17 +2,18 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { Home, Flag } from "lucide-react";
 import { useViewport } from "./ViewportProvider";
 
 const sections = [
-  { id: "home", number: "00", label: "Home" },
-  { id: "the-problem", number: "01", label: "The Problem" },
-  { id: "pipeline", number: "02", label: "The Solution" },
+  { id: "home", number: "00", label: "Home", icon: Home },
+  { id: "the-problem", number: "01", label: "Problem" },
+  { id: "pipeline", number: "02", label: "Solution" },
   { id: "live-example", number: "03", label: "Example" },
   { id: "orchestration", number: "04", label: "Encoding" },
   { id: "context", number: "05", label: "Context" },
   { id: "adoption", number: "06", label: "Adoption" },
-  { id: "quickstart", number: "07", label: "Start" },
+  { id: "quickstart", number: "07", label: "Start", icon: Flag },
 ];
 
 const HEADER_HEIGHT = 56;
@@ -63,7 +64,8 @@ export function SideNav() {
     if (!el) return;
     const top =
       el.getBoundingClientRect().top +
-      window.scrollY;
+      window.scrollY -
+      HEADER_HEIGHT;
     window.scrollTo({ top, behavior: "smooth" });
   };
 
@@ -94,14 +96,22 @@ export function SideNav() {
                   : "bg-border-secondary"
               }`}
             />
-            {/* Number */}
-            <span
-              className={`text-accent text-[10px] leading-none shrink-0 transition-colors duration-300 ${
-                isActive ? "text-fg-brand" : "text-fg-tertiary"
-              }`}
-            >
-              {section.number}
-            </span>
+            {/* Number or Icon */}
+            {section.icon ? (
+              <section.icon
+                className={`w-3 h-3 shrink-0 transition-colors duration-300 ${
+                  isActive ? "text-fg-brand" : "text-fg-tertiary"
+                }`}
+              />
+            ) : (
+              <span
+                className={`text-accent text-[10px] leading-none shrink-0 transition-colors duration-300 ${
+                  isActive ? "text-fg-brand" : "text-fg-tertiary"
+                }`}
+              >
+                {section.number}
+              </span>
+            )}
             {/* Label — all labels appear on container hover */}
             <span
               className={`text-xs font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ease-out max-w-0 opacity-0 group-hover/nav:max-w-[10rem] group-hover/nav:opacity-100 ${
