@@ -104,18 +104,18 @@ function Tab({
         <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: color }} />
       )}
       <span className="truncate max-w-[120px]">{filename}</span>
-      <span
+      <button
+        type="button"
         className="w-4 h-4 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ color: VSCODE.textDim }}
+        style={{ color: VSCODE.textDim, background: "transparent", border: "none", padding: 0 }}
         onClick={(e) => {
           e.stopPropagation();
           onClose();
         }}
-        role="button"
         aria-label={`Close ${filename}`}
       >
         &times;
-      </span>
+      </button>
     </button>
   );
 }
