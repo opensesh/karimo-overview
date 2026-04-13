@@ -104,10 +104,10 @@ const chartPoints: ChartPoint[] = [
     dotColor: "#fe5102",
     gradientId: "grad-karimo",
     detail: {
-      title: "Progressive Planning",
+      title: "Context Compression",
       subtitle: "KARIMO",
       description:
-        "Context compounds across sessions. Research seeds PRDs, PRDs seed briefs, briefs seed parallel worktrees. Each stage multiplies the effective context window.",
+        "Each stage distills context into artifacts optimized for the next session. A 1M token window gets injected with the right information at the right time, building on itself the way a PRD moves through the product management process.",
       context: {
         label: "10–100M effective",
         formula: "1M × tasks × research depth",
@@ -547,13 +547,13 @@ export function ContextSection() {
             Part 2
           </span>
           <h3 className="text-display text-xl md:text-2xl text-fg-primary mt-2">
-            Context Multiplication
+            Context Compression
           </h3>
           <p className="text-body text-fg-secondary mt-2 max-w-xl">
-            Each stage distills knowledge into artifacts that seed the next.
-            A single 1M window becomes many focused sessions — research
-            compounds, agents never start cold, and no two worktrees
-            compete for the same context.
+            Each stage distills context into artifacts optimized for the next
+            session. A 1M token context window gets injected with the right
+            information at the right time, slowly building on itself similar to
+            a PRD moving through the product management process.
           </p>
         </motion.div>
 
@@ -684,7 +684,7 @@ function ComplexityDurationChart() {
             transition={{ duration: 0.4, ease: springEase }}
             className="overflow-hidden"
           >
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_320px] gap-6 items-center px-6 pb-6 md:px-8 md:pb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-center px-6 pb-6 md:px-8 md:pb-8">
         {/* SVG Chart */}
         <div>
           <svg
