@@ -90,12 +90,12 @@ function useTextScrambleReveal(
 // Ordered impressive-first for carousel
 
 const MIGRATION_STATS = [
-  { value: "67", label: "Images" },
-  { value: "20", label: "Tasks" },
-  { value: "4", label: "Waves" },
   { value: "~4,000", label: "Lines" },
   { value: "~2.5", label: "Hours" },
   { value: "39", label: "+ Files" },
+  { value: "67", label: "Images" },
+  { value: "20", label: "Tasks" },
+  { value: "4", label: "Waves" },
 ];
 
 const STATS_PER_PAGE = 3;
@@ -114,7 +114,7 @@ function StatItem({
   const display = useTextScrambleReveal(value, { delay, enabled: inView });
 
   return (
-    <div className="flex flex-col items-center gap-0.5" style={{ width: "5.5rem" }}>
+    <div className="flex flex-col items-center gap-0.5 min-w-0">
       <span
         className="text-brand-500 text-xl md:text-2xl font-bold text-center w-full"
         style={{ fontFamily: "var(--font-accent)", minHeight: "1.75rem" }}
@@ -238,7 +238,7 @@ function KeyStatisticsCarousel() {
                 </AnimatePresence>
               ) : (
                 stats.map((stat) => (
-                  <div key={stat.label} className="flex flex-col items-center gap-0.5" style={{ width: "5.5rem" }}>
+                  <div key={stat.label} className="flex flex-col items-center gap-0.5 min-w-0">
                     <span
                       className="text-xl md:text-2xl font-bold"
                       style={{ fontFamily: "var(--font-accent)", minHeight: "1.75rem" }}
@@ -376,15 +376,14 @@ function ControlBar({
 
   return (
     <div
-      className="rounded-xl border border-border-secondary bg-bg-secondary/50 px-3 py-2 sm:px-4 sm:py-3 mb-3 sm:mb-4 shrink-0"
+      className="rounded-xl border border-border-secondary bg-bg-secondary/50 px-3 py-2 sm:px-4 sm:py-3 mb-3 sm:mb-4 shrink-0 overflow-hidden"
       style={{ backdropFilter: "blur(8px)" }}
     >
       {/* Mobile: two-row layout / Desktop: single row */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
         {/* Chapters — horizontal scroll, no scrollbar */}
         <div
-          className="flex gap-1 sm:gap-1.5 overflow-x-auto min-w-0 pb-0.5 sm:pb-0"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+          className="flex gap-1 sm:gap-1.5 overflow-x-auto min-w-0 pb-0.5 sm:pb-0 hide-scrollbar"
         >
           {CHAPTERS.map((ch, i) => {
             const isActive = hasStarted && i === activeChapter;
@@ -407,7 +406,7 @@ function ControlBar({
                 ) : null}
                 <button
                   onClick={() => onChapterClick(ch.time)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md text-[11px] sm:text-xs transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0"
+                  className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md text-xs sm:text-xs transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0"
                   style={{
                     background: isActive
                       ? isBookend
@@ -468,15 +467,17 @@ function ControlBar({
           })}
         </div>
 
-        {/* Playback controls — centered on mobile, right-aligned on desktop */}
-        <div className="flex items-center justify-center sm:justify-end gap-1.5 sm:gap-2 shrink-0">
+        {/* Playback controls — scrollable on mobile, right-aligned on desktop */}
+        <div
+          className="flex items-center justify-center sm:justify-end gap-2 shrink-0 overflow-x-auto min-w-0 sm:overflow-visible hide-scrollbar"
+        >
           {/* Speed buttons */}
-          <div className="flex items-center rounded-md overflow-hidden border border-border-secondary">
+          <div className="flex items-center rounded-md overflow-hidden border border-border-secondary shrink-0">
             {SPEEDS.map((s) => (
               <button
                 key={s}
                 onClick={() => onSetSpeed(s)}
-                className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-[11px] font-medium transition-colors cursor-pointer"
+                className="px-2 py-0.5 sm:px-2 sm:py-1 text-[11px] sm:text-[11px] font-medium transition-colors cursor-pointer"
                 style={{
                   background:
                     speed === s ? "rgba(254, 81, 2, 0.2)" : "transparent",
@@ -489,18 +490,18 @@ function ControlBar({
           </div>
 
           {/* Divider */}
-          <div className="w-px h-4 bg-border-secondary" />
+          <div className="w-px h-4 bg-border-secondary shrink-0" />
 
           {/* Play/Pause */}
           <button
             onClick={onTogglePlay}
-            className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-1"
+            className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-1 shrink-0"
             aria-label={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
               <svg
-                width="14"
-                height="14"
+                width="16"
+                height="16"
                 viewBox="0 0 14 14"
                 fill="currentColor"
               >
@@ -509,8 +510,8 @@ function ControlBar({
               </svg>
             ) : (
               <svg
-                width="14"
-                height="14"
+                width="16"
+                height="16"
                 viewBox="0 0 14 14"
                 fill="currentColor"
               >
@@ -522,12 +523,12 @@ function ControlBar({
           {/* Restart */}
           <button
             onClick={onRestart}
-            className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-1"
+            className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-1 shrink-0"
             aria-label="Restart"
           >
             <svg
-              width="14"
-              height="14"
+              width="16"
+              height="16"
               viewBox="0 0 14 14"
               fill="none"
               stroke="currentColor"
@@ -753,8 +754,7 @@ export function LiveExampleSection() {
     <section
       ref={sectionRef}
       id="live-example"
-      className="bg-bg-primary relative overflow-hidden"
-      style={{ minHeight: "100dvh" }}
+      className="section-padding bg-bg-primary relative overflow-hidden min-h-screen flex flex-col"
     >
       {/* Noise texture */}
       <div
@@ -767,11 +767,10 @@ export function LiveExampleSection() {
 
       {/* Full-height flex layout */}
       <div
-        className="relative max-w-7xl mx-auto px-4 sm:px-6 flex flex-col"
-        style={{ height: "100dvh" }}
+        className="relative max-w-7xl mx-auto px-4 sm:px-6 flex flex-col flex-1"
       >
         {/* Header — text left, stats carousel right on desktop */}
-        <div className="pt-16 sm:pt-20 pb-4 sm:pb-6 shrink-0 flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-8">
+        <div className="pb-4 sm:pb-6 shrink-0 flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-8">
           {/* Left: label, headline, description */}
           <div className="min-w-0 flex-1">
             <SectionLabel>LIVE EXAMPLE</SectionLabel>
