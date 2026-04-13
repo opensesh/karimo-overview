@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useMotionValueEvent, animate } from "framer-motion";
 import { ChevronLeft, ChevronRight, LinkExternal01 } from "@untitledui/icons";
+import Image from "next/image";
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -159,9 +160,11 @@ function FeatureCard({
         className="relative h-28 sm:h-32 flex items-center justify-center overflow-hidden"
         style={{ backgroundColor: "var(--fg-brand)" }}
       >
-        <img
+        <Image
           src={iconSrc}
           alt=""
+          width={56}
+          height={56}
           draggable={false}
           className="w-12 h-12 sm:w-14 sm:h-14 opacity-90 pointer-events-none
                      group-hover:scale-110 transition-transform duration-500"

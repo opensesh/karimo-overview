@@ -13,11 +13,7 @@ function useTextScrambleReveal(
   target: string,
   { duration = 800, delay = 0, enabled = true } = {}
 ) {
-  const [display, setDisplay] = useState(() =>
-    Array.from({ length: target.length }, () =>
-      SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]
-    ).join("")
-  );
+  const [display, setDisplay] = useState(target);
   const rafRef = useRef<number>(0);
   const hasRun = useRef(false);
 
