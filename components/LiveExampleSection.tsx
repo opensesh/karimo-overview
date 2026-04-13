@@ -742,13 +742,13 @@ function MobileThumbnail({ onTap }: { onTap: () => void }) {
       <div className="relative flex flex-col items-center justify-center py-12 px-6">
         {/* Decorative code lines */}
         <div className="absolute inset-0 opacity-[0.06] overflow-hidden pointer-events-none">
-          {Array.from({ length: 12 }).map((_, i) => (
+          {[62, 45, 78, 35, 58, 72, 40, 67, 53, 75, 48, 60].map((w, i) => (
             <div
               key={i}
               className="h-2.5 rounded-sm mb-2 ml-4"
               style={{
                 background: "#fff",
-                width: `${30 + Math.random() * 50}%`,
+                width: `${w}%`,
                 marginLeft: `${(i % 3) * 12 + 16}px`,
               }}
             />
@@ -992,7 +992,7 @@ export function LiveExampleSection() {
 
           {/* VS Code Emulator — fills remaining space */}
           <div
-            className="relative flex-1 min-h-0 overflow-hidden pb-10 max-h-[60vh]"
+            className="relative flex-1 h-0 overflow-hidden pb-10 max-h-[60vh]"
             onWheel={(e) => {
               const target = e.target as HTMLElement;
               const scrollable = target.closest("[data-vscode-scroll]");
