@@ -6,12 +6,13 @@ import { useViewport } from "./ViewportProvider";
 
 const sections = [
   { id: "home", number: "00", label: "Home" },
-  { id: "pipeline", number: "01", label: "Overview" },
-  { id: "live-example", number: "02", label: "Example" },
-  { id: "orchestration", number: "03", label: "Encoding" },
-  { id: "context", number: "04", label: "Context" },
-  { id: "adoption", number: "05", label: "Adoption" },
-  { id: "quickstart", number: "06", label: "Start" },
+  { id: "the-problem", number: "01", label: "The Problem" },
+  { id: "pipeline", number: "02", label: "The Solution" },
+  { id: "live-example", number: "03", label: "Example" },
+  { id: "orchestration", number: "04", label: "Encoding" },
+  { id: "context", number: "05", label: "Context" },
+  { id: "adoption", number: "06", label: "Adoption" },
+  { id: "quickstart", number: "07", label: "Start" },
 ];
 
 const HEADER_HEIGHT = 56;

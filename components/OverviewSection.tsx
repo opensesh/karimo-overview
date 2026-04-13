@@ -942,10 +942,10 @@ export function OverviewSection() {
       <div className="max-w-5xl mx-auto px-6">
         {/* Header with playback controls */}
         <div className="mb-6">
-          <SectionLabel>OVERVIEW</SectionLabel>
+          <SectionLabel>THE SOLUTION</SectionLabel>
           <div className="flex items-center justify-between mt-4">
             <h2 className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary">
-              Code Sequence
+              Plan Orchestration
             </h2>
             <PlaybackControls
               isPlaying={isPlaying}
