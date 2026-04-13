@@ -14,12 +14,14 @@ import { useScroll, useMotionValueEvent } from "framer-motion";
 interface ViewportContextValue {
   headerVisible: boolean;
   lockHeader: () => void;
+  hideHeaderForNav: () => void;
   suppressScroll: () => void;
 }
 
 const ViewportContext = createContext<ViewportContextValue>({
   headerVisible: true,
   lockHeader: () => {},
+  hideHeaderForNav: () => {},
   suppressScroll: () => {},
 });
 
@@ -34,8 +36,10 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const isLockedRef = useRef(false);
+  const navHiddenRef = useRef(false);
   const isSuppressedRef = useRef(false);
   const lockTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const navHideTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const suppressTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const { scrollY } = useScroll();
 
@@ -46,6 +50,15 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
     lockTimeoutRef.current = setTimeout(() => {
       isLockedRef.current = false;
     }, 1200);
+  }, []);
+
+  const hideHeaderForNav = useCallback(() => {
+    navHiddenRef.current = true;
+    setHeaderVisible(false);
+    clearTimeout(navHideTimeoutRef.current);
+    navHideTimeoutRef.current = setTimeout(() => {
+      navHiddenRef.current = false;
+    }, 1500);
   }, []);
 
   const suppressScroll = useCallback(() => {
@@ -59,6 +72,12 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
   useMotionValueEvent(scrollY, "change", (latest) => {
     // While locked (programmatic scroll from nav), keep header visible
     if (isLockedRef.current) {
+      lastScrollY.current = latest;
+      return;
+    }
+
+    // While nav-hidden (clicking through side nav), keep header hidden
+    if (navHiddenRef.current) {
       lastScrollY.current = latest;
       return;
     }
@@ -95,7 +114,7 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
   }, [headerVisible]);
 
   return (
-    <ViewportContext.Provider value={{ headerVisible, lockHeader, suppressScroll }}>
+    <ViewportContext.Provider value={{ headerVisible, lockHeader, hideHeaderForNav, suppressScroll }}>
       {children}
     </ViewportContext.Provider>
   );

@@ -19,7 +19,7 @@ const sections = [
 const HEADER_HEIGHT = 56;
 
 export function SideNav() {
-  const { headerVisible, lockHeader } = useViewport();
+  const { headerVisible, hideHeaderForNav } = useViewport();
   const [activeSection, setActiveSection] = useState("home");
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -55,7 +55,7 @@ export function SideNav() {
       isScrollingRef.current = false;
     }, 1000);
 
-    lockHeader();
+    hideHeaderForNav();
     if (id === "home") {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
@@ -64,8 +64,7 @@ export function SideNav() {
     if (!el) return;
     const top =
       el.getBoundingClientRect().top +
-      window.scrollY -
-      HEADER_HEIGHT;
+      window.scrollY;
     window.scrollTo({ top, behavior: "smooth" });
   };
 
