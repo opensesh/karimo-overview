@@ -910,7 +910,7 @@ export function OverviewSection() {
     <section
       ref={sectionRef}
       id="pipeline"
-      className="bg-bg-secondary relative overflow-hidden pt-16 md:pt-20 lg:pt-24 pb-16 md:pb-20 lg:pb-24 min-h-screen"
+      className="bg-bg-secondary relative overflow-hidden pt-16 md:pt-20 lg:pt-24 pb-16 md:pb-20 lg:pb-24 min-h-screen flex flex-col justify-center"
     >
       {/* Noise texture */}
       <div
