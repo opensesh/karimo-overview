@@ -10,7 +10,7 @@ import {
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
-import { CircleCheck, CircleX, RotateCcw } from "lucide-react";
+import { ArrowRight, CircleCheck, CircleX, RotateCcw } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -46,10 +46,10 @@ interface BoxDef {
 
 const BOX_SIZE = 2.2;
 const BOX_HEIGHT = 1.6;
-const BOX_GAP = 1.1;
+const BOX_GAP = 0.85;
 const SECTION_WIDTH = BOX_SIZE * 3 + BOX_GAP * 2; // 8.8 — uniform width for both sections
 const PRD_WIDTH = 1.6; // PRD is smaller (single orb)
-const SUB_AGENT_H = 0.35;
+const SUB_AGENT_H = 0.28;
 const SUB_AGENT_GAP = 0.1;
 const CENTER_Y = 0; // both modes render centered
 
@@ -560,6 +560,7 @@ function SubAgentBlock({
         <span ref={labelRef} style={{
           fontFamily: "var(--font-mono, monospace)", fontSize: "9px", color: C.nodeDim,
           letterSpacing: "0.04em", whiteSpace: "nowrap", opacity: 0,
+          lineHeight: 1, display: "block",
         }}>{label}</span>
       </Html>
     </group>
@@ -889,8 +890,8 @@ function Scene({ mode }: { mode: "plan" | "karimo" }) {
   const scale = useMemo(() => {
     if (viewport.width < 5) return 0.32;
     if (viewport.width < 7) return 0.42;
-    if (viewport.width < 10) return 0.58;
-    return 0.72;
+    if (viewport.width < 10) return 0.725;
+    return 0.9;
   }, [viewport.width]);
 
   // Header width in CSS pixels — uniform for both sections
@@ -1081,68 +1082,110 @@ function Scene({ mode }: { mode: "plan" | "karimo" }) {
 // Export
 // ---------------------------------------------------------------------------
 
+const CANVAS_MIN_WIDTH = 720;
+
 export function ProblemComparisonCanvas({ paused = false }: { paused?: boolean }) {
   const [sceneKey, setSceneKey] = useState(0);
   const [activeMode, setActiveMode] = useState<"plan" | "karimo">("plan");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => { if (el.scrollLeft > 10) setHasScrolled(true); };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleModeChange = (mode: "plan" | "karimo") => {
     if (mode !== activeMode) {
       setActiveMode(mode);
       setSceneKey((k) => k + 1);
+      setHasScrolled(false);
+      if (scrollRef.current) scrollRef.current.scrollLeft = 0;
     }
   };
 
   return (
-    <div
-      className="w-full rounded-xl border border-border-secondary overflow-hidden relative"
-      style={{ height: "clamp(320px, 38vw, 440px)" }}
-    >
-      {/* Mode toggle */}
-      <div className="absolute top-3 right-14 z-10 flex rounded-lg border border-border-secondary bg-bg-secondary/80 backdrop-blur-sm overflow-hidden">
+    <div className="w-full rounded-xl border border-border-secondary overflow-hidden relative">
+      {/* Sticky controls — always visible */}
+      <div className="sticky left-0 top-0 z-10 pointer-events-none" style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
+        {/* Mode toggle */}
+        <div className="absolute top-3 right-14 flex rounded-lg border border-border-secondary bg-bg-secondary/80 backdrop-blur-sm overflow-hidden pointer-events-auto">
+          <button
+            onClick={() => handleModeChange("plan")}
+            className={`px-3 py-1.5 text-xs tracking-wider uppercase transition-colors duration-200 ${
+              activeMode === "plan"
+                ? "bg-bg-primary text-fg-primary"
+                : "text-fg-tertiary hover:text-fg-secondary"
+            }`}
+            style={{ fontFamily: "var(--font-body, sans-serif)" }}
+          >
+            Plan
+          </button>
+          <button
+            onClick={() => handleModeChange("karimo")}
+            className={`px-3 py-1.5 text-xs tracking-wider uppercase transition-colors duration-200 ${
+              activeMode === "karimo"
+                ? "bg-bg-primary text-fg-primary"
+                : "text-fg-tertiary hover:text-fg-secondary"
+            }`}
+            style={{ fontFamily: "var(--font-body, sans-serif)" }}
+          >
+            Karimo
+          </button>
+        </div>
+
+        {/* Restart */}
         <button
-          onClick={() => handleModeChange("plan")}
-          className={`px-3 py-1.5 text-xs tracking-wider uppercase transition-colors duration-200 ${
-            activeMode === "plan"
-              ? "bg-bg-primary text-fg-primary"
-              : "text-fg-tertiary hover:text-fg-secondary"
-          }`}
-          style={{ fontFamily: "var(--font-mono, monospace)" }}
+          onClick={() => { setSceneKey((k) => k + 1); setHasScrolled(false); }}
+          className="absolute top-3 right-3 p-2 rounded-lg border border-border-secondary bg-bg-secondary/80 backdrop-blur-sm text-fg-tertiary hover:text-fg-primary hover:border-border-primary transition-colors duration-200 pointer-events-auto"
+          aria-label="Replay animation"
         >
-          Plan
-        </button>
-        <button
-          onClick={() => handleModeChange("karimo")}
-          className={`px-3 py-1.5 text-xs tracking-wider uppercase transition-colors duration-200 ${
-            activeMode === "karimo"
-              ? "bg-bg-primary text-fg-primary"
-              : "text-fg-tertiary hover:text-fg-secondary"
-          }`}
-          style={{ fontFamily: "var(--font-mono, monospace)" }}
-        >
-          Karimo
+          <RotateCcw size={14} />
         </button>
       </div>
 
-      {/* Restart */}
-      <button
-        onClick={() => setSceneKey((k) => k + 1)}
-        className="absolute top-3 right-3 z-10 p-2 rounded-lg border border-border-secondary bg-bg-secondary/80 backdrop-blur-sm text-fg-tertiary hover:text-fg-primary hover:border-border-primary transition-colors duration-200"
-        aria-label="Replay animation"
+      {/* Scrollable canvas area */}
+      <div
+        ref={scrollRef}
+        className="overflow-x-auto overflow-y-hidden"
+        style={{ height: isMobile ? 340 : "clamp(400px, 47.5vw, 550px)" }}
       >
-        <RotateCcw size={14} />
-      </button>
+        <div style={{ minWidth: isMobile ? CANVAS_MIN_WIDTH : "100%", height: "100%" }}>
+          <Canvas
+            orthographic
+            camera={{ zoom: 80, position: [0, 0, 10], near: 0.1, far: 100 }}
+            frameloop={paused ? "never" : "always"}
+            dpr={[1, 1.5]}
+            style={{ background: "transparent" }}
+            gl={{ antialias: true, alpha: true }}
+            onPointerMissed={() => { document.body.style.cursor = "auto"; }}
+          >
+            <Scene key={sceneKey} mode={activeMode} />
+          </Canvas>
+        </div>
+      </div>
 
-      <Canvas
-        orthographic
-        camera={{ zoom: 80, position: [0, 0, 10], near: 0.1, far: 100 }}
-        frameloop={paused ? "never" : "always"}
-        dpr={[1, 1.5]}
-        style={{ background: "transparent" }}
-        gl={{ antialias: true, alpha: true }}
-        onPointerMissed={() => { document.body.style.cursor = "auto"; }}
-      >
-        <Scene key={sceneKey} mode={activeMode} />
-      </Canvas>
+      {/* Scroll hint — mobile only */}
+      {isMobile && !hasScrolled && (
+        <div
+          className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 text-fg-tertiary transition-opacity duration-500 pointer-events-none"
+          style={{ fontFamily: "var(--font-body, sans-serif)", fontSize: "11px" }}
+        >
+          <span>Scroll right to see more</span>
+          <ArrowRight size={12} />
+        </div>
+      )}
     </div>
   );
 }
