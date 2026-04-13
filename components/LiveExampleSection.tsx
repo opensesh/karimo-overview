@@ -92,10 +92,10 @@ function useTextScrambleReveal(
 const MIGRATION_STATS = [
   { value: "67", label: "Images" },
   { value: "20", label: "Tasks" },
-  { value: "39", label: "Files Changed" },
-  { value: "~4,000", label: "Lines Added" },
-  { value: "~2.5", label: "Hours" },
   { value: "4", label: "Waves" },
+  { value: "~4,000", label: "Lines" },
+  { value: "~2.5", label: "Hours" },
+  { value: "39", label: "+ Files" },
 ];
 
 const STATS_PER_PAGE = 3;
@@ -197,8 +197,8 @@ function KeyStatisticsCarousel() {
         </div>
       </div>
 
-      {/* Stats row — all pages in grid to lock width, only active visible */}
-      <div className="grid">
+      {/* Stats row — fixed height prevents AnimatePresence exit from collapsing layout */}
+      <div className="grid" style={{ height: "3.25rem" }}>
         {Array.from({ length: totalPages }).map((_, pi) => {
           const stats = MIGRATION_STATS.slice(
             pi * STATS_PER_PAGE,
