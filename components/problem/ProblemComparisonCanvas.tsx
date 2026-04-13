@@ -49,11 +49,36 @@ const BOX_HEIGHT = 1.6;
 const BOX_GAP = 1.1;
 const SECTION_WIDTH = BOX_SIZE * 3 + BOX_GAP * 2; // 8.8 — uniform width for both sections
 const PRD_WIDTH = 1.6; // PRD is smaller (single orb)
-const KARIMO_BOXES_W = BOX_SIZE + PRD_WIDTH + BOX_SIZE; // 6.0 — boxes touch
 const SUB_AGENT_H = 0.35;
 const SUB_AGENT_GAP = 0.1;
-const PLAN_Y = 2.2;
-const KARIMO_Y = -2.4;
+const CENTER_Y = 0; // both modes render centered
+
+// ---------------------------------------------------------------------------
+// Sequential animation delays
+// ---------------------------------------------------------------------------
+
+const P = {
+  header: 0.0,
+  box: (i: number) => 0.4 + i * 0.8,
+  atoms: (i: number) => 0.6 + i * 0.8,
+  subAgents: (i: number) => 0.8 + i * 0.8,
+  disconnect: 2.8,
+  tokens: 3.3,
+};
+
+const K = {
+  header: 0.0,
+  researchBox: 0.4,
+  researchNodes: 0.6,
+  seamCheck: (i: number) => 1.0 + i * 0.8,
+  prdBox: 1.2,
+  prdOrb: 1.4,
+  taskBox: 2.0,
+  taskNodes: 2.2,
+  worktreeConn: (i: number) => 2.6 + i * 0.1,
+  worktreeBar: (i: number) => 2.8 + i * 0.2,
+  tokens: 3.6,
+};
 
 const C = {
   boxBorder: "#44403a",
@@ -762,12 +787,13 @@ function WorktreeBar({
 // ---------------------------------------------------------------------------
 
 function SectionHeader({
-  y, title, titleColor, titleBorderColor, effectiveTokens, tokensColor, delay, width,
+  y, title, titleColor, titleBorderColor, effectiveTokens, tokensColor, delay, tokensDelay, width,
 }: {
   y: number; title: string; titleColor: string; titleBorderColor: string;
-  effectiveTokens: string; tokensColor: string; delay: number; width: number;
+  effectiveTokens: string; tokensColor: string; delay: number; tokensDelay?: number; width: number;
 }) {
-  const [opacity, setOpacity] = useState(0);
+  const [titleOpacity, setTitleOpacity] = useState(0);
+  const [tokensOpacity, setTokensOpacity] = useState(0);
   const startTime = useRef<number | null>(null);
 
   useFrame((state) => {
@@ -776,23 +802,30 @@ function SectionHeader({
     const elapsed = t - startTime.current;
     if (elapsed > delay) {
       const p = Math.min((elapsed - delay) * 2.5, 1);
-      setOpacity(1 - Math.pow(1 - p, 3));
+      setTitleOpacity(1 - Math.pow(1 - p, 3));
+    }
+    const td = tokensDelay ?? delay;
+    if (elapsed > td) {
+      const p = Math.min((elapsed - td) * 2.5, 1);
+      setTokensOpacity(1 - Math.pow(1 - p, 3));
     }
   });
 
   return (
     <Html position={[0, y, 0]} center style={{ pointerEvents: "none" }}>
       <div style={{
-        opacity, display: "flex", alignItems: "center", justifyContent: "space-between",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
         width: `${width}px`, gap: "16px",
       }}>
         <div style={{
+          opacity: titleOpacity,
           padding: "4px 14px", border: `1px solid ${titleBorderColor}`,
           borderRadius: "5px", fontSize: "12px", color: titleColor,
           fontFamily: "var(--font-accent, monospace)", background: "rgba(13, 13, 13, 0.9)",
           letterSpacing: "0.08em", whiteSpace: "nowrap", textTransform: "uppercase",
         }}>{title}</div>
         <div style={{
+          opacity: tokensOpacity,
           display: "flex", alignItems: "baseline", gap: "6px",
         }}>
           <span style={{
@@ -807,42 +840,6 @@ function SectionHeader({
       </div>
     </Html>
   );
-}
-
-// ---------------------------------------------------------------------------
-// Horizontal divider
-// ---------------------------------------------------------------------------
-
-function DividerLine({ y, width, delay }: { y: number; width: number; delay: number }) {
-  const progressRef = useRef(0);
-  const startTime = useRef<number | null>(null);
-
-  const lineObj = useMemo(() => {
-    const geo = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(-width / 2, y, 0), new THREE.Vector3(width / 2, y, 0),
-    ]);
-    const mat = new THREE.LineBasicMaterial({ color: C.boxBorder, transparent: true, opacity: 0 });
-    return new THREE.Line(geo, mat);
-  }, [y, width]);
-
-  useEffect(() => () => {
-    lineObj.geometry.dispose(); (lineObj.material as THREE.Material).dispose();
-  }, [lineObj]);
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    if (startTime.current === null) startTime.current = t;
-    const elapsed = t - startTime.current;
-    if (elapsed > delay) {
-      const p = Math.min((elapsed - delay) * 2.0, 1);
-      progressRef.current = 1 - Math.pow(1 - p, 3);
-    }
-    if (lineObj.material instanceof THREE.LineBasicMaterial) {
-      lineObj.material.opacity = progressRef.current * 0.3;
-    }
-  });
-
-  return <primitive object={lineObj} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -886,7 +883,7 @@ const KARIMO_TOKEN_LABELS = ["< 1M", "< 1M", "1M+"];
 // Scene
 // ---------------------------------------------------------------------------
 
-function Scene() {
+function Scene({ mode }: { mode: "plan" | "karimo" }) {
   const { viewport } = useThree();
 
   const scale = useMemo(() => {
@@ -901,8 +898,8 @@ function Scene() {
     return Math.round(SECTION_WIDTH * scale * 80);
   }, [scale]);
 
-  const planBoxes = useMemo(() => getPlanBoxes(PLAN_Y), []);
-  const karimoBoxes = useMemo(() => getKarimoBoxes(KARIMO_Y), []);
+  const planBoxes = useMemo(() => getPlanBoxes(CENTER_Y), []);
+  const karimoBoxes = useMemo(() => getKarimoBoxes(CENTER_Y), []);
   const halfW = BOX_SIZE / 2;
   const halfH = BOX_HEIGHT / 2;
 
@@ -921,155 +918,161 @@ function Scene() {
   const barH = 0.38;
   const barGap = 0.18;
   const totalBarsH = WORKTREE_BARS.length * barH + (WORKTREE_BARS.length - 1) * barGap;
-  const barStartY = KARIMO_Y + totalBarsH / 2 - barH / 2; // center bars on KARIMO_Y
+  const barStartY = CENTER_Y + totalBarsH / 2 - barH / 2;
+
+  const karimoBoxDelays = [K.researchBox, K.prdBox, K.taskBox];
 
   return (
-    <group scale={[scale, scale, scale]} position={[0, 0.1, 0]}>
+    <group scale={[scale, scale, scale]} position={[0, 0, 0]}>
       <ambientLight intensity={1.0} />
 
       {/* ================================================================= */}
       {/* PLAN MODE */}
       {/* ================================================================= */}
 
-      <SectionHeader
-        y={PLAN_Y + BOX_HEIGHT / 2 + 0.5}
-        title="Plan Mode"
-        titleColor={C.labelColor}
-        titleBorderColor={C.boxBorder}
-        effectiveTokens="1 – 2M"
-        tokensColor={C.labelColor}
-        delay={0}
-        width={headerWidth}
-      />
+      {mode === "plan" && (
+        <>
+          <SectionHeader
+            y={CENTER_Y + BOX_HEIGHT / 2 + 0.5}
+            title="Plan Mode"
+            titleColor={C.labelColor}
+            titleBorderColor={C.boxBorder}
+            effectiveTokens="1 – 2M"
+            tokensColor={C.labelColor}
+            delay={P.header}
+            tokensDelay={P.tokens}
+            width={headerWidth}
+          />
 
-      {/* Session boxes */}
-      {planBoxes.map((box, i) => (
-        <ContextBox key={`pb-${i}`} box={box} delay={i * 0.15} tokenLabel="1M" />
-      ))}
+          {/* Session boxes */}
+          {planBoxes.map((box, i) => (
+            <ContextBox key={`pb-${i}`} box={box} delay={P.box(i)} tokenLabel="1M" />
+          ))}
 
-      {/* Bouncy atoms */}
-      {PLAN_SESSION_NODES.map((nodes, boxIdx) =>
-        nodes.map((node) => (
-          <FloatingNode key={node.id} node={node} visible stageDelay={0.25 + boxIdx * 0.2}
-            containerCenter={planCenter(boxIdx)} containerHalfW={halfW} containerHalfH={halfH} />
-        ))
+          {/* Bouncy atoms */}
+          {PLAN_SESSION_NODES.map((nodes, boxIdx) =>
+            nodes.map((node) => (
+              <FloatingNode key={node.id} node={node} visible stageDelay={P.atoms(boxIdx)}
+                containerCenter={planCenter(boxIdx)} containerHalfW={halfW} containerHalfH={halfH} />
+            ))
+          )}
+
+          {/* Sub-agent rectangles */}
+          {PLAN_SUB_AGENTS.map((agents, boxIdx) => {
+            const box = planBoxes[boxIdx];
+            const boxCenterX = box.x + box.width / 2;
+            const boxBottomY = box.y;
+            const totalWidth = agents.reduce((acc, a) => acc + a.width, 0) + (agents.length - 1) * SUB_AGENT_GAP;
+            let offsetX = -totalWidth / 2;
+
+            return agents.map((agent, agentIdx) => {
+              const ax = boxCenterX + offsetX + agent.width / 2;
+              const ay = boxBottomY - SUB_AGENT_H / 2 - 0.08;
+              offsetX += agent.width + SUB_AGENT_GAP;
+              return (
+                <group key={`sa-${boxIdx}-${agentIdx}`}>
+                  <SubAgentConnector
+                    fromX={boxCenterX} fromY={boxBottomY}
+                    toX={ax} toY={ay + SUB_AGENT_H / 2}
+                    delay={P.subAgents(boxIdx) + agentIdx * 0.05}
+                  />
+                  <SubAgentBlock x={ax} y={ay} width={agent.width} label={agent.label}
+                    delay={P.subAgents(boxIdx) + agentIdx * 0.05} />
+                </group>
+              );
+            });
+          })}
+
+          {/* Dotted disconnect lines + X icons between sessions */}
+          {[0, 1].map((i) => {
+            const fromBox = planBoxes[i];
+            const toBox = planBoxes[i + 1];
+            return (
+              <DottedConnector key={`dg-${i}`}
+                fromX={fromBox.x + fromBox.width + 0.04}
+                toX={toBox.x - 0.04}
+                y={CENTER_Y} delay={P.disconnect + i * 0.15} variant="error" />
+            );
+          })}
+        </>
       )}
-
-      {/* Sub-agent rectangles */}
-      {PLAN_SUB_AGENTS.map((agents, boxIdx) => {
-        const box = planBoxes[boxIdx];
-        const boxCenterX = box.x + box.width / 2;
-        const boxBottomY = box.y;
-        const totalWidth = agents.reduce((acc, a) => acc + a.width, 0) + (agents.length - 1) * SUB_AGENT_GAP;
-        let offsetX = -totalWidth / 2;
-
-        return agents.map((agent, agentIdx) => {
-          const ax = boxCenterX + offsetX + agent.width / 2;
-          const ay = boxBottomY - SUB_AGENT_H / 2 - 0.08;
-          offsetX += agent.width + SUB_AGENT_GAP;
-          return (
-            <group key={`sa-${boxIdx}-${agentIdx}`}>
-              <SubAgentConnector
-                fromX={boxCenterX} fromY={boxBottomY}
-                toX={ax} toY={ay + SUB_AGENT_H / 2}
-                delay={0.4 + boxIdx * 0.15 + agentIdx * 0.05}
-              />
-              <SubAgentBlock x={ax} y={ay} width={agent.width} label={agent.label}
-                delay={0.4 + boxIdx * 0.15 + agentIdx * 0.05} />
-            </group>
-          );
-        });
-      })}
-
-      {/* Dotted disconnect lines + X icons between sessions */}
-      {[0, 1].map((i) => {
-        const fromBox = planBoxes[i];
-        const toBox = planBoxes[i + 1];
-        return (
-          <DottedConnector key={`dg-${i}`}
-            fromX={fromBox.x + fromBox.width + 0.04}
-            toX={toBox.x - 0.04}
-            y={PLAN_Y} delay={0.5 + i * 0.15} variant="error" />
-        );
-      })}
-
-      {/* ================================================================= */}
-      {/* DIVIDER */}
-      {/* ================================================================= */}
-
-      <DividerLine y={0} width={SECTION_WIDTH + 1} delay={0.4} />
 
       {/* ================================================================= */}
       {/* KARIMO */}
       {/* ================================================================= */}
 
-      <SectionHeader
-        y={KARIMO_Y + BOX_HEIGHT / 2 + 0.5}
-        title="KARIMO"
-        titleColor={C.brand}
-        titleBorderColor={C.brand}
-        effectiveTokens="10 – 100M+"
-        tokensColor={C.brand}
-        delay={0.5}
-        width={headerWidth}
-      />
-
-      {/* Research, PRD, Task Briefs boxes */}
-      {karimoBoxes.map((box, i) => (
-        <ContextBox key={`kb-${i}`} box={box} delay={0.5 + i * 0.15} borderColor={C.brand}
-          tokenLabel={KARIMO_TOKEN_LABELS[i]} />
-      ))}
-
-      {/* Green check icons at box seams */}
-      {[0, 1].map((i) => {
-        const seamX = karimoBoxes[i].x + karimoBoxes[i].width;
-        return (
-          <SeamCheckIcon key={`sc-${i}`} x={seamX} y={KARIMO_Y} delay={0.7 + i * 0.15} />
-        );
-      })}
-
-      {/* Research nodes */}
-      {RESEARCH_NODES.map((node) => (
-        <FloatingNode key={node.id} node={node} visible stageDelay={0.6}
-          containerCenter={karimoCenter(0)} containerHalfW={karimoBoxes[0].width / 2} containerHalfH={halfH}
-          topInset={0.3} />
-      ))}
-
-      {/* PRD Orb */}
-      <PRDOrb containerCenter={karimoCenter(1)} delay={0.75} />
-
-      {/* Task nodes */}
-      {TASK_NODES.map((node) => (
-        <FloatingNode key={node.id} node={node} visible stageDelay={0.85}
-          containerCenter={karimoCenter(2)} containerHalfW={karimoBoxes[2].width / 2} containerHalfH={halfH}
-          topInset={0.3} />
-      ))}
-
-      {/* Task Briefs → Worktree connectors */}
-      {WORKTREE_BARS.map((_bar, i) => {
-        const taskBox = karimoBoxes[2];
-        const fromX = taskBox.x + taskBox.width;
-        const fromY = KARIMO_Y;
-        const toX = taskRightX;
-        const toY = barStartY - i * (barH + barGap);
-        return (
-          <SubAgentConnector key={`tw-${i}`}
-            fromX={fromX} fromY={fromY}
-            toX={toX} toY={toY}
-            delay={0.9 + i * 0.1}
-            color={C.brand}
+      {mode === "karimo" && (
+        <>
+          <SectionHeader
+            y={CENTER_Y + BOX_HEIGHT / 2 + 0.5}
+            title="KARIMO"
+            titleColor={C.brand}
+            titleBorderColor={C.brand}
+            effectiveTokens="10 – 100M+"
+            tokensColor={C.brand}
+            delay={K.header}
+            tokensDelay={K.tokens}
+            width={headerWidth}
           />
-        );
-      })}
 
-      {/* Worktree bars */}
-      {WORKTREE_BARS.map((bar, i) => (
-        <WorktreeBar key={`wt-${i}`}
-          x={taskRightX} y={barStartY - i * (barH + barGap)}
-          targetWidth={bar.targetWidth} height={barH}
-          label={bar.label} segments={bar.segments} color={bar.color}
-          delay={1.0 + i * 0.15} />
-      ))}
+          {/* Research, PRD, Task Briefs boxes */}
+          {karimoBoxes.map((box, i) => (
+            <ContextBox key={`kb-${i}`} box={box} delay={karimoBoxDelays[i]} borderColor={C.brand}
+              tokenLabel={KARIMO_TOKEN_LABELS[i]} />
+          ))}
+
+          {/* Green check icons at box seams */}
+          {[0, 1].map((i) => {
+            const seamX = karimoBoxes[i].x + karimoBoxes[i].width;
+            return (
+              <SeamCheckIcon key={`sc-${i}`} x={seamX} y={CENTER_Y} delay={K.seamCheck(i)} />
+            );
+          })}
+
+          {/* Research nodes */}
+          {RESEARCH_NODES.map((node) => (
+            <FloatingNode key={node.id} node={node} visible stageDelay={K.researchNodes}
+              containerCenter={karimoCenter(0)} containerHalfW={karimoBoxes[0].width / 2} containerHalfH={halfH}
+              topInset={0.3} />
+          ))}
+
+          {/* PRD Orb */}
+          <PRDOrb containerCenter={karimoCenter(1)} delay={K.prdOrb} />
+
+          {/* Task nodes */}
+          {TASK_NODES.map((node) => (
+            <FloatingNode key={node.id} node={node} visible stageDelay={K.taskNodes}
+              containerCenter={karimoCenter(2)} containerHalfW={karimoBoxes[2].width / 2} containerHalfH={halfH}
+              topInset={0.3} />
+          ))}
+
+          {/* Task Briefs → Worktree connectors */}
+          {WORKTREE_BARS.map((_bar, i) => {
+            const taskBox = karimoBoxes[2];
+            const fromX = taskBox.x + taskBox.width;
+            const fromY = CENTER_Y;
+            const toX = taskRightX;
+            const toY = barStartY - i * (barH + barGap);
+            return (
+              <SubAgentConnector key={`tw-${i}`}
+                fromX={fromX} fromY={fromY}
+                toX={toX} toY={toY}
+                delay={K.worktreeConn(i)}
+                color={C.brand}
+              />
+            );
+          })}
+
+          {/* Worktree bars */}
+          {WORKTREE_BARS.map((bar, i) => (
+            <WorktreeBar key={`wt-${i}`}
+              x={taskRightX} y={barStartY - i * (barH + barGap)}
+              targetWidth={bar.targetWidth} height={barH}
+              label={bar.label} segments={bar.segments} color={bar.color}
+              delay={K.worktreeBar(i)} />
+          ))}
+        </>
+      )}
     </group>
   );
 }
@@ -1080,12 +1083,47 @@ function Scene() {
 
 export function ProblemComparisonCanvas({ paused = false }: { paused?: boolean }) {
   const [sceneKey, setSceneKey] = useState(0);
+  const [activeMode, setActiveMode] = useState<"plan" | "karimo">("plan");
+
+  const handleModeChange = (mode: "plan" | "karimo") => {
+    if (mode !== activeMode) {
+      setActiveMode(mode);
+      setSceneKey((k) => k + 1);
+    }
+  };
 
   return (
     <div
       className="w-full rounded-xl border border-border-secondary overflow-hidden relative"
-      style={{ height: "clamp(420px, 52vw, 620px)" }}
+      style={{ height: "clamp(320px, 38vw, 440px)" }}
     >
+      {/* Mode toggle */}
+      <div className="absolute top-3 right-14 z-10 flex rounded-lg border border-border-secondary bg-bg-secondary/80 backdrop-blur-sm overflow-hidden">
+        <button
+          onClick={() => handleModeChange("plan")}
+          className={`px-3 py-1.5 text-xs tracking-wider uppercase transition-colors duration-200 ${
+            activeMode === "plan"
+              ? "bg-bg-primary text-fg-primary"
+              : "text-fg-tertiary hover:text-fg-secondary"
+          }`}
+          style={{ fontFamily: "var(--font-mono, monospace)" }}
+        >
+          Plan
+        </button>
+        <button
+          onClick={() => handleModeChange("karimo")}
+          className={`px-3 py-1.5 text-xs tracking-wider uppercase transition-colors duration-200 ${
+            activeMode === "karimo"
+              ? "bg-bg-primary text-fg-primary"
+              : "text-fg-tertiary hover:text-fg-secondary"
+          }`}
+          style={{ fontFamily: "var(--font-mono, monospace)" }}
+        >
+          Karimo
+        </button>
+      </div>
+
+      {/* Restart */}
       <button
         onClick={() => setSceneKey((k) => k + 1)}
         className="absolute top-3 right-3 z-10 p-2 rounded-lg border border-border-secondary bg-bg-secondary/80 backdrop-blur-sm text-fg-tertiary hover:text-fg-primary hover:border-border-primary transition-colors duration-200"
@@ -1093,6 +1131,7 @@ export function ProblemComparisonCanvas({ paused = false }: { paused?: boolean }
       >
         <RotateCcw size={14} />
       </button>
+
       <Canvas
         orthographic
         camera={{ zoom: 80, position: [0, 0, 10], near: 0.1, far: 100 }}
@@ -1102,7 +1141,7 @@ export function ProblemComparisonCanvas({ paused = false }: { paused?: boolean }
         gl={{ antialias: true, alpha: true }}
         onPointerMissed={() => { document.body.style.cursor = "auto"; }}
       >
-        <Scene key={sceneKey} />
+        <Scene key={sceneKey} mode={activeMode} />
       </Canvas>
     </div>
   );
