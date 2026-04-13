@@ -125,8 +125,8 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
 
       {/* Layer 4: Content */}
       <div className="max-w-3xl mx-auto relative z-10 flex flex-col items-center text-center">
-        {/* ASCII Art — desktop */}
-        <div className="hidden sm:flex flex-col items-center relative">
+        {/* ASCII Art — all viewports */}
+        <div className="flex flex-col items-center relative">
           {KARIMO_ASCII_ART.map((line, i) => (
             <motion.div
               key={i}
@@ -138,22 +138,12 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
                 ease,
               }}
               className="font-mono text-aperol whitespace-pre leading-tight select-none"
-              style={{ fontSize: "clamp(0.35rem, 1.1vw, 0.75rem)" }}
+              style={{ fontSize: "clamp(0.45rem, 1.1vw, 0.75rem)" }}
             >
               {line}
             </motion.div>
           ))}
         </div>
-
-        {/* ASCII Art — mobile fallback */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3, ease }}
-          className="sm:hidden font-display font-bold text-4xl text-aperol tracking-tight"
-        >
-          KARIMO
-        </motion.h1>
 
         {/* Badge chips */}
         <div className="flex flex-wrap justify-center gap-3 mt-6 relative">
@@ -213,8 +203,9 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
           className="max-w-lg text-fg-secondary font-body leading-relaxed relative text-center"
         >
           An open source Claude Code plugin using Anthropic&apos;s latest innovations
-          <br />
-          for PRD-driven autonomous development.
+          <br className="hidden sm:block" />{" "}
+          for PRD-driven autonomous development. Think of it as plan mode on
+          steroids, through context and agent orchestration.
         </motion.p>
 
       </div>
