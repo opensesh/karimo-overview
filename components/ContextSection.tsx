@@ -264,7 +264,7 @@ const stageModalData: Record<string, { title: string; description: string; tree:
     defaultTabs: ["briefs-overview"],
   },
   worktrees: {
-    title: "Parallel Worktrees",
+    title: "Worktrees",
     description: "Each brief spawns a fresh agent in its own worktree with a clean 1M window. The full project context is available.",
     tree: {
       name: ".karimo/prds/002_framer-cms-migration",
@@ -335,8 +335,8 @@ const multiplicationStages = [
   },
   {
     id: "worktrees",
-    label: "Parallel Worktrees",
-    description: "Each brief spawns a fresh agent in its own worktree with a clean 1M window. Waves run in parallel — context compounds across every session.",
+    label: "Worktrees",
+    description: "Each brief spawns a fresh agent in its own worktree with a clean 1M window. Tasks can run in parallel or dependent, pulling relevant context when needed.",
     chips: ["1 window per task", "wave-parallel"],
     multiplier: "NxM",
   },
@@ -373,12 +373,11 @@ export function ContextSection() {
             transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-body text-fg-secondary mt-4 max-w-2xl text-lg leading-relaxed"
           >
-            In plan mode, you get a single 1M-token session — static, flat, and isolated.
-            KARIMO expands that into progressive, compounding context that grows across
-            every session through progressive disclosure, context multiplication, and
-            compound learning — distilling knowledge at each stage so agents only load
-            what they need, every session builds on the last, and feedback persists
-            across every future PRD.
+            In plan mode, you get a single 1M-token session that is static, flat, and
+            isolated. KARIMO expands that into progressive, compounding context
+            through <em>progressive disclosure</em>, <em>context multiplication</em>,
+            and <em>compound learning</em>. Agents only load what they need, every
+            session builds on the last, and feedback persists across every future PRD.
           </motion.p>
         </div>
 

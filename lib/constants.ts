@@ -538,9 +538,9 @@ export const orchestrationData: OrchestrationData = {
   phaseDescriptions: {
     planning: {
       title: "Planning Phase",
-      description: "You are the architect. Research discovers external dependencies, standards, and internal patterns. A structured interview captures your requirements into a PRD. Task briefs and a dependency graph are generated automatically.",
+      description: "You are the architect. Research discovers external dependencies, standards, and internal patterns. You can layer in your own research, upload screenshots, and collect assets in a PRD folder. A structured interview captures your requirements into a PRD. Task briefs and a dependency graph are generated automatically.",
       howItWorks: [
-        "Research scans external deps, API docs, standards + internal patterns, components, conventions",
+        "Research scans external deps, API docs, standards + internal patterns, components, conventions — layer in your own research and assets",
         "Structured PRD interview captures requirements (~10 min via /karimo:plan)",
         "Task briefs generated from research + PRD artifacts",
         "Dependency graph maps execution order into parallelizable waves",
@@ -548,21 +548,21 @@ export const orchestrationData: OrchestrationData = {
     },
     execution: {
       title: "Execution Phase",
-      description: "Tasks execute in parallel waves using git worktree isolation. Each task runs in its own worktree with model routing — Sonnet for simple tasks, Opus for complex. Built-in safeguards prevent stuck loops and wrong-branch commits.",
+      description: "Tasks execute in dependency-ordered waves using git worktree isolation. Model routing assigns Sonnet or Opus based on each task's complexity score. Built-in safeguards prevent stuck loops and wrong-branch commits.",
       howItWorks: [
         "Waves execute in parallel using native git worktree isolation",
-        "Model routing: Sonnet for simple tasks, Opus for complex — auto-escalation on failure",
+        "Model routing based on complexity score — Sonnet for simple tasks, Opus for complex, with auto-escalation",
         "4-layer branch assertion validates state before and after each operation",
         "Loop detection via semantic fingerprinting catches stuck tasks",
       ],
     },
     review: {
       title: "Review & Merge Phase",
-      description: "Each PR is automatically reviewed via Greptile or Claude Code Review. Simple findings are auto-fixed by Sonnet; complex ones escalate to Opus. After passing review, the feature branch merges to main with clean atomic history.",
+      description: "Each PR can be manually reviewed or automatically reviewed with tools like Greptile. Revision loops run automatically before merge with configurable limits. After passing review, the feature branch merges to main with clean atomic history.",
       howItWorks: [
-        "Automated code review via Greptile or Claude Code Review",
+        "Manual review or automated review via Greptile",
         "Sonnet auto-fixes simple findings, escalates to Opus for complex issues",
-        "Up to 3 review loops before requiring human intervention",
+        "Configurable revision loops before merge",
         "Final merge to main with clean, atomic commit history",
       ],
     },
