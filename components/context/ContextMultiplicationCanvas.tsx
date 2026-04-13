@@ -517,7 +517,7 @@ function WorktreeRow({
   // Mobile: Wave label centered above, worktrees spread wider
   // Desktop: Wave label on the left, worktrees across boxes
   const wavePosition: [number, number, number] = isMobile
-    ? [0, WT_ROW_Y + 0.55, 0]
+    ? [0, WT_ROW_Y + 0.85, 0]
     : [-totalWidth / 2 - 0.6, WT_ROW_Y, 0];
 
   const wtPositions = isMobile
