@@ -169,7 +169,7 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
               label: "version",
               value: loading ? null : (version ?? "—"),
             },
-            { label: "Claude Code", value: "Framework & Plugin" },
+            { label: "Claude Code", value: "Plugin" },
             {
               label: "\u2605 Stars",
               value: loading ? null : (stars ?? "—"),
@@ -234,6 +234,16 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
       <div className="relative z-10 max-w-5xl mx-auto mt-8 px-4">
         <ClaudeFeatures />
       </div>
+
+      {/* Bottom fade — sits above all layers so the transition to #000 is seamless */}
+      <div
+        className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none"
+        style={{
+          height: "40%",
+          background:
+            "linear-gradient(to bottom, transparent 0%, black 100%)",
+        }}
+      />
     </section>
   );
 }
