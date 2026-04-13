@@ -113,6 +113,17 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
       id="overview"
       className="relative bg-bg-secondary overflow-hidden pt-40 pb-24 px-6 min-h-screen flex flex-col justify-center"
     >
+      {/* Layer 0: CRT video overlay — far background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-[0.07]"
+        style={{ mixBlendMode: "screen" }}
+        src="/videos/crt-overlay.mp4"
+      />
+
       {/* Layer 1: Plus pattern background */}
       <BackgroundPlus />
 
