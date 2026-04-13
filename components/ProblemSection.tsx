@@ -150,7 +150,7 @@ export function ProblemSection() {
             }}
             className="text-body text-base text-fg-secondary mt-3 max-w-2xl"
           >
-            Plan mode works great for boilerplate code. Larger features need shared and compressed context for humans and agents. The limiting factor is{" "}
+            Plan mode works great for boilerplate code. The limiting factor is{" "}
             <a
               href="https://en.wikipedia.org/wiki/Attention_Is_All_You_Need"
               target="_blank"
@@ -159,7 +159,7 @@ export function ProblemSection() {
             >
               quadratic attention
             </a>
-            , and the workaround is harness engineering.
+            , and the workaround is harness engineering. With higher task complexity and duration, we need shared and optimized context for humans and agents.
           </motion.p>
         </div>
 
