@@ -14,11 +14,13 @@ import { useScroll, useMotionValueEvent } from "framer-motion";
 interface ViewportContextValue {
   headerVisible: boolean;
   lockHeader: () => void;
+  suppressScroll: () => void;
 }
 
 const ViewportContext = createContext<ViewportContextValue>({
   headerVisible: true,
   lockHeader: () => {},
+  suppressScroll: () => {},
 });
 
 export function useViewport() {
@@ -32,7 +34,9 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const isLockedRef = useRef(false);
+  const isSuppressedRef = useRef(false);
   const lockTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const suppressTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const { scrollY } = useScroll();
 
   const lockHeader = useCallback(() => {
@@ -44,9 +48,23 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
     }, 1200);
   }, []);
 
+  const suppressScroll = useCallback(() => {
+    isSuppressedRef.current = true;
+    clearTimeout(suppressTimeoutRef.current);
+    suppressTimeoutRef.current = setTimeout(() => {
+      isSuppressedRef.current = false;
+    }, 100);
+  }, []);
+
   useMotionValueEvent(scrollY, "change", (latest) => {
     // While locked (programmatic scroll from nav), keep header visible
     if (isLockedRef.current) {
+      lastScrollY.current = latest;
+      return;
+    }
+
+    // While suppressed (programmatic scroll correction), ignore silently
+    if (isSuppressedRef.current) {
       lastScrollY.current = latest;
       return;
     }
@@ -77,7 +95,7 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
   }, [headerVisible]);
 
   return (
-    <ViewportContext.Provider value={{ headerVisible, lockHeader }}>
+    <ViewportContext.Provider value={{ headerVisible, lockHeader, suppressScroll }}>
       {children}
     </ViewportContext.Provider>
   );

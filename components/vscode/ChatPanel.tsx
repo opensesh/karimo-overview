@@ -4,6 +4,7 @@ import { memo, useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ChatMessage, VSCODE } from "@/lib/vscode-data";
 import { usePretextHeights } from "@/hooks/usePretextLayout";
+import { useViewport } from "@/components/ViewportProvider";
 
 // ─── Claude Logo (from hero section) ─────────────────────
 
@@ -161,6 +162,7 @@ export const ChatPanel = memo(function ChatPanel({
   isDragging,
 }: ChatPanelProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { suppressScroll } = useViewport();
   const activePhase = getActivePhase(currentTime);
 
   // Pretext: pre-compute message heights during drag to avoid DOM reflows
@@ -176,13 +178,14 @@ export const ChatPanel = memo(function ChatPanel({
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (el) {
+      suppressScroll();
       const savedY = window.scrollY;
       el.scrollTop = el.scrollHeight;
       if (window.scrollY !== savedY) {
         window.scrollTo({ top: savedY });
       }
     }
-  }, [messages.length]);
+  }, [messages.length, suppressScroll]);
 
   return (
     <div

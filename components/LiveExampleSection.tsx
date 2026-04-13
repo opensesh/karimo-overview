@@ -150,13 +150,12 @@ function ControlBar({
                         ? bookendActiveColor
                         : "#ff7a38"
                       : "#78716c",
-                    border: `1px solid ${
-                      isActive
-                        ? isBookend
-                          ? bookendActiveBorder
-                          : "rgba(254, 81, 2, 0.3)"
-                        : "transparent"
-                    }`,
+                    borderWidth: "1px",
+                    borderColor: isActive
+                      ? isBookend
+                        ? bookendActiveBorder
+                        : "rgba(254, 81, 2, 0.3)"
+                      : "transparent",
                     borderStyle:
                       isBookend && isActive ? "dashed" : "solid",
                   }}

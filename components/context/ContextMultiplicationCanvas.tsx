@@ -506,21 +506,35 @@ function WorktreeRow({
     }
   });
 
+  const { viewport } = useThree();
+  const isMobile = viewport.width < 7;
+
   if (progress < 0.01) return null;
 
   // Fixed X positions for each worktree label, centered over the boxes
   const totalWidth = BOX_SIZE * 3 + BOX_GAP * 2;
-  const waveX = -totalWidth / 2 - 0.6;
-  // Space 3 worktrees evenly across the box area
-  const wtPositions = [
-    -totalWidth / 2 + totalWidth * 0.2,
-    -totalWidth / 2 + totalWidth * 0.5,
-    -totalWidth / 2 + totalWidth * 0.8,
-  ];
+
+  // Mobile: Wave label centered above, worktrees spread wider
+  // Desktop: Wave label on the left, worktrees across boxes
+  const wavePosition: [number, number, number] = isMobile
+    ? [0, WT_ROW_Y + 0.55, 0]
+    : [-totalWidth / 2 - 0.6, WT_ROW_Y, 0];
+
+  const wtPositions = isMobile
+    ? [
+        -totalWidth * 0.38,
+        0,
+        totalWidth * 0.38,
+      ]
+    : [
+        -totalWidth / 2 + totalWidth * 0.2,
+        -totalWidth / 2 + totalWidth * 0.5,
+        -totalWidth / 2 + totalWidth * 0.8,
+      ];
 
   const labelStyle = {
     fontFamily: "var(--font-mono, monospace)",
-    fontSize: "11px",
+    fontSize: isMobile ? "9px" : "11px",
     color: "#a8a29e",
     letterSpacing: "0.01em",
     whiteSpace: "nowrap" as const,
@@ -528,8 +542,8 @@ function WorktreeRow({
 
   return (
     <group>
-      {/* Wave 1 pill — positioned at left */}
-      <Html position={[waveX, WT_ROW_Y, 0]} center style={{ pointerEvents: "none" }}>
+      {/* Wave 1 pill — centered above on mobile, left on desktop */}
+      <Html position={wavePosition} center style={{ pointerEvents: "none" }}>
         <div style={{
           opacity: progress,
           padding: "4px 12px",
@@ -549,9 +563,9 @@ function WorktreeRow({
       {/* Each worktree label at a known X position */}
       {WORKTREE_DEFS.map((wt, i) => (
         <Html key={wt.id} position={[wtPositions[i], WT_ROW_Y, 0]} center style={{ pointerEvents: "none" }}>
-          <div style={{ opacity: progress, display: "flex", alignItems: "center", gap: "5px" }}>
+          <div style={{ opacity: progress, display: "flex", alignItems: "center", gap: isMobile ? "3px" : "5px" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={GIT_ICON} alt="" width={13} height={13} style={{ opacity: 0.6 }} />
+            <img src={GIT_ICON} alt="" width={isMobile ? 11 : 13} height={isMobile ? 11 : 13} style={{ opacity: 0.6 }} />
             <span style={labelStyle}>{wt.label}</span>
           </div>
         </Html>
@@ -711,8 +725,8 @@ function Scene({ activeStage }: { activeStage: number }) {
   const boxes = useMemo(() => getBoxLayout(activeStage), [activeStage]);
 
   const scale = useMemo(() => {
-    if (viewport.width < 5) return 0.42;
-    if (viewport.width < 7) return 0.55;
+    if (viewport.width < 5) return 0.38;
+    if (viewport.width < 7) return 0.5;
     if (viewport.width < 10) return 0.7;
     return 0.8;
   }, [viewport.width]);
