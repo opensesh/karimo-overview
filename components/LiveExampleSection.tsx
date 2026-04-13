@@ -90,7 +90,7 @@ function useTextScrambleReveal(
 // Ordered impressive-first for carousel
 
 const MIGRATION_STATS = [
-  { value: "~4,000", label: "Lines" },
+  { value: "4.5K+", label: "Lines" },
   { value: "~2.5", label: "Hours" },
   { value: "39", label: "+ Files" },
   { value: "67", label: "Images" },
