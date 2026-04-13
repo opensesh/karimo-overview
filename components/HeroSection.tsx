@@ -111,7 +111,7 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
     <section
       ref={sectionRef}
       id="overview"
-      className="relative bg-bg-secondary overflow-hidden pt-40 pb-12 px-6 min-h-screen flex flex-col justify-center"
+      className="relative bg-bg-secondary overflow-hidden pt-40 pb-24 px-6 min-h-screen flex flex-col justify-center"
     >
       {/* Layer 1: Plus pattern background */}
       <BackgroundPlus />
@@ -230,8 +230,8 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
 
       </div>
 
-      {/* Claude Features — breaks out of max-w-3xl to use full section width */}
-      <div className="relative z-10 max-w-5xl mx-auto mt-8 px-4">
+      {/* Claude Features — sits above the bottom fade gradient */}
+      <div className="relative z-30 max-w-5xl mx-auto mt-8 px-6">
         <ClaudeFeatures />
       </div>
 
