@@ -469,7 +469,7 @@ export function LiveExampleSection() {
     <section
       id="live-example"
       className="bg-bg-primary relative overflow-hidden"
-      style={{ minHeight: "100dvh", scrollMarginTop: "56px" }}
+      style={{ minHeight: "100dvh" }}
     >
       {/* Noise texture */}
       <div
@@ -486,7 +486,7 @@ export function LiveExampleSection() {
         style={{ height: "100dvh" }}
       >
         {/* Header */}
-        <div className="pt-20 sm:pt-24 pb-4 sm:pb-8 shrink-0">
+        <div className="pt-16 sm:pt-20 pb-4 sm:pb-8 shrink-0">
           <SectionLabel>LIVE EXAMPLE</SectionLabel>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}

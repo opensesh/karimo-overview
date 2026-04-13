@@ -151,7 +151,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 64px;
+  scroll-padding-top: 56px;
 }
 
 body {
@@ -168,12 +168,7 @@ body::-webkit-scrollbar {
 }
 
 [id] {
-  scroll-margin-top: 64px;
-}
-
-/* Override for the overview section — tighter scroll target for seamless hero→overview */
-#pipeline {
-  scroll-margin-top: 0;
+  scroll-margin-top: 56px;
 }
 
 /* =============================================================================
@@ -297,20 +292,20 @@ body::-webkit-scrollbar {
    ============================================================================= */
 
 .section-padding {
-  padding-top: 5rem;
+  padding-top: 4.5rem;
   padding-bottom: 5rem;
 }
 
 @media (min-width: 768px) {
   .section-padding {
-    padding-top: 6rem;
+    padding-top: 5rem;
     padding-bottom: 6rem;
   }
 }
 
 @media (min-width: 1024px) {
   .section-padding {
-    padding-top: 8rem;
+    padding-top: 6rem;
     padding-bottom: 8rem;
   }
 }

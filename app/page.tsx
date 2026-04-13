@@ -39,7 +39,7 @@ export default async function Home() {
           <div className="relative" style={{ zIndex: 1 }}>
             <HeroSection version={version} />
           </div>
-          <div className="relative section-layer" style={{ zIndex: 2 }}>
+          <div className="relative" style={{ zIndex: 2 }}>
             <OverviewSection />
           </div>
           <div className="relative section-layer" style={{ zIndex: 3 }}>

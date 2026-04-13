@@ -243,7 +243,7 @@ function TerminalPreview({
       </div>
 
       {/* Terminal body */}
-      <div className="bg-[#0a0a0a] p-4 sm:p-5 font-mono text-[11px] sm:text-xs leading-relaxed overflow-hidden flex-1 min-h-[340px]">
+      <div className="bg-[#0a0a0a] p-4 sm:p-5 font-mono text-[11px] sm:text-xs leading-relaxed overflow-hidden flex-1 min-h-[280px]">
         {/* Command prompt */}
         <div className="mb-3 break-all">
           <span className="text-fg-brand">$</span>{" "}
