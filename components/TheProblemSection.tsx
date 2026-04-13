@@ -1,10 +1,17 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { useParallax } from "@/components/ui/ParallaxSection";
 import { staggerContainer, fadeInUp } from "@/lib/motion";
-import { LinkBroken01, Container, Compass01, CurrencyDollar } from "@untitledui/icons";
+import {
+  LinkBroken01,
+  Container,
+  Compass01,
+  CurrencyDollar,
+  ChevronDown,
+} from "@untitledui/icons";
 import { ProblemComparisonCanvas } from "@/components/problem/ProblemComparisonCanvas";
 
 // ---------------------------------------------------------------------------
@@ -16,27 +23,74 @@ const PROBLEM_CARDS = [
     icon: LinkBroken01,
     title: "Session Isolation",
     description:
-      "Each Claude Code session starts with a blank slate. Context from your last session \u2014 decisions made, patterns discovered, architecture established \u2014 is gone. You're re-explaining your project from scratch every time.",
+      "Every session starts blank. Decisions, patterns, and architecture from the last run are gone — you re-explain your project from scratch each time.",
   },
   {
     icon: Container,
     title: "Context Ceiling",
     description:
-      "A single session caps at ~200K tokens. For any feature touching more than a few files, you hit the ceiling mid-implementation. The agent forgets earlier decisions and starts contradicting itself.",
+      "A single session caps at ~200K tokens. Hit the ceiling mid-feature and the agent forgets earlier decisions, contradicting itself.",
   },
   {
     icon: Compass01,
     title: "No Orchestration",
     description:
-      "Plan mode helps you think, but doesn't execute across sessions. There's no foreman coordinating the work \u2014 every sub-agent shows up and does their own thing with no awareness of what others built.",
+      "Plan mode helps you think but doesn't execute across sessions. Sub-agents work in isolation with no awareness of what others built.",
   },
   {
     icon: CurrencyDollar,
     title: "Cost Inefficiency",
     description:
-      "Using Opus for a simple file rename. Using Opus for writing a test. Without complexity-based routing, you burn premium tokens on tasks that a lighter model handles just as well.",
+      "Opus for a file rename. Opus for a test. Without complexity-based routing, premium tokens burn on tasks a lighter model handles fine.",
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Mobile accordion item
+// ---------------------------------------------------------------------------
+
+function ProblemAccordion({
+  card,
+  isOpen,
+  onToggle,
+}: {
+  card: (typeof PROBLEM_CARDS)[number];
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="rounded-xl border border-border-secondary bg-bg-secondary overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center gap-3 p-4 text-left"
+      >
+        <card.icon className="w-5 h-5 text-fg-brand shrink-0" />
+        <h3 className="text-heading text-sm text-fg-primary flex-1">
+          {card.title}
+        </h3>
+        <ChevronDown
+          className={`w-4 h-4 text-fg-tertiary transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <p className="text-body text-sm text-fg-secondary leading-relaxed px-4 pb-4 pt-0">
+              {card.description}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -44,6 +98,7 @@ const PROBLEM_CARDS = [
 
 export function TheProblemSection() {
   const { ref: sectionRef, y } = useParallax(30);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section
@@ -61,40 +116,40 @@ export function TheProblemSection() {
       />
 
       <motion.div style={{ y }} className="relative">
-        <div className="max-w-5xl mx-auto px-6">
-          {/* Header */}
-          <div className="mb-8">
-            <SectionLabel>THE PROBLEM</SectionLabel>
-            <motion.h2
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{
-                duration: 0.6,
-                delay: 0.1,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
-            >
-              Plan Mode Doesn&apos;t Scale
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{
-                duration: 0.6,
-                delay: 0.2,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="text-body text-base text-fg-secondary mt-3 max-w-2xl"
-            >
-              Each session is a silo. No memory between runs, no coordination
-              across agents, no way to scale beyond a single context window.
-            </motion.p>
-          </div>
+        {/* Header — constrained width */}
+        <div className="max-w-5xl mx-auto px-6 mb-8">
+          <SectionLabel>THE PROBLEM</SectionLabel>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{
+              duration: 0.6,
+              delay: 0.1,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
+          >
+            Plan Mode Doesn&apos;t Scale
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{
+              duration: 0.6,
+              delay: 0.2,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="text-body text-base text-fg-secondary mt-3 max-w-2xl"
+          >
+            Each session is a silo. No memory between runs, no coordination
+            across agents, no way to scale beyond a single context window.
+          </motion.p>
+        </div>
 
-          {/* Comparison visual */}
+        {/* Comparison visual — constrained width */}
+        <div className="max-w-5xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -108,28 +163,52 @@ export function TheProblemSection() {
           >
             <ProblemComparisonCanvas />
           </motion.div>
+        </div>
 
-          {/* Problem cards */}
+        {/* Problem cards — wider max-width for 4-col row */}
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Desktop: single row of 4 equal cards */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            className="hidden lg:grid grid-cols-4 gap-4"
           >
             {PROBLEM_CARDS.map((card) => (
               <motion.div
                 key={card.title}
                 variants={fadeInUp}
-                className="rounded-xl border border-border-secondary bg-bg-secondary p-5"
+                className="rounded-xl border border-border-secondary bg-bg-secondary p-5 flex flex-col"
               >
                 <card.icon className="w-5 h-5 text-fg-brand mb-3" />
-                <h3 className="text-heading text-base text-fg-primary mb-1.5">
+                <h3 className="text-heading text-sm text-fg-primary mb-1.5">
                   {card.title}
                 </h3>
-                <p className="text-body text-sm text-fg-secondary leading-relaxed">
+                <p className="text-body text-[13px] text-fg-secondary leading-relaxed">
                   {card.description}
                 </p>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Mobile / Tablet: accordion stack */}
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            className="lg:hidden flex flex-col gap-2"
+          >
+            {PROBLEM_CARDS.map((card, i) => (
+              <motion.div key={card.title} variants={fadeInUp}>
+                <ProblemAccordion
+                  card={card}
+                  isOpen={openIndex === i}
+                  onToggle={() =>
+                    setOpenIndex(openIndex === i ? null : i)
+                  }
+                />
               </motion.div>
             ))}
           </motion.div>
