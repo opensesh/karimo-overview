@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { useTimeline } from "@/hooks/useTimeline";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { VSCodeEmulator, type MobilePanel } from "@/components/vscode/VSCodeEmulator";
@@ -11,6 +11,275 @@ import {
   TIMELINE_EVENTS,
   TIMELINE_DURATION,
 } from "@/lib/vscode-data";
+
+// ─── Scramble Text Hook ──────────────────────────────────
+
+const SCRAMBLE_CHARS = "█▓▒░▮▯▰▱▣▤▥▦@#$%^&*_+[]{}|;:<>?~";
+
+function useTextScrambleReveal(
+  target: string,
+  { duration = 800, delay = 0, enabled = true } = {}
+) {
+  // Initialize with target to avoid hydration mismatch (random chars differ server vs client)
+  const [display, setDisplay] = useState(target);
+  const rafRef = useRef<number>(0);
+  const hasRun = useRef(false);
+  const hasMounted = useRef(false);
+
+  // After mount, replace with scrambled characters so the reveal effect is visible
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      setDisplay(
+        Array.from({ length: target.length }, () =>
+          SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]
+        ).join("")
+      );
+    }
+  }, [target]);
+
+  useEffect(() => {
+    if (!enabled || hasRun.current || !hasMounted.current) return;
+
+    const timeout = setTimeout(() => {
+      hasRun.current = true;
+      const start = performance.now();
+
+      function tick() {
+        const elapsed = performance.now() - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased =
+          progress < 0.5
+            ? 4 * progress * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+        const revealed = Math.floor(eased * target.length);
+        let result = "";
+
+        for (let i = 0; i < target.length; i++) {
+          if (i < revealed) {
+            result += target[i];
+          } else {
+            result +=
+              SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+          }
+        }
+
+        setDisplay(result);
+
+        if (progress < 1) {
+          rafRef.current = requestAnimationFrame(tick);
+        } else {
+          setDisplay(target);
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    }, delay);
+
+    return () => {
+      clearTimeout(timeout);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [enabled, target, duration, delay]);
+
+  return display;
+}
+
+// ─── Migration Stats Data ────────────────────────────────
+// Ordered impressive-first for carousel
+
+const MIGRATION_STATS = [
+  { value: "~4,000", label: "Lines Added" },
+  { value: "~2.5", label: "Hours" },
+  { value: "39", label: "Files Changed" },
+  { value: "67", label: "Images" },
+  { value: "20", label: "Tasks" },
+  { value: "4", label: "Waves" },
+];
+
+const STATS_PER_PAGE = 3;
+
+function StatItem({
+  value,
+  label,
+  delay,
+  inView,
+}: {
+  value: string;
+  label: string;
+  delay: number;
+  inView: boolean;
+}) {
+  const display = useTextScrambleReveal(value, { delay, enabled: inView });
+
+  return (
+    <div className="flex flex-col items-center gap-0.5" style={{ width: "5.5rem" }}>
+      <span
+        className="text-brand-500 text-xl md:text-2xl font-bold text-center w-full"
+        style={{ fontFamily: "var(--font-accent)" }}
+      >
+        {display}
+      </span>
+      <span
+        className="text-[10px] text-fg-tertiary uppercase tracking-wider whitespace-nowrap"
+        style={{ fontFamily: "var(--font-accent)" }}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
+// ─── Key Statistics Carousel ─────────────────────────────
+
+function KeyStatisticsCarousel() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { once: true, margin: "-50px" });
+  const [page, setPage] = useState(0);
+  const totalPages = Math.ceil(MIGRATION_STATS.length / STATS_PER_PAGE);
+
+  return (
+    <motion.div
+      ref={containerRef}
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className="rounded-xl border border-border-secondary bg-bg-secondary/30 px-4 py-3 sm:px-5 sm:py-4 shrink-0 w-full md:w-[280px]"
+      style={{ backdropFilter: "blur(8px)" }}
+    >
+      {/* Header row with title + arrows */}
+      <div className="flex items-center justify-between mb-3">
+        <span
+          className="text-[11px] text-fg-tertiary uppercase tracking-wider"
+          style={{ fontFamily: "var(--font-accent)" }}
+        >
+          Key Statistics
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setPage((p) => (p - 1 + totalPages) % totalPages)}
+            className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-0.5"
+            aria-label="Previous stats"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M8.5 3L4.5 7L8.5 11" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setPage((p) => (p + 1) % totalPages)}
+            className="text-fg-tertiary hover:text-fg-primary transition-colors cursor-pointer p-0.5"
+            aria-label="Next stats"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5.5 3L9.5 7L5.5 11" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Stats row — all pages in grid to lock width, only active visible */}
+      <div className="grid">
+        {Array.from({ length: totalPages }).map((_, pi) => {
+          const stats = MIGRATION_STATS.slice(
+            pi * STATS_PER_PAGE,
+            pi * STATS_PER_PAGE + STATS_PER_PAGE
+          );
+          const isActive = pi === page;
+          return (
+            <div
+              key={pi}
+              className="grid grid-cols-3 gap-4 sm:gap-6 pointer-events-none"
+              style={{
+                gridArea: "1 / 1",
+                visibility: isActive ? "visible" : "hidden",
+              }}
+              aria-hidden={!isActive}
+            >
+              {isActive ? (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={page}
+                    initial={{ opacity: 0, x: 8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="col-span-3 grid grid-cols-3 gap-4 sm:gap-6 pointer-events-auto"
+                  >
+                    {stats.map((stat, i) => (
+                      <StatItem
+                        key={stat.label}
+                        value={stat.value}
+                        label={stat.label}
+                        delay={i * 80}
+                        inView={isInView}
+                      />
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
+              ) : (
+                stats.map((stat) => (
+                  <div key={stat.label} className="flex flex-col items-center gap-0.5" style={{ width: "5.5rem" }}>
+                    <span
+                      className="text-xl md:text-2xl font-bold"
+                      style={{ fontFamily: "var(--font-accent)" }}
+                    >
+                      {stat.value}
+                    </span>
+                    <span
+                      className="text-[10px] sm:text-[11px] uppercase tracking-wider whitespace-nowrap"
+                      style={{ fontFamily: "var(--font-accent)" }}
+                    >
+                      {stat.label}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Page dots */}
+      <div className="flex items-center justify-center gap-1.5 mt-3">
+        {Array.from({ length: totalPages }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setPage(i)}
+            className="cursor-pointer"
+            aria-label={`Page ${i + 1}`}
+          >
+            <div
+              className="w-1 h-1 rounded-full transition-colors duration-200"
+              style={{
+                background: i === page ? "#fe5102" : "#555",
+              }}
+            />
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
 
 // ─── Chapters ─────────────────────────────────────────────
 
@@ -484,33 +753,43 @@ export function LiveExampleSection() {
         className="relative max-w-7xl mx-auto px-4 sm:px-6 flex flex-col"
         style={{ height: "100dvh" }}
       >
-        {/* Header */}
-        <div className="pt-16 sm:pt-20 pb-4 sm:pb-8 shrink-0">
-          <SectionLabel>LIVE EXAMPLE</SectionLabel>
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="text-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
-          >
-            A Real Migration, Start to Finish
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{
-              duration: 0.6,
-              delay: 0.1,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="text-body text-sm sm:text-base text-fg-secondary mt-2 sm:mt-3 max-w-2xl"
-          >
-            An entire Framer website migrated into a custom Next.js codebase.
-            20 tasks, 4 waves, 39 files changed &mdash; all from a single KARIMO feature plan.
-          </motion.p>
+        {/* Header — text left, stats carousel right on desktop */}
+        <div className="pt-16 sm:pt-20 pb-4 sm:pb-6 shrink-0 flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-8">
+          {/* Left: label, headline, description */}
+          <div className="min-w-0 flex-1">
+            <SectionLabel>LIVE EXAMPLE</SectionLabel>
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="text-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
+            >
+              A Real Migration, Start to Finish
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{
+                duration: 0.6,
+                delay: 0.1,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className="text-body text-sm sm:text-base text-fg-secondary mt-2 sm:mt-3 max-w-2xl"
+            >
+              Recently, we migrated an entire Framer website to a custom Next.js
+              codebase. This can never be done in one plan mode. We migrated all
+              the content, images, compressed them, and built new web page structures.
+            </motion.p>
+          </div>
+
+          {/* Right: Key Statistics carousel */}
+          <div className="md:shrink-0">
+            <KeyStatisticsCarousel />
+          </div>
         </div>
+
 
         {/* Control bar */}
         <ControlBar
