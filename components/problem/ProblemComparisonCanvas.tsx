@@ -1159,7 +1159,7 @@ export function ProblemComparisonCanvas({ paused = false }: { paused?: boolean }
       <div
         ref={scrollRef}
         className="overflow-x-auto overflow-y-hidden relative"
-        style={{ height: isMobile ? 340 : "clamp(400px, 47.5vw, 550px)" }}
+        style={{ height: isMobile ? 280 : "clamp(300px, 35vw, 425px)" }}
       >
         <div style={{ minWidth: isMobile ? CANVAS_MIN_WIDTH : "100%", height: "100%" }}>
           <Canvas
