@@ -670,19 +670,6 @@ function PhaseDetailPanel({
   const [activeCommandIdx, setActiveCommandIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [lockedHeight, setLockedHeight] = useState<number | undefined>(undefined);
-
-  // Measure grid after each phase renders and lock to the tallest observed
-  useEffect(() => {
-    if (!gridRef.current) return;
-    const frame = requestAnimationFrame(() => {
-      if (!gridRef.current) return;
-      const h = gridRef.current.scrollHeight;
-      setLockedHeight((prev) => (prev === undefined ? h : Math.max(prev, h)));
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [phaseId, activeCommandIdx]);
 
   useEffect(() => {
     setActiveCommandIdx(0);
@@ -729,16 +716,14 @@ function PhaseDetailPanel({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={smoothTransition}
-          className="w-full max-w-5xl mx-auto mt-10"
+          className="w-full max-w-5xl mx-auto mt-10 md:pb-32"
         >
-          {/* 3-column grid — height locks to tallest observed loop */}
+          {/* 3-column grid — fixed height container so dropdowns don't push page content */}
           <div
-            ref={gridRef}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-stretch"
-            style={lockedHeight ? { minHeight: `${lockedHeight}px` } : undefined}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-start md:h-[300px] md:overflow-visible"
           >
-            {/* LEFT: Explanation + Input/Output */}
-            <div className="order-1 flex flex-col gap-3">
+            {/* LEFT: Explanation + Input/Output — fixed height across all loops */}
+            <div className="order-1 flex flex-col gap-3 md:h-[300px] md:overflow-hidden">
               <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-4">
                 <span
                   className="text-xs text-fg-brand uppercase tracking-widest"
@@ -786,8 +771,8 @@ function PhaseDetailPanel({
               </div>
             </div>
 
-            {/* CENTER: Terminal — fills full fixed height */}
-            <div className="order-2 min-w-0 md:h-full">
+            {/* CENTER: Terminal — fixed height, matches left column */}
+            <div className="order-2 min-w-0 md:h-[300px]">
               <InlineTerminal
                 lines={
                   activeCommand?.terminalLines ??
@@ -799,7 +784,7 @@ function PhaseDetailPanel({
               />
             </div>
 
-            {/* RIGHT: Command dropdowns */}
+            {/* RIGHT: Command dropdowns — free to expand without affecting row height */}
             <div className="order-3 space-y-2">
               {phase.commands.map((cmd, i) => (
                 <CompactCommandDropdown
@@ -864,7 +849,7 @@ function PlaybackControls({
 }
 
 // ─── Main Section ──────────────────────────────────────────
-export function OverviewSection() {
+export function SolutionSection() {
   const { ref: sectionRef, y } = useParallax(30);
 
   // Animation state
@@ -942,10 +927,10 @@ export function OverviewSection() {
       <div className="max-w-5xl mx-auto px-6">
         {/* Header with playback controls */}
         <div className="mb-6">
-          <SectionLabel>THE SOLUTION</SectionLabel>
+          <SectionLabel> SOLUTION</SectionLabel>
           <div className="flex items-center justify-between mt-4">
             <h2 className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary">
-              Plan Orchestration
+              Compound Orchestration
             </h2>
             <PlaybackControls
               isPlaying={isPlaying}
@@ -1027,4 +1012,4 @@ export function OverviewSection() {
   );
 }
 
-export default OverviewSection;
+export default SolutionSection;

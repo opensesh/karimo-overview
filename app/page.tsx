@@ -2,12 +2,12 @@ import { ViewportProvider } from "@/components/ViewportProvider";
 import { Navigation } from "@/components/Navigation";
 import { SideNav } from "@/components/SideNav";
 import { HeroSection } from "@/components/HeroSection";
-import { OverviewSection } from "@/components/OverviewSection";
+import { SolutionSection } from "@/components/SolutionSection";
 import { LiveExampleSection } from "@/components/LiveExampleSection";
 import { EncodingSection } from "@/components/EncodingSection";
 import { ContextSection } from "@/components/ContextSection";
 import { AdoptionSection } from "@/components/AdoptionSection";
-import { TheProblemSection } from "@/components/TheProblemSection";
+import { ProblemSection } from "@/components/ProblemSection";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 
@@ -41,10 +41,10 @@ export default async function Home() {
             <HeroSection version={version} />
           </div>
           <div className="relative section-layer" style={{ zIndex: 2 }}>
-            <TheProblemSection />
+            <ProblemSection />
           </div>
           <div className="relative section-layer" style={{ zIndex: 3 }}>
-            <OverviewSection />
+            <SolutionSection />
           </div>
           <div className="relative section-layer" style={{ zIndex: 4 }}>
             <LiveExampleSection />
