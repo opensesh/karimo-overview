@@ -162,8 +162,8 @@ export const processSteps = [
     id: "worktrees",
     number: "06",
     title: "Worktrees",
-    command: "Parallel Isolation",
-    description: "Each task runs in its own git worktree with an isolated branch. Work happens in parallel — tasks in the same wave never interfere with each other. PRs target the feature branch, not main.",
+    command: "Isolation",
+    description: "Each task runs in its own git worktree, all merging to one isolated feature branch. Work happens in parallel or dependent and merges to the feature branch before PR to main.",
     details: [
       "Each task gets worktree/{prd-slug}-{task-id}",
       "Tasks in the same wave execute in parallel",
@@ -181,7 +181,7 @@ export const processSteps = [
     id: "greptile-review",
     number: "07",
     title: "Code Review",
-    command: "Greptile / Manual",
+    command: "Auto/Manual",
     description: "Task PRs are reviewed by Greptile or manually. Greptile scores each PR and auto-remediates findings in up to 3 loops. Sonnet fixes simple issues; Opus handles architectural ones.",
     details: [
       "Greptile scores each PR (threshold configurable)",

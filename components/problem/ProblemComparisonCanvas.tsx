@@ -10,7 +10,7 @@ import {
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
-import { CircleCheck, CircleX } from "lucide-react";
+import { CircleCheck, CircleX, RotateCcw } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -44,11 +44,15 @@ interface BoxDef {
 // Layout constants
 // ---------------------------------------------------------------------------
 
-const BOX_SIZE = 2.0;
-const BOX_GAP = 0.7; // wider spacing between boxes
-const SUB_AGENT_H = 0.5; // taller sub-agent blocks
+const BOX_SIZE = 2.2;
+const BOX_HEIGHT = 1.6;
+const BOX_GAP = 1.1;
+const SECTION_WIDTH = BOX_SIZE * 3 + BOX_GAP * 2; // 8.8 — uniform width for both sections
+const PRD_WIDTH = 1.6; // PRD is smaller (single orb)
+const KARIMO_BOXES_W = BOX_SIZE + PRD_WIDTH + BOX_SIZE; // 6.0 — boxes touch
+const SUB_AGENT_H = 0.35;
 const SUB_AGENT_GAP = 0.1;
-const PLAN_Y = 2.0;
+const PLAN_Y = 2.2;
 const KARIMO_Y = -2.4;
 
 const C = {
@@ -60,8 +64,10 @@ const C = {
   brand: "#fe5102",
   brandGlow: "#ff7a38",
   taskNode: "#ff7a38",
-  dimRed: "#6b3a3a",
+  dimRed: "#8b4a4a",
   redBg: "#3a1c1c",
+  dimOrange: "#6b3a1a",
+  orangeBg: "rgba(101, 52, 22, 0.4)",
   labelColor: "#78716c",
   green: "#22c55e",
   greenDim: "#166534",
@@ -157,9 +163,9 @@ function makePlanSessionNodes(sessionIndex: number): NodeDef[] {
 interface SubAgentDef { label: string; width: number }
 
 const PLAN_SUB_AGENTS: SubAgentDef[][] = [
-  [{ label: "50K", width: 0.52 }, { label: "70K", width: 0.6 }, { label: "20K", width: 0.42 }],
-  [{ label: "20K", width: 0.42 }, { label: "30K", width: 0.48 }, { label: "40K", width: 0.52 }],
-  [{ label: "30K", width: 0.48 }, { label: "70K", width: 0.6 }],
+  [{ label: "50K", width: 0.58 }, { label: "70K", width: 0.58 }, { label: "20K", width: 0.58 }],
+  [{ label: "20K", width: 0.58 }, { label: "30K", width: 0.58 }, { label: "40K", width: 0.58 }],
+  [{ label: "30K", width: 0.58 }, { label: "70K", width: 0.58 }],
 ];
 
 // ---------------------------------------------------------------------------
@@ -218,15 +224,14 @@ function makeTaskNodes(): NodeDef[] {
 interface WorktreeBarDef {
   label: string;
   targetWidth: number;
-  tokens: string;
+  segments: string[];
   color: string;
 }
 
 const WORKTREE_BARS: WorktreeBarDef[] = [
-  { label: "Wave 1", targetWidth: 2.4, tokens: "~800K", color: C.brand },
-  { label: "Wave 2", targetWidth: 3.2, tokens: "~1.2M", color: C.brandGlow },
-  { label: "Wave 3", targetWidth: 1.8, tokens: "~500K", color: C.brand },
-  { label: "Wave 4", targetWidth: 2.8, tokens: "~1M", color: C.brandGlow },
+  { label: "Wave 1", targetWidth: 2.2, segments: ["800K", "200K", "1M"], color: C.brand },
+  { label: "Wave 2", targetWidth: 2.2, segments: ["1.2M", "400K"], color: C.brandGlow },
+  { label: "Wave 3", targetWidth: 2.2, segments: ["2M", "600K", "400K"], color: C.brand },
 ];
 
 // ---------------------------------------------------------------------------
@@ -234,10 +239,11 @@ const WORKTREE_BARS: WorktreeBarDef[] = [
 // ---------------------------------------------------------------------------
 
 function FloatingNode({
-  node, visible, stageDelay, containerCenter, containerHalfSize,
+  node, visible, stageDelay, containerCenter, containerHalfW, containerHalfH, topInset = 0,
 }: {
   node: NodeDef; visible: boolean; stageDelay: number;
-  containerCenter: [number, number]; containerHalfSize: number;
+  containerCenter: [number, number]; containerHalfW: number; containerHalfH: number;
+  topInset?: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
@@ -266,11 +272,14 @@ function FloatingNode({
         dx += Math.sin(ft * node.speedX * 1.7 + node.phaseY) * node.ampX * 0.4;
         let dy = Math.sin(ft * node.speedY + node.phaseY) * node.ampY;
         dy += Math.sin(ft * node.speedY * 1.3 + node.phaseX) * node.ampY * 0.5;
-        const limit = containerHalfSize - node.radius - 0.08;
+        const limitX = containerHalfW - node.radius - 0.08;
+        const limitYBottom = containerHalfH - node.radius - 0.08;
+        const limitYTop = containerHalfH - topInset - node.radius - 0.08;
+        const yOffset = -topInset / 2; // shift center down when top is inset
         meshRef.current.position.x =
-          containerCenter[0] + Math.max(-limit, Math.min(limit, node.baseX + dx));
+          containerCenter[0] + Math.max(-limitX, Math.min(limitX, node.baseX + dx));
         meshRef.current.position.y =
-          containerCenter[1] + Math.max(-limit, Math.min(limit, node.baseY + dy));
+          containerCenter[1] + yOffset + Math.max(-limitYBottom, Math.min(limitYTop, node.baseY + dy));
       }
     } else { scaleRef.current *= 0.85; }
     const s = scaleRef.current;
@@ -288,7 +297,7 @@ function FloatingNode({
 
   return (
     <mesh ref={meshRef}
-      position={[containerCenter[0] + node.baseX, containerCenter[1] + node.baseY, 0.1]}
+      position={[containerCenter[0] + node.baseX, containerCenter[1] - topInset / 2 + node.baseY, 0.1]}
       onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
       <circleGeometry args={[node.radius, 32]} />
       <meshBasicMaterial color={hovered ? C.brandGlow : node.color} toneMapped={false} />
@@ -310,11 +319,14 @@ function FloatingNode({
 // Context Box
 // ---------------------------------------------------------------------------
 
-function ContextBox({ box, delay, borderColor }: { box: BoxDef; delay: number; borderColor?: string }) {
+function ContextBox({ box, delay, borderColor, tokenLabel }: {
+  box: BoxDef; delay: number; borderColor?: string; tokenLabel?: string;
+}) {
   const groupRef = useRef<THREE.Group>(null);
   const fillRef = useRef<THREE.Mesh>(null);
   const edgesRef = useRef<THREE.LineSegments>(null);
   const labelRef = useRef<HTMLDivElement>(null);
+  const tokenRef = useRef<HTMLSpanElement>(null);
   const progressRef = useRef(0);
   const startTime = useRef<number | null>(null);
 
@@ -340,6 +352,7 @@ function ContextBox({ box, delay, borderColor }: { box: BoxDef; delay: number; b
     (fillRef.current.material as THREE.MeshBasicMaterial).opacity = p * 0.12;
     (edgesRef.current.material as THREE.LineBasicMaterial).opacity = p * 0.85;
     if (labelRef.current) labelRef.current.style.opacity = String(p);
+    if (tokenRef.current) tokenRef.current.style.opacity = String(p);
   });
 
   return (
@@ -362,6 +375,20 @@ function ContextBox({ box, delay, borderColor }: { box: BoxDef; delay: number; b
           {box.label}
         </div>
       </Html>
+      {/* Upper-right token label inside the box */}
+      {tokenLabel && (
+        <Html
+          position={[box.width / 2 - 0.12, box.height / 2 - 0.12, 0]}
+          style={{ pointerEvents: "none" }}
+        >
+          <span ref={tokenRef} style={{
+            fontFamily: "var(--font-mono, monospace)", fontSize: "8px", color: C.nodeDim,
+            whiteSpace: "nowrap", opacity: 0, transform: "translateX(-100%)", display: "inline-block",
+          }}>
+            {tokenLabel}
+          </span>
+        </Html>
+      )}
     </group>
   );
 }
@@ -515,8 +542,8 @@ function SubAgentBlock({
 }
 
 // Connector line from session box bottom to sub-agent
-function SubAgentConnector({ fromX, fromY, toX, toY, delay }: {
-  fromX: number; fromY: number; toX: number; toY: number; delay: number;
+function SubAgentConnector({ fromX, fromY, toX, toY, delay, color = C.nodeDim }: {
+  fromX: number; fromY: number; toX: number; toY: number; delay: number; color?: string;
 }) {
   const progressRef = useRef(0);
   const startTime = useRef<number | null>(null);
@@ -525,9 +552,9 @@ function SubAgentConnector({ fromX, fromY, toX, toY, delay }: {
     const geo = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(fromX, fromY, 0), new THREE.Vector3(toX, toY, 0),
     ]);
-    const mat = new THREE.LineBasicMaterial({ color: C.nodeDim, transparent: true, opacity: 0 });
+    const mat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0 });
     return new THREE.Line(geo, mat);
-  }, [fromX, fromY, toX, toY]);
+  }, [fromX, fromY, toX, toY, color]);
 
   useEffect(() => () => {
     lineObj.geometry.dispose(); (lineObj.material as THREE.Material).dispose();
@@ -557,13 +584,13 @@ function DottedConnector({
   fromX, toX, y, delay, variant,
 }: {
   fromX: number; toX: number; y: number; delay: number;
-  variant: "error" | "success";
+  variant: "error" | "success" | "brand";
 }) {
   const progressRef = useRef(0);
   const startTime = useRef<number | null>(null);
   const [opacity, setOpacity] = useState(0);
 
-  const lineColor = variant === "error" ? C.dimRed : C.greenDim;
+  const lineColor = variant === "error" ? C.dimRed : variant === "brand" ? C.dimOrange : C.greenDim;
 
   const lineObj = useMemo(() => {
     const geo = new THREE.BufferGeometry().setFromPoints([
@@ -613,10 +640,11 @@ function DottedConnector({
         ) : (
           <div style={{
             opacity, width: "22px", height: "22px",
-            borderRadius: "50%", background: "rgba(22, 101, 52, 0.4)",
+            borderRadius: "50%",
+            background: variant === "brand" ? C.orangeBg : "rgba(22, 101, 52, 0.4)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <CircleCheck size={16} color={C.green} strokeWidth={2} />
+            <CircleCheck size={16} color={variant === "brand" ? C.brand : C.green} strokeWidth={2} />
           </div>
         )}
       </Html>
@@ -625,14 +653,45 @@ function DottedConnector({
 }
 
 // ---------------------------------------------------------------------------
+// Green check icon at KARIMO box seams
+// ---------------------------------------------------------------------------
+
+function SeamCheckIcon({ x, y, delay }: { x: number; y: number; delay: number }) {
+  const [opacity, setOpacity] = useState(0);
+  const startTime = useRef<number | null>(null);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (startTime.current === null) startTime.current = t;
+    const elapsed = t - startTime.current;
+    if (elapsed > delay) {
+      const p = Math.min((elapsed - delay) * 2.5, 1);
+      setOpacity(1 - Math.pow(1 - p, 3));
+    }
+  });
+
+  return (
+    <Html position={[x, y, 0.2]} center style={{ pointerEvents: "none" }}>
+      <div style={{
+        opacity, width: "22px", height: "22px",
+        borderRadius: "50%", background: "rgba(22, 101, 52, 0.4)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        <CircleCheck size={16} color={C.green} strokeWidth={2} />
+      </div>
+    </Html>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Worktree growing bars
 // ---------------------------------------------------------------------------
 
 function WorktreeBar({
-  x, y, targetWidth, height, label, tokens, color, delay,
+  x, y, targetWidth, height, label, segments, color, delay,
 }: {
   x: number; y: number; targetWidth: number; height: number;
-  label: string; tokens: string; color: string; delay: number;
+  label: string; segments: string[]; color: string; delay: number;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const fillRef = useRef<THREE.Mesh>(null);
@@ -673,19 +732,25 @@ function WorktreeBar({
       <lineSegments ref={edgesRef} geometry={edgeGeo}>
         <lineBasicMaterial color={color} transparent opacity={0} />
       </lineSegments>
-      <Html position={[0, 0, 0]} center style={{ pointerEvents: "none" }}>
+      <Html position={[-targetWidth / 2 + 0.08, 0, 0]} style={{ pointerEvents: "none" }}>
         <div style={{
-          display: "flex", gap: "8px", alignItems: "center",
+          display: "flex", alignItems: "center",
           opacity: labelOpacity, transition: "opacity 0.2s",
+          whiteSpace: "nowrap",
         }}>
           <span style={{
-            fontFamily: "var(--font-mono, monospace)", fontSize: "9px",
-            color: C.nodeMid, whiteSpace: "nowrap",
-          }}>{label}</span>
-          <span style={{
             fontFamily: "var(--font-mono, monospace)", fontSize: "8px",
-            color: C.nodeDim, whiteSpace: "nowrap",
-          }}>{tokens}</span>
+            color: C.nodeMid, paddingRight: "6px",
+          }}>{label}</span>
+          {segments.map((seg, i) => (
+            <span key={i} style={{
+              fontFamily: "var(--font-mono, monospace)", fontSize: "7px",
+              color: C.nodeDim,
+              borderLeft: `1px solid ${color}`,
+              paddingLeft: "4px", paddingRight: "4px",
+              opacity: 0.8,
+            }}>{seg}</span>
+          ))}
         </div>
       </Html>
     </group>
@@ -731,11 +796,11 @@ function SectionHeader({
           display: "flex", alignItems: "baseline", gap: "6px",
         }}>
           <span style={{
-            fontFamily: "var(--font-accent, monospace)", fontSize: "9px",
+            fontFamily: "var(--font-accent, monospace)", fontSize: width < 300 ? "7px" : "9px",
             color: C.labelColor, letterSpacing: "0.08em", textTransform: "uppercase",
           }}>Effective Tokens:</span>
           <span style={{
-            fontFamily: "var(--font-accent, monospace)", fontSize: "14px",
+            fontFamily: "var(--font-accent, monospace)", fontSize: width < 300 ? "11px" : "14px",
             fontWeight: 700, color: tokensColor, letterSpacing: "0.02em",
           }}>{effectiveTokens}</span>
         </div>
@@ -789,31 +854,33 @@ const RESEARCH_NODES = makeResearchNodes();
 const TASK_NODES = makeTaskNodes();
 
 function getPlanBoxes(centerY: number): BoxDef[] {
-  const s = BOX_SIZE;
+  const w = BOX_SIZE;
+  const h = BOX_HEIGHT;
   const g = BOX_GAP;
-  const totalW = s * 3 + g * 2;
+  const totalW = w * 3 + g * 2;
   const startX = -totalW / 2;
   return [0, 1, 2].map((i) => ({
-    x: startX + i * (s + g),
-    y: centerY - s / 2,
-    width: s, height: s,
+    x: startX + i * (w + g),
+    y: centerY - h / 2,
+    width: w, height: h,
     label: `PLAN ${i + 1}`,
   }));
 }
 
 function getKarimoBoxes(centerY: number): BoxDef[] {
-  const s = BOX_SIZE;
-  const g = BOX_GAP;
-  const totalW = s * 3 + g * 2;
-  const startX = -totalW / 2;
+  const h = BOX_HEIGHT;
+  const startX = -SECTION_WIDTH / 2;
+  const rw = BOX_SIZE;   // Research — same as Plan boxes
+  const pw = PRD_WIDTH;  // PRD — smaller
+  const tw = BOX_SIZE;   // Task Briefs — same as Plan boxes
   return [
-    { x: startX, y: centerY - s / 2, width: s, height: s, label: "RESEARCH" },
-    { x: startX + s + g, y: centerY - s / 2, width: s, height: s, label: "PRD" },
-    { x: startX + (s + g) * 2, y: centerY - s / 2, width: s, height: s, label: "TASK BRIEFS" },
+    { x: startX, y: centerY - h / 2, width: rw, height: h, label: "RESEARCH" },
+    { x: startX + rw, y: centerY - h / 2, width: pw, height: h, label: "PRD" },
+    { x: startX + rw + pw, y: centerY - h / 2, width: tw, height: h, label: "TASK BRIEFS" },
   ];
 }
 
-const KARIMO_TOKEN_LABELS = ["< 1,000,000", "< 1,000,000", "1,000,000+"];
+const KARIMO_TOKEN_LABELS = ["< 1M", "< 1M", "1M+"];
 
 // ---------------------------------------------------------------------------
 // Scene
@@ -823,22 +890,21 @@ function Scene() {
   const { viewport } = useThree();
 
   const scale = useMemo(() => {
-    if (viewport.width < 5) return 0.24;
-    if (viewport.width < 7) return 0.32;
-    if (viewport.width < 10) return 0.46;
-    return 0.56;
+    if (viewport.width < 5) return 0.32;
+    if (viewport.width < 7) return 0.42;
+    if (viewport.width < 10) return 0.58;
+    return 0.72;
   }, [viewport.width]);
 
-  // Header width in CSS pixels (scales with canvas)
+  // Header width in CSS pixels — uniform for both sections
   const headerWidth = useMemo(() => {
-    if (viewport.width < 7) return 320;
-    if (viewport.width < 10) return 520;
-    return 700;
-  }, [viewport.width]);
+    return Math.round(SECTION_WIDTH * scale * 80);
+  }, [scale]);
 
   const planBoxes = useMemo(() => getPlanBoxes(PLAN_Y), []);
   const karimoBoxes = useMemo(() => getKarimoBoxes(KARIMO_Y), []);
-  const halfBox = BOX_SIZE / 2;
+  const halfW = BOX_SIZE / 2;
+  const halfH = BOX_HEIGHT / 2;
 
   const planCenter = useCallback((i: number): [number, number] => {
     const b = planBoxes[i];
@@ -851,13 +917,14 @@ function Scene() {
   }, [karimoBoxes]);
 
   // Worktree bar area
-  const taskRightX = karimoBoxes[2].x + karimoBoxes[2].width + 0.2;
-  const taskTopY = karimoBoxes[2].y + karimoBoxes[2].height;
-  const barH = 0.42;
-  const barGap = 0.1;
+  const taskRightX = karimoBoxes[2].x + karimoBoxes[2].width + 0.4;
+  const barH = 0.38;
+  const barGap = 0.18;
+  const totalBarsH = WORKTREE_BARS.length * barH + (WORKTREE_BARS.length - 1) * barGap;
+  const barStartY = KARIMO_Y + totalBarsH / 2 - barH / 2; // center bars on KARIMO_Y
 
   return (
-    <group scale={[scale, scale, scale]} position={[0, 0.3, 0]}>
+    <group scale={[scale, scale, scale]} position={[0, 0.1, 0]}>
       <ambientLight intensity={1.0} />
 
       {/* ================================================================= */}
@@ -865,11 +932,11 @@ function Scene() {
       {/* ================================================================= */}
 
       <SectionHeader
-        y={PLAN_Y + BOX_SIZE / 2 + 0.65}
+        y={PLAN_Y + BOX_HEIGHT / 2 + 0.5}
         title="Plan Mode"
         titleColor={C.labelColor}
         titleBorderColor={C.boxBorder}
-        effectiveTokens="1,000,000"
+        effectiveTokens="1 – 2M"
         tokensColor={C.labelColor}
         delay={0}
         width={headerWidth}
@@ -877,14 +944,14 @@ function Scene() {
 
       {/* Session boxes */}
       {planBoxes.map((box, i) => (
-        <ContextBox key={`pb-${i}`} box={box} delay={i * 0.15} />
+        <ContextBox key={`pb-${i}`} box={box} delay={i * 0.15} tokenLabel="1M" />
       ))}
 
       {/* Bouncy atoms */}
       {PLAN_SESSION_NODES.map((nodes, boxIdx) =>
         nodes.map((node) => (
           <FloatingNode key={node.id} node={node} visible stageDelay={0.25 + boxIdx * 0.2}
-            containerCenter={planCenter(boxIdx)} containerHalfSize={halfBox} />
+            containerCenter={planCenter(boxIdx)} containerHalfW={halfW} containerHalfH={halfH} />
         ))
       )}
 
@@ -898,7 +965,7 @@ function Scene() {
 
         return agents.map((agent, agentIdx) => {
           const ax = boxCenterX + offsetX + agent.width / 2;
-          const ay = boxBottomY - SUB_AGENT_H / 2 - 0.25;
+          const ay = boxBottomY - SUB_AGENT_H / 2 - 0.08;
           offsetX += agent.width + SUB_AGENT_GAP;
           return (
             <group key={`sa-${boxIdx}-${agentIdx}`}>
@@ -930,18 +997,18 @@ function Scene() {
       {/* DIVIDER */}
       {/* ================================================================= */}
 
-      <DividerLine y={0} width={14} delay={0.4} />
+      <DividerLine y={0} width={SECTION_WIDTH + 1} delay={0.4} />
 
       {/* ================================================================= */}
       {/* KARIMO */}
       {/* ================================================================= */}
 
       <SectionHeader
-        y={KARIMO_Y + BOX_SIZE / 2 + 0.65}
+        y={KARIMO_Y + BOX_HEIGHT / 2 + 0.5}
         title="KARIMO"
         titleColor={C.brand}
         titleBorderColor={C.brand}
-        effectiveTokens="10,000,000 – 100,000,000+"
+        effectiveTokens="10 – 100M+"
         tokensColor={C.brand}
         delay={0.5}
         width={headerWidth}
@@ -949,23 +1016,23 @@ function Scene() {
 
       {/* Research, PRD, Task Briefs boxes */}
       {karimoBoxes.map((box, i) => (
-        <ContextBox key={`kb-${i}`} box={box} delay={0.5 + i * 0.15} borderColor={C.brand} />
+        <ContextBox key={`kb-${i}`} box={box} delay={0.5 + i * 0.15} borderColor={C.brand}
+          tokenLabel={KARIMO_TOKEN_LABELS[i]} />
       ))}
 
-      {/* Token count below each KARIMO box */}
-      {karimoBoxes.map((box, i) => (
-        <TokenBadge key={`tb-${i}`}
-          x={box.x + box.width / 2}
-          y={box.y - 0.25}
-          text={KARIMO_TOKEN_LABELS[i]}
-          delay={0.65 + i * 0.15}
-        />
-      ))}
+      {/* Green check icons at box seams */}
+      {[0, 1].map((i) => {
+        const seamX = karimoBoxes[i].x + karimoBoxes[i].width;
+        return (
+          <SeamCheckIcon key={`sc-${i}`} x={seamX} y={KARIMO_Y} delay={0.7 + i * 0.15} />
+        );
+      })}
 
       {/* Research nodes */}
       {RESEARCH_NODES.map((node) => (
         <FloatingNode key={node.id} node={node} visible stageDelay={0.6}
-          containerCenter={karimoCenter(0)} containerHalfSize={halfBox} />
+          containerCenter={karimoCenter(0)} containerHalfW={karimoBoxes[0].width / 2} containerHalfH={halfH}
+          topInset={0.3} />
       ))}
 
       {/* PRD Orb */}
@@ -974,33 +1041,33 @@ function Scene() {
       {/* Task nodes */}
       {TASK_NODES.map((node) => (
         <FloatingNode key={node.id} node={node} visible stageDelay={0.85}
-          containerCenter={karimoCenter(2)} containerHalfSize={halfBox} />
+          containerCenter={karimoCenter(2)} containerHalfW={karimoBoxes[2].width / 2} containerHalfH={halfH}
+          topInset={0.3} />
       ))}
 
-      {/* Dotted check lines between KARIMO boxes */}
-      {[0, 1].map((i) => {
-        const fromBox = karimoBoxes[i];
-        const toBox = karimoBoxes[i + 1];
+      {/* Task Briefs → Worktree connectors */}
+      {WORKTREE_BARS.map((_bar, i) => {
+        const taskBox = karimoBoxes[2];
+        const fromX = taskBox.x + taskBox.width;
+        const fromY = KARIMO_Y;
+        const toX = taskRightX;
+        const toY = barStartY - i * (barH + barGap);
         return (
-          <DottedConnector key={`kc-${i}`}
-            fromX={fromBox.x + fromBox.width + 0.04}
-            toX={toBox.x - 0.04}
-            y={KARIMO_Y} delay={0.7 + i * 0.15} variant="success" />
+          <SubAgentConnector key={`tw-${i}`}
+            fromX={fromX} fromY={fromY}
+            toX={toX} toY={toY}
+            delay={0.9 + i * 0.1}
+            color={C.brand}
+          />
         );
       })}
 
       {/* Worktree bars */}
-      <Html position={[taskRightX + 1.4, taskTopY + 0.2, 0]} center style={{ pointerEvents: "none" }}>
-        <span style={{
-          fontFamily: "var(--font-accent, monospace)", fontSize: "9px",
-          color: C.nodeMid, letterSpacing: "0.1em", textTransform: "uppercase",
-        }}>Worktrees</span>
-      </Html>
       {WORKTREE_BARS.map((bar, i) => (
         <WorktreeBar key={`wt-${i}`}
-          x={taskRightX} y={taskTopY - 0.3 - i * (barH + barGap)}
+          x={taskRightX} y={barStartY - i * (barH + barGap)}
           targetWidth={bar.targetWidth} height={barH}
-          label={bar.label} tokens={bar.tokens} color={bar.color}
+          label={bar.label} segments={bar.segments} color={bar.color}
           delay={1.0 + i * 0.15} />
       ))}
     </group>
@@ -1011,21 +1078,31 @@ function Scene() {
 // Export
 // ---------------------------------------------------------------------------
 
-export function ProblemComparisonCanvas() {
+export function ProblemComparisonCanvas({ paused = false }: { paused?: boolean }) {
+  const [sceneKey, setSceneKey] = useState(0);
+
   return (
     <div
-      className="w-full rounded-xl border border-border-secondary overflow-hidden"
-      style={{ height: "clamp(400px, 55vw, 620px)" }}
+      className="w-full rounded-xl border border-border-secondary overflow-hidden relative"
+      style={{ height: "clamp(420px, 52vw, 620px)" }}
     >
+      <button
+        onClick={() => setSceneKey((k) => k + 1)}
+        className="absolute top-3 right-3 z-10 p-2 rounded-lg border border-border-secondary bg-bg-secondary/80 backdrop-blur-sm text-fg-tertiary hover:text-fg-primary hover:border-border-primary transition-colors duration-200"
+        aria-label="Replay animation"
+      >
+        <RotateCcw size={14} />
+      </button>
       <Canvas
         orthographic
-        camera={{ zoom: 60, position: [0, 0, 10], near: 0.1, far: 100 }}
-        dpr={[1, 2]}
+        camera={{ zoom: 80, position: [0, 0, 10], near: 0.1, far: 100 }}
+        frameloop={paused ? "never" : "always"}
+        dpr={[1, 1.5]}
         style={{ background: "transparent" }}
         gl={{ antialias: true, alpha: true }}
         onPointerMissed={() => { document.body.style.cursor = "auto"; }}
       >
-        <Scene />
+        <Scene key={sceneKey} />
       </Canvas>
     </div>
   );

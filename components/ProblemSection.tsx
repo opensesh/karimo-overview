@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { useParallax } from "@/components/ui/ParallaxSection";
 import { staggerContainer, fadeInUp } from "@/lib/motion";
@@ -103,6 +103,8 @@ function ProblemAccordion({
 
 export function ProblemSection() {
   const { ref: sectionRef, y } = useParallax(30);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const canvasInView = useInView(canvasRef, { margin: "100px" });
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
@@ -148,7 +150,7 @@ export function ProblemSection() {
             }}
             className="text-body text-base text-fg-secondary mt-3 max-w-2xl"
           >
-            Plan mode works great for boilerplate code. The larger features need shared and compressed context for humans and agents. The limiting factor is{" "}
+            Plan mode works great for boilerplate code. Larger features need shared and compressed context for humans and agents. The limiting factor is{" "}
             <a
               href="https://en.wikipedia.org/wiki/Attention_Is_All_You_Need"
               target="_blank"
@@ -157,12 +159,12 @@ export function ProblemSection() {
             >
               quadratic attention
             </a>
-            , and the solution is strategic coordination.
+            , and the workaround is harness engineering.
           </motion.p>
         </div>
 
         {/* Comparison visual — constrained width */}
-        <div className="max-w-5xl mx-auto px-6">
+        <div ref={canvasRef} className="max-w-5xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -174,7 +176,7 @@ export function ProblemSection() {
             }}
             className="mb-12"
           >
-            <ProblemComparisonCanvas />
+            <ProblemComparisonCanvas paused={!canvasInView} />
           </motion.div>
         </div>
 
