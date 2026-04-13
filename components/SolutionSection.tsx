@@ -854,14 +854,33 @@ export function SolutionSection() {
   const sectionInView = useInView(sectionRef, { margin: "100px" });
   const wasPlayingRef = useRef(false);
 
+  // Disable autoplay on mobile to prevent layout jumps
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+
   // Animation state
   const [isPlaying, setIsPlaying] = useState(false);
   const [animationStep, setAnimationStep] = useState(-1);
   const [manualPhase, setManualPhase] = useState("loop1");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Pause/resume when scrolling out of / back into view
+  // Stop playback when switching to mobile
   useEffect(() => {
+    if (isMobile && isPlaying) {
+      setIsPlaying(false);
+      setAnimationStep(-1);
+    }
+  }, [isMobile]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pause/resume when scrolling out of / back into view (desktop only)
+  useEffect(() => {
+    if (isMobile) return;
     if (!sectionInView) {
       if (isPlaying) {
         wasPlayingRef.current = true;
@@ -871,7 +890,7 @@ export function SolutionSection() {
       wasPlayingRef.current = false;
       setIsPlaying(true);
     }
-  }, [sectionInView]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sectionInView, isMobile]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Derive everything from animationStep
   const currentStep = animationStep >= 0 ? STEP_MAP[animationStep] : null;
@@ -907,6 +926,7 @@ export function SolutionSection() {
   };
 
   const handleTogglePlay = () => {
+    if (isMobile) return;
     setIsPlaying((prev) => {
       if (!prev) {
         // Starting playback
@@ -918,6 +938,7 @@ export function SolutionSection() {
   };
 
   const handleRestart = () => {
+    if (isMobile) return;
     setAnimationStep(0);
     setManualPhase("loop1");
     setIsPlaying(true);
