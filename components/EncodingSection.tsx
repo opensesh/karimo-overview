@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { orchestrationData, type PhaseId } from "@/lib/constants";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -15,25 +15,8 @@ const PHASE_ORDER: PhaseId[] = ["planning", "execution", "review"];
 export function EncodingSection() {
   const { ref: sectionRef, y } = useParallax(30);
   const [activePhase, setActivePhase] = useState<PhaseId>("planning");
-  const graphRef = useRef<HTMLDivElement>(null);
-  const maxHeightRef = useRef(0);
 
   const currentIndex = PHASE_ORDER.indexOf(activePhase);
-
-  // Track the tallest phase and lock the container to that height
-  useEffect(() => {
-    const el = graphRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => {
-      const h = entry.contentRect.height;
-      if (h > maxHeightRef.current) {
-        maxHeightRef.current = h;
-        el.style.minHeight = `${h}px`;
-      }
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
 
   const handleNavigate = useCallback(
     (direction: "prev" | "next") => {
@@ -46,59 +29,88 @@ export function EncodingSection() {
     [currentIndex]
   );
 
+  const canGoPrev = currentIndex > 0;
+  const canGoNext = currentIndex < PHASE_ORDER.length - 1;
+
   return (
     <section ref={sectionRef} id="orchestration" className="section-padding min-h-screen bg-bg-secondary overflow-hidden">
       <motion.div style={{ y }}>
       {/* Header + Phase toggle — narrower container */}
       <div className="max-w-5xl mx-auto px-6">
-        <div className="mb-8">
+        {/* Row 1: Label + Heading + Nav arrows + Legend */}
+        <div className="mb-4">
           <SectionLabel>ENCODING</SectionLabel>
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary mt-4"
-          >
-            Git Timeline
-          </motion.h2>
+          <div className="flex items-center justify-between mt-4">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary"
+            >
+              Git Timeline
+            </motion.h2>
+
+            {/* Nav arrows + Legend */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleNavigate("prev")}
+                disabled={!canGoPrev}
+                className="w-8 h-8 rounded-md bg-bg-tertiary flex items-center justify-center
+                           text-fg-secondary hover:text-fg-primary hover:bg-border-primary
+                           disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+                aria-label="Previous phase"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <button
+                onClick={() => handleNavigate("next")}
+                disabled={!canGoNext}
+                className="w-8 h-8 rounded-md bg-bg-tertiary flex items-center justify-center
+                           text-fg-secondary hover:text-fg-primary hover:bg-border-primary
+                           disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+                aria-label="Next phase"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div className="w-px h-5 bg-border-secondary ml-1" />
+              <TimelineLegend />
+            </div>
+          </div>
         </div>
 
+        {/* Row 2: Phase tabs */}
         <PhaseToggle
           phases={orchestrationData.phases}
           activePhase={activePhase}
           onPhaseChange={setActivePhase}
-          onNavigate={handleNavigate}
-          canGoPrev={currentIndex > 0}
-          canGoNext={currentIndex < PHASE_ORDER.length - 1}
-        >
-          <TimelineLegend />
-        </PhaseToggle>
+        />
       </div>
 
       {/* Graph + Description — wider container */}
       <div className="max-w-6xl mx-auto px-6">
-        {/* Height-locked wrapper — grows to tallest phase, never shrinks */}
-        <div ref={graphRef}>
-          {/* Desktop git graph */}
-          <div className="hidden md:block">
-            <GitGraph
-              key={`desktop-${activePhase}`}
-              data={orchestrationData}
-              activePhase={activePhase}
-              shouldAnimate={true}
-            />
-          </div>
+        {/* Desktop git graph */}
+        <div className="hidden md:block">
+          <GitGraph
+            key={`desktop-${activePhase}`}
+            data={orchestrationData}
+            activePhase={activePhase}
+            shouldAnimate={true}
+          />
+        </div>
 
-          {/* Mobile card layout */}
-          <div className="md:hidden">
-            <GitGraphMobile
-              key={`mobile-${activePhase}`}
-              data={orchestrationData}
-              activePhase={activePhase}
-              shouldAnimate={true}
-            />
-          </div>
+        {/* Mobile card layout */}
+        <div className="md:hidden">
+          <GitGraphMobile
+            key={`mobile-${activePhase}`}
+            data={orchestrationData}
+            activePhase={activePhase}
+            shouldAnimate={true}
+          />
         </div>
 
         {/* Phase description panel */}
