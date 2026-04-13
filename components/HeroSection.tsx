@@ -64,31 +64,47 @@ interface HeroSectionProps {
   version?: string | null;
 }
 
-function useVersion(serverVersion?: string | null) {
+function useGitHubMeta(serverVersion?: string | null) {
   const [version, setVersion] = useState(serverVersion ?? null);
-  const [loading, setLoading] = useState(!serverVersion);
+  const [stars, setStars] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (serverVersion) return;
+    const controller = new AbortController();
+    const headers: HeadersInit = { Accept: "application/vnd.github+json" };
+    const opts = { headers, signal: controller.signal };
 
-    fetch("https://api.github.com/repos/opensesh/KARIMO/releases/latest", {
-      headers: { Accept: "application/vnd.github+json" },
-    })
+    const repoFetch = fetch("https://api.github.com/repos/opensesh/KARIMO", opts)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.tag_name) setVersion(data.tag_name);
+        if (data?.stargazers_count != null) {
+          const count = data.stargazers_count;
+          setStars(count >= 1000 ? `${(count / 1000).toFixed(1)}k` : String(count));
+        }
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .catch(() => {});
+
+    const versionFetch = serverVersion
+      ? Promise.resolve()
+      : fetch("https://api.github.com/repos/opensesh/KARIMO/releases/latest", opts)
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data?.tag_name) setVersion(data.tag_name);
+          })
+          .catch(() => {});
+
+    Promise.allSettled([repoFetch, versionFetch]).finally(() => setLoading(false));
+
+    return () => controller.abort();
   }, [serverVersion]);
 
-  return { version, loading };
+  return { version, stars, loading };
 }
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
 export function HeroSection({ version: serverVersion }: HeroSectionProps) {
-  const { version, loading } = useVersion(serverVersion);
+  const { version, stars, loading } = useGitHubMeta(serverVersion);
   const sectionRef = useRef<HTMLElement>(null);
   const meshRef = useMeshGradient(sectionRef);
   return (
@@ -154,6 +170,10 @@ export function HeroSection({ version: serverVersion }: HeroSectionProps) {
               value: loading ? null : (version ?? "—"),
             },
             { label: "Claude Code", value: "Framework & Plugin" },
+            {
+              label: "\u2605 Stars",
+              value: loading ? null : (stars ?? "—"),
+            },
           ].map((badge, i) => (
             <motion.div
               key={badge.label}
