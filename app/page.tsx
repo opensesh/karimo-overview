@@ -7,6 +7,7 @@ import { LiveExampleSection } from "@/components/LiveExampleSection";
 import { EncodingSection } from "@/components/EncodingSection";
 import { ContextSection } from "@/components/ContextSection";
 import { AdoptionSection } from "@/components/AdoptionSection";
+import { TheProblemSection } from "@/components/TheProblemSection";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 
@@ -39,22 +40,25 @@ export default async function Home() {
           <div className="relative" style={{ zIndex: 1 }}>
             <HeroSection version={version} />
           </div>
-          <div className="relative" style={{ zIndex: 2 }}>
-            <OverviewSection />
+          <div className="relative section-layer" style={{ zIndex: 2 }}>
+            <TheProblemSection />
           </div>
           <div className="relative section-layer" style={{ zIndex: 3 }}>
-            <LiveExampleSection />
+            <OverviewSection />
           </div>
           <div className="relative section-layer" style={{ zIndex: 4 }}>
-            <EncodingSection />
+            <LiveExampleSection />
           </div>
           <div className="relative section-layer" style={{ zIndex: 5 }}>
-            <ContextSection />
+            <EncodingSection />
           </div>
           <div className="relative section-layer" style={{ zIndex: 6 }}>
-            <AdoptionSection />
+            <ContextSection />
           </div>
           <div className="relative section-layer" style={{ zIndex: 7 }}>
+            <AdoptionSection />
+          </div>
+          <div className="relative section-layer" style={{ zIndex: 8 }}>
             <CTASection />
           </div>
         </main>
