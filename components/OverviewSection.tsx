@@ -718,8 +718,8 @@ function PhaseDetailPanel({
           transition={smoothTransition}
           className="w-full max-w-5xl mx-auto mt-10"
         >
-          {/* 3-column grid — fixed height to prevent jumping between loops */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-stretch">
+          {/* 3-column grid — fixed height on desktop to prevent jumping between loops */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:h-[320px] md:items-stretch">
             {/* LEFT: Explanation + Input/Output */}
             <div className="order-1 flex flex-col gap-3 md:overflow-y-auto">
               <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-4">
