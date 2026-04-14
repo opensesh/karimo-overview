@@ -976,7 +976,7 @@ export function LiveExampleSection() {
         </AnimatePresence>
 
         {/* ── Desktop: control bar + emulator ── */}
-        <div className="hidden lg:flex lg:flex-col lg:flex-1 lg:min-h-0">
+        <div className="hidden lg:flex lg:flex-col">
           <ControlBar
             progress={timeline.progress}
             currentTime={timeline.currentTime}
@@ -992,7 +992,8 @@ export function LiveExampleSection() {
 
           {/* VS Code Emulator — fills remaining space */}
           <div
-            className="relative flex-1 h-0 overflow-hidden pb-10 max-h-[60vh]"
+            className="relative overflow-hidden"
+            style={{ height: 'clamp(350px, 55vh, 600px)' }}
             onWheel={(e) => {
               const target = e.target as HTMLElement;
               const scrollable = target.closest("[data-vscode-scroll]");
