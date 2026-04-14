@@ -23,19 +23,19 @@ const PROBLEM_CARDS = [
     icon: LinkBroken01,
     title: "Session Isolation",
     description:
-      "Every session starts blank. Decisions, patterns, and architecture from the last run are gone — you re-explain your project from scratch each time.",
+      "Every session starts blank. Decisions, patterns, and architecture from the last run are gone — you re-explain your project each time.",
   },
   {
     icon: Container,
     title: "Context Ceiling",
     description:
-      "A single session caps at ~200K tokens. Hit the ceiling mid-feature and the agent forgets earlier decisions, contradicting itself.",
+      "A single session caps at ~200K-1M tokens. Hit the ceiling mid-feature and the agent forgets earlier decisions, contradicting itself.",
   },
   {
     icon: Compass01,
-    title: "No Orchestration",
+    title: "Limited Orchestration",
     description:
-      "Plan mode helps you think but doesn't execute across sessions. Sub-agents work in isolation with no awareness of what others built.",
+      "Sub-agents work in isolation with limited awareness of what others built. Without shared context, work has duplicates or conflicts.",
   },
   {
     icon: CurrencyDollar,
