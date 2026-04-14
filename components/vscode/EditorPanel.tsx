@@ -74,8 +74,11 @@ function Tab({
   const isBrowser = contentKey.startsWith("browser-");
 
   return (
-    <button
-      className="flex items-center gap-1.5 px-3 py-1.5 text-xs shrink-0 group"
+    <div
+      role="tab"
+      tabIndex={0}
+      aria-selected={active}
+      className="flex items-center gap-1.5 px-3 py-1.5 text-xs shrink-0 group cursor-pointer"
       style={{
         background: active ? VSCODE.tabActiveBg : VSCODE.tabInactiveBg,
         color: active ? VSCODE.text : VSCODE.textDim,
@@ -83,6 +86,12 @@ function Tab({
         borderTop: active ? `1px solid ${VSCODE.accent}` : "1px solid transparent",
       }}
       onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
     >
       {isBrowser ? (
         <svg
@@ -116,7 +125,7 @@ function Tab({
       >
         &times;
       </button>
-    </button>
+    </div>
   );
 }
 
@@ -140,7 +149,7 @@ function CodeView({ contentKey }: { contentKey: string }) {
 
   return (
     <div
-      className="flex-1 overflow-y-auto overflow-x-hidden"
+      className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden"
       data-vscode-scroll
       style={{ overscrollBehavior: "contain" }}
     >
@@ -194,7 +203,7 @@ function MarkdownView({ contentKey }: { contentKey: string }) {
 
   return (
     <div
-      className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-4"
+      className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-6 py-4"
       data-vscode-scroll
       style={{ overscrollBehavior: "contain" }}
     >

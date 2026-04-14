@@ -218,7 +218,7 @@ export const ChatPanel = memo(function ChatPanel({
       <div
         ref={scrollContainerRef}
         data-vscode-scroll
-        className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3"
+        className="flex-1 min-h-0 overflow-y-auto px-3 py-3 flex flex-col gap-3"
         style={{ overscrollBehavior: "contain" }}
       >
         {messages.map((msg, i) => {

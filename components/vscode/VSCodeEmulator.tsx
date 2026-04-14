@@ -107,7 +107,7 @@ function DesktopLayout({
       }}
     >
       <TitleBar />
-      <div className="flex overflow-hidden min-w-0">
+      <div className="flex overflow-hidden min-w-0 min-h-0">
         <ActivityBar />
         <FileTree
           tree={tree}
