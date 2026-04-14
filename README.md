@@ -1,5 +1,7 @@
 # KARIMO Overview
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 Interactive visual explainer for [KARIMO](https://github.com/opensesh/KARIMO) — the autonomous development framework for Claude Code.
 
 **Live site:** [karimo-overview.vercel.app](https://karimo-overview.vercel.app)
@@ -56,7 +58,7 @@ This site walks through KARIMO's pipeline visually — from research through mer
 
 ## License
 
-MIT
+[Apache 2.0](LICENSE)
 
 ---
 
