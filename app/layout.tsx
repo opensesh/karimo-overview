@@ -3,10 +3,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://karimo-overview.vercel.app"),
-  title: "KARIMO Unpacked",
+  title: "KARIMO [Claude Code Plugin Overview]",
   description: "What happens when you run /karimo:plan? PRD interviews, agent orchestration, automated review—mapped step by step.",
   openGraph: {
-    title: "KARIMO Unpacked",
+    title: "KARIMO [Claude Code Plugin Overview]",
     description: "Interactive overview of how KARIMO transforms requirements into shipped code.",
     type: "website",
     images: [
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "KARIMO Unpacked",
+    title: "KARIMO [Claude Code Plugin Overview]",
     description: "Interactive overview of how KARIMO transforms requirements into shipped code.",
     images: ["/opengraph-image.jpg"],
   },
