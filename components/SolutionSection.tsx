@@ -670,6 +670,8 @@ function PhaseDetailPanel({
   const [activeCommandIdx, setActiveCommandIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(panelRef, { margin: "-50px" });
 
   useEffect(() => {
     setActiveCommandIdx(0);
@@ -685,7 +687,7 @@ function PhaseDetailPanel({
   }, [syncedCommandIndex]);
 
   useEffect(() => {
-    if (!phase || !isAutoPlaying || syncedCommandIndex !== undefined) {
+    if (!phase || !isAutoPlaying || !isInView || syncedCommandIndex !== undefined) {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
       return;
     }
@@ -697,7 +699,7 @@ function PhaseDetailPanel({
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
-  }, [phase, isAutoPlaying, syncedCommandIndex]);
+  }, [phase, isAutoPlaying, isInView, syncedCommandIndex]);
 
   const handleCommandToggle = (idx: number) => {
     setIsAutoPlaying(false);
@@ -710,6 +712,7 @@ function PhaseDetailPanel({
     <AnimatePresence mode="wait">
       {phase && (
         <motion.div
+          ref={panelRef}
           data-interactive
           key={phase.id}
           initial={{ opacity: 0, y: 16 }}
@@ -720,10 +723,10 @@ function PhaseDetailPanel({
         >
           {/* 3-column grid — fixed height container so dropdowns don't push page content */}
           <div
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-start md:h-[300px] md:overflow-visible"
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-start md:h-[420px] md:overflow-visible"
           >
             {/* LEFT: Explanation + Input/Output — fixed height across all loops */}
-            <div className="order-1 flex flex-col gap-3 md:h-[300px] md:overflow-hidden">
+            <div className="order-1 flex flex-col gap-3 md:h-[420px]">
               <div className="rounded-lg bg-bg-tertiary border border-border-secondary p-4">
                 <span
                   className="text-xs text-fg-brand uppercase tracking-widest"
@@ -772,7 +775,7 @@ function PhaseDetailPanel({
             </div>
 
             {/* CENTER: Terminal — fixed height, matches left column */}
-            <div className="order-2 min-w-0 md:h-[300px]">
+            <div className="order-2 min-w-0 md:h-[420px]">
               <InlineTerminal
                 lines={
                   activeCommand?.terminalLines ??
