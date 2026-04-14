@@ -788,6 +788,46 @@ export function LiveExampleSection() {
   const [hasStarted, setHasStarted] = useState(false);
   const [showMobileModal, setShowMobileModal] = useState(false);
 
+  // Resize drag state for VS Code emulator
+  const emulatorRef = useRef<HTMLDivElement>(null);
+  const [extraHeight, setExtraHeight] = useState(0);
+  const isDraggingRef = useRef(false);
+  const dragStartYRef = useRef(0);
+  const dragStartExtraRef = useRef(0);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    isDraggingRef.current = true;
+    dragStartYRef.current = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    dragStartExtraRef.current = extraHeight;
+
+    const handleMove = (ev: MouseEvent | TouchEvent) => {
+      if (!isDraggingRef.current) return;
+      const clientY = 'touches' in ev ? ev.touches[0].clientY : (ev as MouseEvent).clientY;
+      const delta = clientY - dragStartYRef.current;
+      // Get the base height so we can cap at 25% growth
+      const baseHeight = emulatorRef.current
+        ? emulatorRef.current.offsetHeight - dragStartExtraRef.current
+        : 600;
+      const maxExtra = baseHeight * 0.25;
+      const newExtra = Math.max(0, Math.min(dragStartExtraRef.current + delta, maxExtra));
+      setExtraHeight(newExtra);
+    };
+
+    const handleUp = () => {
+      isDraggingRef.current = false;
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleUp);
+      document.removeEventListener('touchmove', handleMove);
+      document.removeEventListener('touchend', handleUp);
+    };
+
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleUp);
+    document.addEventListener('touchmove', handleMove);
+    document.addEventListener('touchend', handleUp);
+  }, [extraHeight]);
+
   const timeline = useTimeline({
     duration: TIMELINE_DURATION,
     loop: true,
@@ -911,7 +951,8 @@ export function LiveExampleSection() {
     <section
       ref={sectionRef}
       id="live-example"
-      className="section-padding bg-bg-primary relative overflow-hidden min-h-screen flex flex-col"
+      className="section-padding bg-bg-primary relative overflow-hidden flex flex-col pb-24 sm:pb-32"
+      style={{ minHeight: `calc(100vh + ${extraHeight}px)` }}
     >
       {/* Noise texture */}
       <div
@@ -990,10 +1031,11 @@ export function LiveExampleSection() {
             onChapterClick={handleChapterSeek}
           />
 
-          {/* VS Code Emulator — fills remaining space */}
+          {/* VS Code Emulator — fills remaining space, resizable */}
           <div
+            ref={emulatorRef}
             className="relative overflow-hidden"
-            style={{ height: 'clamp(350px, 55vh, 600px)' }}
+            style={{ height: `calc(clamp(350px, 55vh, 600px) + ${extraHeight}px)` }}
             onWheel={(e) => {
               const target = e.target as HTMLElement;
               const scrollable = target.closest("[data-vscode-scroll]");
@@ -1018,6 +1060,18 @@ export function LiveExampleSection() {
               onFileSelect={handleFileSelect}
               onTabSelect={handleTabSelect}
               onTabClose={handleTabClose}
+            />
+          </div>
+
+          {/* Resize handle */}
+          <div
+            className="group flex items-center justify-center h-4 cursor-ns-resize select-none shrink-0"
+            onMouseDown={handleResizeStart}
+            onTouchStart={handleResizeStart}
+          >
+            <div
+              className="w-12 h-1 rounded-full transition-colors duration-150 group-hover:bg-brand-500/60"
+              style={{ background: 'rgba(255, 255, 255, 0.12)' }}
             />
           </div>
         </div>
