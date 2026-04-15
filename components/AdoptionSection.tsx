@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { adoptionPhases } from "@/lib/constants";
+import { adoptionPhases, faqItems } from "@/lib/constants";
+import { ChevronDown } from "@untitledui/icons";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Chip } from "@/components/ui/Chip";
 import { useParallax } from "@/components/ui/ParallaxSection";
@@ -77,6 +78,19 @@ const terminalPreviews: Record<number, { command: string; lines: string[] }> = {
 export function AdoptionSection() {
   const { ref: sectionRef, y } = useParallax(30);
   const [expandedPhase, setExpandedPhase] = useState(1);
+  const [openFaqIndices, setOpenFaqIndices] = useState<Set<number>>(new Set());
+
+  const toggleFaq = (index: number) => {
+    setOpenFaqIndices((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  };
 
   const togglePhase = (phase: number) => {
     if (expandedPhase === phase) return;
@@ -209,6 +223,31 @@ export function AdoptionSection() {
           </motion.div>
         </div>
 
+        {/* FAQ */}
+        <div className="mt-20 md:mt-28">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="text-accent text-xs text-fg-tertiary uppercase tracking-wider mb-8"
+          >
+            Frequently Asked Questions
+          </motion.p>
+
+          <div className="divide-y divide-border-secondary border-t border-border-secondary">
+            {faqItems.map((item, index) => (
+              <FaqItem
+                key={index}
+                question={item.question}
+                answer={item.answer}
+                isOpen={openFaqIndices.has(index)}
+                onToggle={() => toggleFaq(index)}
+              />
+            ))}
+          </div>
+        </div>
+
       </div>
       </motion.div>
     </section>
@@ -273,6 +312,56 @@ function TerminalPreview({
           </motion.div>
         </AnimatePresence>
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// FaqItem
+// ---------------------------------------------------------------------------
+
+function FaqItem({
+  question,
+  answer,
+  isOpen,
+  onToggle,
+}: {
+  question: string;
+  answer: string;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between py-5 md:py-6 text-left cursor-pointer"
+        aria-expanded={isOpen}
+      >
+        <span className="text-fg-primary font-medium text-sm md:text-base pr-4">
+          {question}
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 text-fg-tertiary shrink-0 transition-transform duration-300 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <p className="text-body text-sm text-fg-secondary leading-relaxed pb-5 md:pb-6 pr-8">
+              {answer}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -568,3 +568,45 @@ export const orchestrationData: OrchestrationData = {
     },
   },
 };
+
+// ---------------------------------------------------------------------------
+// FAQ items (from KARIMO README)
+// ---------------------------------------------------------------------------
+
+export const faqItems = [
+  {
+    question: "Can I run without automated review?",
+    answer:
+      "Yes. Review is optional (Phase 2). PRD interviews, execution, and PRs all work out of the box.",
+  },
+  {
+    question: "Do I need to use a feature branch?",
+    answer:
+      "No. KARIMO supports two modes configured via /karimo:configure: feature branch mode (tasks branch from a feature branch) or main mode (tasks branch directly from main). Choose what fits your workflow.",
+  },
+  {
+    question: "Can I run multiple sessions at once?",
+    answer:
+      "Yes, but be careful when running multiple feature branches with worktrees simultaneously. Typically when a feature branch and work trees are kicked off for a PRD, you only want to be doing research and planning on main. For best results, let one orchestration complete before starting another.",
+  },
+  {
+    question: "Do I need to use Greptile?",
+    answer:
+      "No. You can use manual review, Claude Code Review, or any other review mechanism. Greptile is one option for automated review in Phase 2, but it's entirely optional.",
+  },
+  {
+    question: "Can I use other tools for research?",
+    answer:
+      "Yes. We use Firecrawl MCP for deeper web research capability. You can integrate any MCP servers or tools that fit your workflow.",
+  },
+  {
+    question: "Can I customize for my use case?",
+    answer:
+      "Yes. You can modify your local installation directly or fork the repository for more extensive customization. Agent definitions, templates, and skills are all editable.",
+  },
+  {
+    question: "Having issues?",
+    answer:
+      "Run /karimo:doctor to diagnose. Still stuck? Contact hello@opensession.co",
+  },
+];
