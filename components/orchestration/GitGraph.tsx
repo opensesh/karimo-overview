@@ -1,7 +1,8 @@
 "use client";
 
+import { Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { OrchestrationData, PhaseId } from "@/lib/constants";
+import type { Gate, OrchestrationData, PhaseId } from "@/lib/constants";
 import { Folder, FolderCode } from "@untitledui/icons";
 import { phaseStagger, drawLineX, drawLineY, fadeInUp, nodeAppear, contentStagger, itemPop } from "@/lib/motion";
 import { AgentRow } from "./AgentRow";
@@ -77,6 +78,41 @@ function AgentSection({ phaseStep }: { phaseStep: string }) {
         <div className="flex-1 h-px bg-border-secondary/50" />
       </div>
       <AgentRow phaseStep={phaseStep} />
+    </div>
+  );
+}
+
+// ─── Gate marker (between waves) ─────────────────────────────────────────────
+
+function gateAccent(status: Gate["status"]) {
+  if (status === "waiting") {
+    return { dot: "#f59e0b", text: "text-amber-400/80", bg: "bg-amber-500/10", border: "border-amber-500/25" };
+  }
+  return { dot: "#22c55e", text: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/25" };
+}
+
+function GateMarker({ gate }: { gate: Gate }) {
+  const accent = gateAccent(gate.status);
+  return (
+    <div className="flex items-center gap-3 py-1">
+      <span className="text-fg-tertiary text-[10px] w-12 flex-shrink-0 uppercase tracking-[0.1em]" style={{ fontFamily: "var(--font-accent, sans-serif)" }}>
+        Gate
+      </span>
+      <div className="flex items-center gap-2 flex-1 max-w-[280px]">
+        <div className="flex-1 h-px border-t border-dashed" style={{ borderColor: accent.dot, opacity: 0.5 }} />
+        <span
+          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded ${accent.bg} ${accent.text} ${accent.border} border text-[9px] whitespace-nowrap`}
+          style={{ fontFamily: "var(--font-mono, monospace)" }}
+        >
+          <span className="font-semibold">{gate.label}</span>
+          <span className="opacity-60">·</span>
+          <span>{gate.mode}</span>
+          <span className="opacity-60">·</span>
+          <span>{gate.status.replace("-", " ")}</span>
+          {gate.status !== "waiting" && <span>✓</span>}
+        </span>
+        <div className="flex-1 h-px border-t border-dashed" style={{ borderColor: accent.dot, opacity: 0.5 }} />
+      </div>
     </div>
   );
 }
@@ -418,33 +454,41 @@ function ExecutionPhase({ data }: { data: OrchestrationData }) {
                 </div>
 
                 <div className="space-y-2">
-                  {data.execution.waves.map((wave) => (
-                    <div key={wave.wave} className="flex items-center gap-3">
-                      <span className="text-fg-secondary text-[11px] w-12 flex-shrink-0" style={{ fontFamily: "var(--font-body)" }}>Wave {wave.wave}</span>
-                      <div className="flex gap-0.5 flex-1 max-w-[280px]">
-                        {wave.tasks.map((task) => {
-                          const filled = task.status !== "pending";
-                          const opacity = task.status === "complete" ? 0.8 : task.status === "active" ? 0.4 : 0.1;
-                          return (
-                            <div key={task.id} className="flex-1 flex flex-col items-center gap-0.5">
-                              <motion.div
-                                className="h-3 w-full rounded-sm border"
-                                style={{
-                                  backgroundColor: filled ? `${wave.color}${Math.round(opacity * 255).toString(16).padStart(2, "0")}` : "var(--bg-tertiary)",
-                                  borderColor: filled ? `${wave.color}60` : "var(--border-secondary)",
-                                }}
-                                animate={task.status === "active" ? { opacity: [0.5, 1, 0.5] } : {}}
-                                transition={{ duration: 2, repeat: Infinity }}
-                              />
-                              <span className="text-[8px]" style={{ fontFamily: "var(--font-mono, monospace)", color: wave.color, opacity: 0.7 }}>
-                                {task.id.replace("PRD-", "")}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
+                  {data.execution.waves.map((wave) => {
+                    const gatesAfter = data.execution.gates.filter(g => g.afterWave === wave.wave);
+                    return (
+                      <Fragment key={wave.wave}>
+                        <div className="flex items-center gap-3">
+                          <span className="text-fg-secondary text-[11px] w-12 flex-shrink-0" style={{ fontFamily: "var(--font-body)" }}>Wave {wave.wave}</span>
+                          <div className="flex gap-0.5 flex-1 max-w-[280px]">
+                            {wave.tasks.map((task) => {
+                              const filled = task.status !== "pending";
+                              const opacity = task.status === "complete" ? 0.8 : task.status === "active" ? 0.4 : 0.1;
+                              return (
+                                <div key={task.id} className="flex-1 flex flex-col items-center gap-0.5">
+                                  <motion.div
+                                    className="h-3 w-full rounded-sm border"
+                                    style={{
+                                      backgroundColor: filled ? `${wave.color}${Math.round(opacity * 255).toString(16).padStart(2, "0")}` : "var(--bg-tertiary)",
+                                      borderColor: filled ? `${wave.color}60` : "var(--border-secondary)",
+                                    }}
+                                    animate={task.status === "active" ? { opacity: [0.5, 1, 0.5] } : {}}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                  />
+                                  <span className="text-[8px]" style={{ fontFamily: "var(--font-mono, monospace)", color: wave.color, opacity: 0.7 }}>
+                                    {task.id.replace("PRD-", "")}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        {gatesAfter.map((gate) => (
+                          <GateMarker key={gate.id} gate={gate} />
+                        ))}
+                      </Fragment>
+                    );
+                  })}
                 </div>
 
                 {/* Merge to feature */}
