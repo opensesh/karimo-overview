@@ -108,6 +108,40 @@ function layoutRow(
   };
 }
 
+// Hand-crafted bento layout for the root level — squarify on five tiles of
+// similar weight produces two visually identical 2-stack columns, which feels
+// repetitive. This packs agents as a hero on the left and varies the right
+// side into a wide-templates row, a wide-skills row, and a split commands/hooks
+// row, so each tile reads as a distinct shape.
+function rootLayout(nodes: ArchNode[], width: number, height: number): Tile[] {
+  const byId = (id: string) => nodes.find((n) => n.id === id);
+  const agents = byId("agents");
+  const templates = byId("templates");
+  const skills = byId("skills");
+  const commands = byId("commands");
+  const hooks = byId("hooks");
+
+  if (!agents || !templates || !skills || !commands || !hooks) {
+    return squarify(nodes, width, height);
+  }
+
+  const heroW = width * 0.42;
+  const restX = heroW;
+  const restW = width - heroW;
+  const row1H = height * 0.40;
+  const row2H = height * 0.30;
+  const row3H = height - row1H - row2H;
+  const splitX = restX + restW * 0.55;
+
+  return [
+    { node: agents,    x: 0,      y: 0,             w: heroW,                   h: height },
+    { node: templates, x: restX,  y: 0,             w: restW,                   h: row1H },
+    { node: skills,    x: restX,  y: row1H,         w: restW,                   h: row2H },
+    { node: commands,  x: restX,  y: row1H + row2H, w: restW * 0.55,            h: row3H },
+    { node: hooks,     x: splitX, y: row1H + row2H, w: restW * 0.45,            h: row3H },
+  ];
+}
+
 function squarify(
   nodes: ArchNode[],
   width: number,
@@ -231,8 +265,11 @@ export function ArchitectureExplorer() {
 
   const tiles = useMemo(() => {
     if (width < 1 || height < 1) return [];
+    if (pathStack.length === 0 && children.length === 5) {
+      return rootLayout(children, width, height);
+    }
     return squarify(children, width, height);
-  }, [children, width, height]);
+  }, [children, width, height, pathStack.length]);
 
   const drillInto = useCallback((node: ArchNode) => {
     if (node.children?.length) {
@@ -278,16 +315,12 @@ export function ArchitectureExplorer() {
   return (
     <div>
       <SectionLabel>FRAMEWORK</SectionLabel>
-      <div className="mt-4 mb-3 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+      <div className="mt-4 mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <h3 className="text-display text-2xl md:text-3xl lg:text-4xl text-fg-primary">
           The harness
         </h3>
-        <p className="text-body text-sm text-fg-tertiary md:max-w-sm md:text-right">
-          Click around the source tree to see what KARIMO actually ships with.
-        </p>
+        <Legend />
       </div>
-
-      <Legend />
 
       <Breadcrumb
         segments={breadcrumbSegments}
@@ -303,25 +336,6 @@ export function ArchitectureExplorer() {
           className="relative w-full overflow-hidden rounded-xl border border-border-secondary bg-bg-tertiary/40"
           style={{ height: "min(60vh, 520px)" }}
         >
-          <AnimatePresence>
-            {pathStack.length === 0 ? (
-              <motion.div
-                key="watermark"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
-                aria-hidden
-                className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
-              >
-                <Dataflow03
-                  className="h-2/3 w-2/3 max-h-[360px] max-w-[360px]"
-                  style={{ color: "rgba(255, 250, 238, 0.04)" }}
-                />
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-
           <AnimatePresence mode="wait">
             <motion.div
               key={pathStack.join("/") || "__root__"}
@@ -381,7 +395,7 @@ function Legend() {
   return (
     <ul
       role="list"
-      className="mt-3 mb-6 flex flex-wrap gap-x-4 gap-y-2 text-mono text-[11px] uppercase tracking-[0.16em] text-fg-tertiary md:justify-end"
+      className="flex flex-wrap gap-x-4 gap-y-2 text-mono text-[11px] uppercase tracking-[0.16em] text-fg-tertiary md:justify-end"
     >
       {CATEGORY_ORDER.map((key) => {
         const meta = CATEGORY_META[key];
@@ -479,6 +493,8 @@ function TreemapTile({
   const minSide = Math.min(tile.w, tile.h);
   const showLabel = minSide >= 56;
   const showCount = minSide >= 80;
+  const showWatermark = minSide >= 72;
+  const watermarkSize = Math.max(40, Math.min(160, minSide * 0.5));
 
   const style: CSSProperties = {
     left: tile.x,
@@ -511,13 +527,28 @@ function TreemapTile({
       style={style}
       className="group absolute m-0.5 flex flex-col justify-between overflow-hidden rounded-md border p-3 text-left transition-[border-color,box-shadow,filter] duration-200 hover:brightness-110 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-aperol) focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary"
     >
+      {showWatermark ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 flex items-center justify-center"
+        >
+          <Dataflow03
+            style={{
+              width: watermarkSize,
+              height: watermarkSize,
+              color: meta.text,
+              opacity: 0.16,
+            }}
+          />
+        </div>
+      ) : null}
       {showLabel ? (
         <>
-          <div className="text-mono text-[12px] font-semibold leading-tight">
+          <div className="relative z-10 text-mono text-[12px] font-semibold leading-tight">
             {tile.node.name}
           </div>
           {showCount ? (
-            <div className="text-mono text-[10px] uppercase tracking-[0.14em] opacity-70">
+            <div className="relative z-10 text-mono text-[10px] uppercase tracking-[0.14em] opacity-70">
               {totalFiles} {totalFiles === 1 ? "file" : "files"}
             </div>
           ) : null}
