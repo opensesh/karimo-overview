@@ -519,6 +519,9 @@ function TreemapTile({
   const showCount = minSide >= 80;
   const showWatermark = minSide >= 72;
   const watermarkSize = Math.max(40, Math.min(160, minSide * 0.5));
+  const cramped = minSide < 110;
+  const paddingClass = cramped ? "p-2" : "p-3";
+  const labelSizeClass = cramped ? "text-[11px]" : "text-[12px]";
 
   const style: CSSProperties = {
     left: tile.x,
@@ -549,7 +552,7 @@ function TreemapTile({
         isLeaf ? "" : `, contains ${tile.node.children?.length} items`
       }`}
       style={style}
-      className="group absolute m-0.5 flex flex-col justify-between overflow-hidden rounded-md border p-3 text-left transition-[border-color,box-shadow,filter] duration-200 hover:brightness-110 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-aperol) focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary"
+      className={`group absolute m-0.5 flex flex-col justify-between gap-1 overflow-hidden rounded-md border ${paddingClass} text-left transition-[border-color,box-shadow,filter] duration-200 hover:brightness-110 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-aperol) focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary`}
     >
       {showWatermark ? (
         <div
@@ -573,7 +576,9 @@ function TreemapTile({
       ) : null}
       {showLabel ? (
         <>
-          <div className="relative z-10 text-mono text-[12px] font-semibold leading-tight">
+          <div
+            className={`relative z-10 text-mono ${labelSizeClass} font-semibold leading-tight [overflow-wrap:anywhere] [hyphens:auto]`}
+          >
             {tile.node.name}
           </div>
           {showCount ? (
