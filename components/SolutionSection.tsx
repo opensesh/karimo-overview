@@ -6,6 +6,7 @@ import { pipelinePhases } from "@/lib/constants";
 import { smoothTransition } from "@/lib/motion";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { useParallax } from "@/components/ui/ParallaxSection";
+import { ArchitectureExplorer } from "@/components/ArchitectureExplorer";
 
 // ─── Types ─────────────────────────────────────────────────
 type PipelinePhase = (typeof pipelinePhases)[number];
@@ -951,7 +952,7 @@ export function SolutionSection() {
     <section
       ref={sectionRef}
       id="pipeline"
-      className="section-padding bg-bg-secondary relative overflow-hidden min-h-screen flex flex-col justify-center"
+      className="section-padding bg-bg-secondary relative overflow-hidden"
     >
       {/* Noise texture */}
       <div
@@ -1045,6 +1046,11 @@ export function SolutionSection() {
           phaseId={focusedPhase}
           syncedCommandIndex={syncedCommandIdx}
         />
+
+        {/* Architecture Explorer — interactive treemap of the KARIMO repo */}
+        <div className="mt-24 lg:mt-32 pt-12 border-t border-border-secondary/40">
+          <ArchitectureExplorer />
+        </div>
       </div>
       </motion.div>
     </section>
