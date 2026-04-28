@@ -105,11 +105,11 @@ export const processSteps = [
     number: "03",
     title: "Run",
     command: "/karimo:run",
-    description: "Infers orchestration policy from your config, generates task briefs, validates them, then executes with agents using your configured integration cadence.",
+    description: "Generates task briefs, validates them, then configures execution — including gate placement for PRDs with 15+ tasks. Gates are checkpoints between waves for human review.",
     details: [
-      "Infers gate model (pause, conditional, skip-on-pass) from config",
+      "Auto-places gates between waves based on PRD size and complexity",
       "Generates detailed briefs with auto-review for gaps and conflicts",
-      "Dispatches via worktree, wave, or feature cadence",
+      "Dispatches via worktree, wave, or feature integration cadence",
     ],
     terminalLines: [
       { type: "command" as const, text: "claude /karimo:run --prd auth-system" },
@@ -144,11 +144,11 @@ export const processSteps = [
     number: "05",
     title: "Orchestrate",
     command: "PM Agent",
-    description: "The PM agent reads execution_plan.yaml and sequences waves. Gates between waves enforce quality checkpoints — pause for human review, auto-pass when tests are green, or skip entirely on pass.",
+    description: "The PM agent sequences waves and pauses at gates for human review. Gates are checkpoints placed between waves — review findings, provide feedback, then resume execution.",
     details: [
-      "Gate models: pause (human approval), conditional (auto if green), skip-on-pass",
+      "Gates pause execution for human-in-the-loop review",
       "Propagates findings.md between waves for task-to-task coordination",
-      "Live worktree state tracking with crash recovery",
+      "Resume with --resume after reviewing each gate checkpoint",
     ],
     terminalLines: [
       { type: "command" as const, text: "→ PM Agent coordinating execution..." },
@@ -605,9 +605,9 @@ export const faqItems = [
       "Yes. You can modify your local installation directly or fork the repository for more extensive customization. Agent definitions, templates, and skills are all editable.",
   },
   {
-    question: "What are gate models and when should I use each?",
+    question: "What are gates and when do I need them?",
     answer:
-      "Gates control wave transitions. Use 'pause' (default) when you want human approval before each wave. Use 'conditional' to auto-pass when tests and build succeed. Use 'skip-on-pass' to skip gates entirely when everything is green. Configure via .karimo/config.yaml.",
+      "Gates are checkpoints placed between waves for human review. PRDs with 15+ tasks require at least one gate — they're auto-suggested during /karimo:run or you can customize placement. At each gate, execution pauses so you can review findings, provide feedback, then resume with --resume.",
   },
   {
     question: "How does compound learning work?",

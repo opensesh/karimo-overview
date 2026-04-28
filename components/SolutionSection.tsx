@@ -969,7 +969,7 @@ export function SolutionSection() {
           <SectionLabel> SOLUTION</SectionLabel>
           <div className="flex items-center justify-between mt-4">
             <h2 className="text-display text-3xl md:text-4xl lg:text-5xl text-fg-primary">
-              Compound Orchestration
+              Agent Orchestration
             </h2>
             <PlaybackControls
               isPlaying={isPlaying}

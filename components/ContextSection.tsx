@@ -618,35 +618,26 @@ export function ContextSection() {
               </div>
             </div>
 
-            {/* Card 2: Gate Models */}
+            {/* Card 2: Gates */}
             <div className="rounded-lg bg-bg-secondary border border-border-secondary p-6">
               <h4 className="text-accent text-[10px] font-bold text-fg-tertiary uppercase tracking-wider mb-4">
-                Gate Models
+                Gates
               </h4>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 font-mono shrink-0">
-                    pause
+              <p className="text-body text-sm text-fg-secondary leading-relaxed mb-4">
+                Checkpoints placed between waves for human review. Required for PRDs with 15+ tasks.
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs text-fg-tertiary">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-fg-brand/10 text-fg-brand font-mono">
+                    auto-placed
                   </span>
-                  <p className="text-body text-sm text-fg-secondary">
-                    Human approval required (default)
-                  </p>
+                  <span>or custom during /karimo:run</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono shrink-0">
-                    conditional
+                <div className="flex items-center gap-2 text-xs text-fg-tertiary">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-fg-brand/10 text-fg-brand font-mono">
+                    --resume
                   </span>
-                  <p className="text-body text-sm text-fg-secondary">
-                    Auto-pass if tests/build succeed
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20 font-mono shrink-0">
-                    skip-on-pass
-                  </span>
-                  <p className="text-body text-sm text-fg-secondary">
-                    Skip gate entirely when green
-                  </p>
+                  <span>to continue past checkpoint</span>
                 </div>
               </div>
             </div>
