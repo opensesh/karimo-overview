@@ -951,8 +951,12 @@ export function LiveExampleSection() {
     <section
       ref={sectionRef}
       id="live-example"
-      className="section-padding bg-bg-primary relative overflow-hidden flex flex-col pb-24 sm:pb-32"
-      style={{ minHeight: `calc(100vh + ${extraHeight}px)` }}
+      className="section-padding bg-bg-primary relative overflow-hidden flex flex-col lg:min-h-screen lg:pb-32"
+      style={
+        extraHeight > 0
+          ? { minHeight: `calc(100vh + ${extraHeight}px)` }
+          : undefined
+      }
     >
       {/* Noise texture */}
       <div
