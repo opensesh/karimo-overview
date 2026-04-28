@@ -563,7 +563,7 @@ export function ContextSection() {
           <div className="flex-1 h-px bg-border-secondary" />
         </div>
 
-        {/* ── PART 3: Compound Learning ── */}
+        {/* ── PART 3: Compound Learning & Gates ── */}
         <div className="mt-24 md:mt-32">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -575,37 +575,101 @@ export function ContextSection() {
               Part 3
             </span>
             <h3 className="text-display text-xl md:text-2xl text-fg-primary mt-2">
-              Compound Learning
+              Compound Learning & Gates
             </h3>
             <p className="text-body text-fg-secondary mt-3 max-w-2xl leading-relaxed">
-              At any point, run{" "}
-              <span className="font-mono text-fg-primary text-sm">/karimo:feedback</span>{" "}
-              to capture issues or potential improvements. Observations move through a
-              capture stage, then get stored as summarized learnings in the KARIMO
-              learnings folder — patterns that work, anti-patterns to avoid, execution
-              rules, and product-specific notes. These compound over time: every future
-              PRD and task brief loads in relevant learnings for that specific task.
-              Agents never repeat the same mistake twice.
+              KARIMO captures knowledge at two levels and enforces quality through configurable gates.
+              Every session builds on the last — agents never repeat the same mistake twice.
             </p>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-body text-sm text-fg-tertiary mt-6"
-            >
-              Open source — {" "}
-              <a
-                href="https://github.com/opensesh/KARIMO"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-fg-brand hover:underline"
-              >
-                contribute on GitHub
-              </a>
-              {" "} to help improve KARIMO as models evolve.
-            </motion.p>
           </motion.div>
+
+          {/* Two-card grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8"
+          >
+            {/* Card 1: Two-Tier Knowledge */}
+            <div className="rounded-lg bg-bg-secondary border border-border-secondary p-6">
+              <h4 className="text-accent text-[10px] font-bold text-fg-tertiary uppercase tracking-wider mb-4">
+                Two-Tier Knowledge
+              </h4>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-fg-brand/10 text-fg-brand font-mono shrink-0 mt-0.5">
+                    findings
+                  </span>
+                  <p className="text-body text-sm text-fg-secondary leading-relaxed">
+                    Per-PRD, automatic. Coordinates task-to-task within a single PRD.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-fg-brand/10 text-fg-brand font-mono shrink-0 mt-0.5">
+                    learnings
+                  </span>
+                  <p className="text-body text-sm text-fg-secondary leading-relaxed">
+                    Project-wide via{" "}
+                    <span className="font-mono text-fg-primary text-xs">/karimo:feedback</span>.
+                    Patterns that work, anti-patterns to avoid.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Gate Models */}
+            <div className="rounded-lg bg-bg-secondary border border-border-secondary p-6">
+              <h4 className="text-accent text-[10px] font-bold text-fg-tertiary uppercase tracking-wider mb-4">
+                Gate Models
+              </h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 font-mono shrink-0">
+                    pause
+                  </span>
+                  <p className="text-body text-sm text-fg-secondary">
+                    Human approval required (default)
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono shrink-0">
+                    conditional
+                  </span>
+                  <p className="text-body text-sm text-fg-secondary">
+                    Auto-pass if tests/build succeed
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20 font-mono shrink-0">
+                    skip-on-pass
+                  </span>
+                  <p className="text-body text-sm text-fg-secondary">
+                    Skip gate entirely when green
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-body text-sm text-fg-tertiary mt-8"
+          >
+            Open source — {" "}
+            <a
+              href="https://github.com/opensesh/KARIMO"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-fg-brand hover:underline"
+            >
+              contribute on GitHub
+            </a>
+            {" "} to help improve KARIMO as models evolve.
+          </motion.p>
         </div>
       </div>
       </motion.div>
