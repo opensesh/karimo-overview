@@ -135,15 +135,32 @@ function WaveLifecycle({ data }: { data: OrchestrationData }) {
           <p className="text-[9px] text-fg-tertiary uppercase tracking-wider" style={{ fontFamily: "var(--font-accent, sans-serif)" }}>
             Merged
           </p>
-          {completedWaves.map(w => (
-            <div key={w.wave} className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: w.color }} />
-              <span className="text-fg-secondary text-[10px]" style={{ fontFamily: "var(--font-mono, monospace)" }}>
-                W{w.wave} — {w.tasks.length} merged
-              </span>
-              <span className="text-green-400 text-[9px]">✓</span>
-            </div>
-          ))}
+          {completedWaves.map(w => {
+            const gatesAfter = data.execution.gates.filter(g => g.afterWave === w.wave);
+            return (
+              <Fragment key={w.wave}>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: w.color }} />
+                  <span className="text-fg-secondary text-[10px]" style={{ fontFamily: "var(--font-mono, monospace)" }}>
+                    W{w.wave} — {w.tasks.length} merged
+                  </span>
+                  <span className="text-green-400 text-[9px]">✓</span>
+                </div>
+                {gatesAfter.map(g => {
+                  const accent = gateAccent(g.status);
+                  return (
+                    <div key={g.id} className="flex items-center gap-2 pl-3">
+                      <div className="w-1 h-1 rounded-full" style={{ backgroundColor: accent.dot }} />
+                      <span className={`text-[10px] ${accent.text}`} style={{ fontFamily: "var(--font-mono, monospace)" }}>
+                        {g.label} — {g.status.replace("-", " ")}
+                      </span>
+                      {g.status !== "waiting" && <span className="text-green-400 text-[9px]">✓</span>}
+                    </div>
+                  );
+                })}
+              </Fragment>
+            );
+          })}
         </div>
       )}
 
