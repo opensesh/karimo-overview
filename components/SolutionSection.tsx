@@ -525,7 +525,7 @@ function MobileLoopCarousel({
         label="MERGE"
         side="left"
         active={mergeActive}
-        description="Validates the feature branch, runs your full test suite, and creates a single consolidated PR to main with a complete audit trail."
+        description="Validates the feature branch after all gates pass, runs your full test suite, and creates a single consolidated PR to main with gate outcomes and audit trail."
       />
     </motion.div>
   );
@@ -1022,7 +1022,7 @@ export function SolutionSection() {
               label="MERGE"
               side="right"
               active={mergeActive}
-              description="Validates the feature branch, runs your full test suite, and creates a single consolidated PR to main with a complete audit trail."
+              description="Validates the feature branch after all gates pass, runs your full test suite, and creates a single consolidated PR to main with gate outcomes and audit trail."
             />
           </div>
         </div>
