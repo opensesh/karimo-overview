@@ -62,22 +62,15 @@ const WAVES = [
   { wave: 4, color: "#a855f7", label: "Wave 4" },
 ];
 
-// ─── Section IDs + tooltip ──────────────────────────────────────────────────
+// ─── Section IDs ────────────────────────────────────────────────────────────
 
 type SectionId = "branches" | "phases" | "tasks-waves" | "agents";
-
-const SECTION_TOOLTIPS: Record<SectionId, string> = {
-  branches: "Nodes and lines for main and feature branches",
-  phases: "Planning, Execution, and Review phase tabs",
-  "tasks-waves": "Wave colors, task statuses, and parallelizable groups",
-  agents: "Coordinator, sub-agent, and team roles",
-};
 
 function HoverTooltip({ label, children }: { label: string; children: React.ReactNode }) {
   const [show, setShow] = useState(false);
   return (
     <div
-      className="relative w-full"
+      className="relative inline-flex"
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
       onFocus={() => setShow(true)}
@@ -91,7 +84,7 @@ function HoverTooltip({ label, children }: { label: string; children: React.Reac
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="pointer-events-none absolute left-5 top-full z-20 mt-1 rounded-md border border-border-secondary bg-bg-primary px-2 py-1 text-[10px] text-fg-secondary whitespace-nowrap shadow-lg"
+            className="pointer-events-none absolute right-0 top-full z-20 mt-1.5 rounded-md border border-border-secondary bg-bg-primary px-2 py-1 text-[10px] text-fg-secondary whitespace-nowrap shadow-lg"
             style={{ fontFamily: "var(--font-body)" }}
           >
             {label}
@@ -119,37 +112,35 @@ function LegendSection({
 }) {
   return (
     <div>
-      <HoverTooltip label={SECTION_TOOLTIPS[id]}>
-        <button
-          type="button"
-          onClick={() => onOpen(id)}
-          aria-expanded={isOpen}
-          className="flex w-full items-center gap-2 cursor-pointer select-none py-2 text-left"
+      <button
+        type="button"
+        onClick={() => onOpen(id)}
+        aria-expanded={isOpen}
+        className="flex w-full items-center gap-2 cursor-pointer select-none py-2 text-left"
+      >
+        <motion.svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="text-fg-tertiary flex-shrink-0"
         >
-          <motion.svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            animate={{ rotate: isOpen ? 90 : 0 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-fg-tertiary flex-shrink-0"
-          >
-            <path d="M9 18l6-6-6-6" />
-          </motion.svg>
-          <span
-            className="text-fg-primary text-[13px] font-semibold"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            {title}
-          </span>
-          <div className="flex-1 h-px bg-border-secondary/50" />
-        </button>
-      </HoverTooltip>
+          <path d="M9 18l6-6-6-6" />
+        </motion.svg>
+        <span
+          className="text-fg-primary text-[13px] font-semibold"
+          style={{ fontFamily: "var(--font-body)" }}
+        >
+          {title}
+        </span>
+        <div className="flex-1 h-px bg-border-secondary/50" />
+      </button>
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -220,15 +211,17 @@ export function TimelineLegend() {
   return (
     <>
       {/* Trigger — icon button matching nav button style */}
-      <button
-        onClick={() => setOpen(true)}
-        className="w-8 h-8 rounded-md bg-bg-tertiary flex items-center justify-center
-                   text-fg-secondary hover:text-fg-primary hover:bg-border-primary
-                   transition-all duration-200"
-        aria-label="Open legend"
-      >
-        <BookOpen01 width={14} height={14} />
-      </button>
+      <HoverTooltip label="Legend">
+        <button
+          onClick={() => setOpen(true)}
+          className="w-8 h-8 rounded-md bg-bg-tertiary flex items-center justify-center
+                     text-fg-secondary hover:text-fg-primary hover:bg-border-primary
+                     transition-all duration-200"
+          aria-label="Open legend"
+        >
+          <BookOpen01 width={14} height={14} />
+        </button>
+      </HoverTooltip>
 
       {/* Modal — portaled to body to escape transform ancestors */}
       {typeof document !== "undefined" && createPortal(
