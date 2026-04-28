@@ -6,6 +6,7 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import { ChevronLeft, ChevronRight, ExternalLink, X } from "lucide-react";
+import { Dataflow03 } from "@untitledui/icons";
 import {
   useCallback,
   useEffect,
@@ -204,7 +205,6 @@ const CATEGORY_ORDER: Category[] = [
   "commands",
   "templates",
   "hooks",
-  "plugins",
 ];
 
 // ---------------------------------------------------------------------------
@@ -277,10 +277,10 @@ export function ArchitectureExplorer() {
 
   return (
     <div>
-      <SectionLabel>02.1 — ARCHITECTURE EXPLORER</SectionLabel>
+      <SectionLabel>FRAMEWORK</SectionLabel>
       <div className="mt-4 mb-3 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <h3 className="text-display text-2xl md:text-3xl lg:text-4xl text-fg-primary">
-          Inside the framework
+          The harness
         </h3>
         <p className="text-body text-sm text-fg-tertiary md:max-w-sm md:text-right">
           Click around the source tree to see what KARIMO actually ships with.
@@ -303,6 +303,25 @@ export function ArchitectureExplorer() {
           className="relative w-full overflow-hidden rounded-xl border border-border-secondary bg-bg-tertiary/40"
           style={{ height: "min(60vh, 520px)" }}
         >
+          <AnimatePresence>
+            {pathStack.length === 0 ? (
+              <motion.div
+                key="watermark"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
+              >
+                <Dataflow03
+                  className="h-2/3 w-2/3 max-h-[360px] max-w-[360px]"
+                  style={{ color: "rgba(255, 250, 238, 0.04)" }}
+                />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
           <AnimatePresence mode="wait">
             <motion.div
               key={pathStack.join("/") || "__root__"}
@@ -362,7 +381,7 @@ function Legend() {
   return (
     <ul
       role="list"
-      className="mt-3 mb-6 flex flex-wrap gap-x-4 gap-y-2 text-mono text-[11px] uppercase tracking-[0.16em] text-fg-tertiary"
+      className="mt-3 mb-6 flex flex-wrap gap-x-4 gap-y-2 text-mono text-[11px] uppercase tracking-[0.16em] text-fg-tertiary md:justify-end"
     >
       {CATEGORY_ORDER.map((key) => {
         const meta = CATEGORY_META[key];

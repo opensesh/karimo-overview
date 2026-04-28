@@ -5,7 +5,6 @@ export type Category =
   | "agents"
   | "skills"
   | "commands"
-  | "plugins"
   | "hooks"
   | "templates";
 
@@ -32,7 +31,6 @@ export const CATEGORY_META: Record<Category, CategoryMeta> = {
   agents:    { label: "Agents",       fill: "#9C5E26", stroke: "#C9772E", text: "#F2D9C2" },
   skills:    { label: "Skills",       fill: "#5E6E54", stroke: "#7A8C6E", text: "#DAE2D2" },
   commands:  { label: "Commands",     fill: "#465E6E", stroke: "#5C7A8C", text: "#CFDDE6" },
-  plugins:   { label: "Plugins",      fill: "#7A4530", stroke: "#A05A3D", text: "#EBCDB6" },
   hooks:     { label: "Hooks/Config", fill: "#52504C", stroke: "#6B6660", text: "#D6D2CC" },
   templates: { label: "Templates",    fill: "#6B5266", stroke: "#8C6E84", text: "#E2D2DD" },
 };
@@ -172,23 +170,6 @@ export const architectureRoot: ArchNode = {
         { id: "hooks/post-merge", name: "post-merge.sh", category: "hooks", fileCount: 1, description: "Cleanup hook — drop worktrees, archive PRD, capture learnings.", githubUrl: `${KARIMO_TREE}/hooks/post-merge.sh` },
         { id: "hooks/on-gate", name: "on-gate.sh", category: "hooks", fileCount: 1, description: "Triggered each time a gate is reached — notification, dashboard pin.", githubUrl: `${KARIMO_TREE}/hooks/on-gate.sh` },
         { id: "hooks/on-feedback", name: "on-feedback.sh", category: "hooks", fileCount: 1, description: "Captures /karimo:feedback output into the project-wide learnings store.", githubUrl: `${KARIMO_TREE}/hooks/on-feedback.sh` },
-      ],
-    },
-    {
-      id: "plugins",
-      name: "plugins/",
-      category: "plugins",
-      fileCount: 6,
-      description:
-        "Optional integrations — plug your review provider, observability, or research tooling into KARIMO.",
-      githubUrl: `${KARIMO_TREE}/plugins`,
-      children: [
-        { id: "plugins/greptile", name: "greptile/", category: "plugins", fileCount: 1, description: "Greptile review provider with score thresholds and auto-remediation.", githubUrl: `${KARIMO_TREE}/plugins/greptile` },
-        { id: "plugins/claude-review", name: "claude-review/", category: "plugins", fileCount: 1, description: "Claude as the review provider — model routing built in.", githubUrl: `${KARIMO_TREE}/plugins/claude-review` },
-        { id: "plugins/firecrawl", name: "firecrawl/", category: "plugins", fileCount: 1, description: "Firecrawl MCP for deeper external research during the planning loop.", githubUrl: `${KARIMO_TREE}/plugins/firecrawl` },
-        { id: "plugins/sentry", name: "sentry/", category: "plugins", fileCount: 1, description: "Pulls live error context into briefs and findings.", githubUrl: `${KARIMO_TREE}/plugins/sentry` },
-        { id: "plugins/linear", name: "linear/", category: "plugins", fileCount: 1, description: "Two-way sync between PRDs and Linear projects.", githubUrl: `${KARIMO_TREE}/plugins/linear` },
-        { id: "plugins/github", name: "github/", category: "plugins", fileCount: 1, description: "PR creation, status checks, and review aggregation via the GitHub MCP.", githubUrl: `${KARIMO_TREE}/plugins/github` },
       ],
     },
   ],
