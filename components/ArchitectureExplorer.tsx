@@ -6,7 +6,13 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import { ChevronLeft, ChevronRight, ExternalLink, X } from "lucide-react";
-import { Dataflow03 } from "@untitledui/icons";
+import {
+  BracketsSlash,
+  Dataflow03,
+  LayersTwo01,
+  Lightbulb05,
+  Settings02,
+} from "@untitledui/icons";
 import {
   useCallback,
   useEffect,
@@ -240,6 +246,19 @@ const CATEGORY_ORDER: Category[] = [
   "templates",
   "hooks",
 ];
+
+type IconComponent = React.ComponentType<{
+  className?: string;
+  style?: CSSProperties;
+}>;
+
+const CATEGORY_ICON: Record<Category, IconComponent> = {
+  agents: Dataflow03,
+  skills: Lightbulb05,
+  commands: BracketsSlash,
+  templates: LayersTwo01,
+  hooks: Settings02,
+};
 
 // ---------------------------------------------------------------------------
 // Component
@@ -532,14 +551,19 @@ function TreemapTile({
           aria-hidden
           className="pointer-events-none absolute inset-0 flex items-center justify-center"
         >
-          <Dataflow03
-            style={{
-              width: watermarkSize,
-              height: watermarkSize,
-              color: meta.text,
-              opacity: 0.16,
-            }}
-          />
+          {(() => {
+            const Icon = CATEGORY_ICON[tile.node.category];
+            return (
+              <Icon
+                style={{
+                  width: watermarkSize,
+                  height: watermarkSize,
+                  color: meta.text,
+                  opacity: 0.16,
+                }}
+              />
+            );
+          })()}
         </div>
       ) : null}
       {showLabel ? (
