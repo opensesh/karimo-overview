@@ -106,6 +106,9 @@ function WaveLifecycle({ data }: { data: OrchestrationData }) {
                 W{w.wave} — {w.tasks.length} merged
               </span>
               <span className="text-green-400 text-[9px]">✓</span>
+              <span className="text-[8px] px-1 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20" style={{ fontFamily: "var(--font-mono, monospace)" }}>
+                gate: auto-passed
+              </span>
             </div>
           ))}
         </div>
