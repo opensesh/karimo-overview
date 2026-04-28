@@ -77,6 +77,8 @@ export const BrowserPreview = memo(function BrowserPreview({
         <img
           src={imageSrc}
           alt="Browser preview"
+          loading="lazy"
+          decoding="async"
           className="w-full h-full"
           style={{ objectFit: "contain", objectPosition: "top center" }}
         />

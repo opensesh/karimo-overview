@@ -351,7 +351,7 @@ export function ContextSection() {
   const [activeLayer, setActiveLayer] = useState("l0");
 
   return (
-    <section ref={sectionRef} id="context" className="section-padding min-h-screen bg-bg-primary overflow-hidden">
+    <section ref={sectionRef} id="context" className="section-padding min-h-screen bg-bg-primary relative overflow-hidden">
       <motion.div style={{ y }}>
       <div className="max-w-5xl mx-auto px-6">
         {/* Section header */}

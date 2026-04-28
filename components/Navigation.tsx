@@ -91,9 +91,9 @@ export function Navigation() {
             <Image
               src="/logos/horizontal-vanilla.png"
               alt="Open Session"
-              width={100}
-              height={20}
-              style={{ width: "100px", height: "auto" }}
+              width={2048}
+              height={324}
+              className="w-[100px] h-auto"
               priority
             />
           </a>

@@ -33,7 +33,7 @@ export function EncodingSection() {
   const canGoNext = currentIndex < PHASE_ORDER.length - 1;
 
   return (
-    <section ref={sectionRef} id="orchestration" className="section-padding min-h-screen bg-bg-secondary overflow-hidden">
+    <section ref={sectionRef} id="orchestration" className="section-padding min-h-screen bg-bg-secondary relative overflow-hidden">
       <motion.div style={{ y }}>
       {/* Header + Phase toggle — matches content max-width */}
       <div className="max-w-6xl mx-auto px-6">
