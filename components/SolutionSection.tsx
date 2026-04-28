@@ -663,9 +663,11 @@ function InlineTerminal({
 function PhaseDetailPanel({
   phaseId,
   syncedCommandIndex,
+  isMobile = false,
 }: {
   phaseId: string | null;
   syncedCommandIndex?: number;
+  isMobile?: boolean;
 }) {
   const phase = pipelinePhases.find((p) => p.id === phaseId);
   const [activeCommandIdx, setActiveCommandIdx] = useState(0);
@@ -688,7 +690,13 @@ function PhaseDetailPanel({
   }, [syncedCommandIndex]);
 
   useEffect(() => {
-    if (!phase || !isAutoPlaying || !isInView || syncedCommandIndex !== undefined) {
+    if (
+      !phase ||
+      !isAutoPlaying ||
+      !isInView ||
+      syncedCommandIndex !== undefined ||
+      isMobile
+    ) {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
       return;
     }
@@ -700,7 +708,7 @@ function PhaseDetailPanel({
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
-  }, [phase, isAutoPlaying, isInView, syncedCommandIndex]);
+  }, [phase, isAutoPlaying, isInView, syncedCommandIndex, isMobile]);
 
   const handleCommandToggle = (idx: number) => {
     setIsAutoPlaying(false);
@@ -952,7 +960,7 @@ export function SolutionSection() {
     <section
       ref={sectionRef}
       id="pipeline"
-      className="section-padding bg-bg-secondary relative overflow-hidden"
+      className="bg-bg-secondary relative overflow-hidden pt-24 pb-20 md:pt-28 md:pb-24 lg:pt-36 lg:pb-32"
     >
       {/* Noise texture */}
       <div
@@ -1045,10 +1053,11 @@ export function SolutionSection() {
         <PhaseDetailPanel
           phaseId={focusedPhase}
           syncedCommandIndex={syncedCommandIdx}
+          isMobile={isMobile}
         />
 
         {/* Architecture Explorer — interactive treemap of the KARIMO repo */}
-        <div className="mt-24 lg:mt-32 pt-12 border-t border-border-secondary/40">
+        <div className="mt-20 pt-20 lg:mt-24 lg:pt-24 border-t border-border-secondary/40">
           <ArchitectureExplorer />
         </div>
       </div>
