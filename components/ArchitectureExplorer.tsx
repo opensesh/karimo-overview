@@ -28,7 +28,7 @@ import {
   type ArchNode,
   type Category,
 } from "@/lib/architectureData";
-import { accordionContent, smoothTransition } from "@/lib/motion";
+import { smoothTransition } from "@/lib/motion";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 
 // ---------------------------------------------------------------------------
@@ -131,6 +131,25 @@ function rootLayout(nodes: ArchNode[], width: number, height: number): Tile[] {
     return squarify(nodes, width, height);
   }
 
+  // Portrait / narrow viewport: stack four wide rows + a split row at the
+  // bottom. Same hierarchy (agents > templates > skills > commands > hooks),
+  // just rearranged so each tile keeps a usable footprint on mobile.
+  if (width < height * 1.1) {
+    const r1 = height * 0.30; // agents
+    const r2 = height * 0.25; // templates
+    const r3 = height * 0.20; // skills
+    const r4 = height - r1 - r2 - r3; // commands + hooks split row
+    const splitX = width * 0.6;
+    return [
+      { node: agents,    x: 0,      y: 0,                w: width,         h: r1 },
+      { node: templates, x: 0,      y: r1,               w: width,         h: r2 },
+      { node: skills,    x: 0,      y: r1 + r2,          w: width,         h: r3 },
+      { node: commands,  x: 0,      y: r1 + r2 + r3,     w: splitX,        h: r4 },
+      { node: hooks,     x: splitX, y: r1 + r2 + r3,     w: width - splitX, h: r4 },
+    ];
+  }
+
+  // Landscape: agents hero on the left, three rows on the right.
   const heroW = width * 0.42;
   const restX = heroW;
   const restW = width - heroW;
@@ -348,50 +367,36 @@ export function ArchitectureExplorer() {
         canGoBack={pathStack.length > 0}
       />
 
-      {/* Desktop treemap */}
-      <div className="hidden md:block">
-        <div
-          ref={canvasRef}
-          className="relative w-full overflow-hidden rounded-xl border border-border-secondary bg-bg-tertiary/40"
-          style={{ height: "min(60vh, 520px)" }}
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={pathStack.join("/") || "__root__"}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={reduceMotion ? { duration: 0 } : { duration: 0.22 }}
-              className="absolute inset-0"
-            >
-              {tiles.map((tile, i) => (
-                <TreemapTile
-                  key={tile.node.id}
-                  tile={tile}
-                  index={i}
-                  hovered={hover?.id === tile.node.id}
-                  selected={selected?.id === tile.node.id}
-                  onHover={setHover}
-                  onSelect={drillInto}
-                  reduceMotion={!!reduceMotion}
-                />
-              ))}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        <HoverHint hovered={hover} />
+      <div
+        ref={canvasRef}
+        className="relative w-full overflow-hidden rounded-xl border border-border-secondary bg-bg-tertiary/40"
+        style={{ height: "min(64vh, 520px)" }}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={pathStack.join("/") || "__root__"}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.22 }}
+            className="absolute inset-0"
+          >
+            {tiles.map((tile, i) => (
+              <TreemapTile
+                key={tile.node.id}
+                tile={tile}
+                index={i}
+                hovered={hover?.id === tile.node.id}
+                selected={selected?.id === tile.node.id}
+                onHover={setHover}
+                onSelect={drillInto}
+                reduceMotion={!!reduceMotion}
+              />
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </div>
-
-      {/* Mobile stacked list */}
-      <div className="md:hidden">
-        <MobileList
-          nodes={children}
-          selected={selected}
-          onDrill={drillInto}
-          onSelect={(node) => setSelected(node)}
-          onClear={() => setSelected(null)}
-        />
-      </div>
+      <HoverHint hovered={hover} />
 
       <AnimatePresence mode="wait">
         {selected ? (
@@ -627,106 +632,6 @@ function HoverHint({ hovered }: { hovered: ArchNode | null }) {
   );
 }
 
-interface MobileListProps {
-  nodes: ArchNode[];
-  selected: ArchNode | null;
-  onDrill: (node: ArchNode) => void;
-  onSelect: (node: ArchNode) => void;
-  onClear: () => void;
-}
-
-function MobileList({
-  nodes,
-  selected,
-  onDrill,
-  onSelect,
-  onClear,
-}: MobileListProps) {
-  return (
-    <ul role="list" className="space-y-2">
-      {nodes.map((node) => {
-        const meta = CATEGORY_META[node.category];
-        const isLeaf = !node.children?.length;
-        const totalFiles = totalDescendantFiles(node);
-        const isExpanded = isLeaf && selected?.id === node.id;
-
-        const handleTap = () => {
-          if (isLeaf) {
-            if (isExpanded) onClear();
-            else onSelect(node);
-          } else {
-            onDrill(node);
-          }
-        };
-
-        return (
-          <li
-            key={node.id}
-            className="overflow-hidden rounded-lg border border-border-secondary bg-bg-tertiary/40"
-          >
-            <button
-              type="button"
-              onClick={handleTap}
-              className="flex w-full items-center gap-3 px-3 py-3 text-left transition hover:bg-bg-tertiary/70"
-              aria-expanded={isLeaf ? isExpanded : undefined}
-            >
-              <span
-                aria-hidden
-                className="block h-9 w-1 rounded-full"
-                style={{ backgroundColor: meta.stroke }}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="text-mono text-sm text-fg-primary truncate">
-                  {node.name}
-                </div>
-                <div className="text-mono text-[10px] uppercase tracking-[0.16em] text-fg-tertiary">
-                  {meta.label} · {totalFiles}{" "}
-                  {totalFiles === 1 ? "file" : "files"}
-                </div>
-              </div>
-              <ChevronRight
-                size={14}
-                className="text-fg-tertiary"
-                aria-hidden
-              />
-            </button>
-
-            <AnimatePresence initial={false}>
-              {isLeaf && isExpanded && node.description ? (
-                <motion.div
-                  key="content"
-                  variants={accordionContent}
-                  initial="collapsed"
-                  animate="expanded"
-                  exit="collapsed"
-                  className="overflow-hidden"
-                >
-                  <div className="border-t border-border-secondary px-4 py-3">
-                    <p className="text-body text-sm text-fg-secondary">
-                      {node.description}
-                    </p>
-                    {node.githubUrl ? (
-                      <a
-                        href={node.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-3 inline-flex items-center gap-1.5 text-mono text-xs text-(--color-aperol) hover:underline"
-                      >
-                        View on GitHub
-                        <ExternalLink size={12} aria-hidden />
-                      </a>
-                    ) : null}
-                  </div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
 interface InfoBoxProps {
   node: ArchNode;
   onClose: () => void;
@@ -742,7 +647,7 @@ function InfoBox({ node, onClose }: InfoBoxProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 8 }}
       transition={smoothTransition}
-      className="mt-6 hidden rounded-xl border border-border-secondary bg-bg-tertiary/60 p-5 md:block"
+      className="mt-6 rounded-xl border border-border-secondary bg-bg-tertiary/60 p-5"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
