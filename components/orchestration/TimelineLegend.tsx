@@ -62,45 +62,112 @@ const WAVES = [
   { wave: 4, color: "#a855f7", label: "Wave 4" },
 ];
 
-// ─── Collapsible section ────────────────────────────────────────────────────
+// ─── Section IDs + tooltip ──────────────────────────────────────────────────
+
+type SectionId = "branches" | "phases" | "tasks-waves" | "agents";
+
+const SECTION_TOOLTIPS: Record<SectionId, string> = {
+  branches: "Nodes and lines for main and feature branches",
+  phases: "Planning, Execution, and Review phase tabs",
+  "tasks-waves": "Wave colors, task statuses, and parallelizable groups",
+  agents: "Coordinator, sub-agent, and team roles",
+};
+
+function HoverTooltip({ label, children }: { label: string; children: React.ReactNode }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div
+      className="relative w-full"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      onFocus={() => setShow(true)}
+      onBlur={() => setShow(false)}
+    >
+      {children}
+      <AnimatePresence>
+        {show && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="pointer-events-none absolute left-5 top-full z-20 mt-1 rounded-md border border-border-secondary bg-bg-primary px-2 py-1 text-[10px] text-fg-secondary whitespace-nowrap shadow-lg"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            {label}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── Single-open accordion section ──────────────────────────────────────────
 
 function LegendSection({
+  id,
   title,
-  defaultOpen = false,
+  isOpen,
+  onOpen,
   children,
 }: {
+  id: SectionId;
   title: string;
-  defaultOpen?: boolean;
+  isOpen: boolean;
+  onOpen: (id: SectionId) => void;
   children: React.ReactNode;
 }) {
   return (
-    <details open={defaultOpen} className="group">
-      <summary className="flex items-center gap-2 cursor-pointer select-none list-none py-2 [&::-webkit-details-marker]:hidden">
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-fg-tertiary transition-transform duration-200 group-open:rotate-90 flex-shrink-0"
+    <div>
+      <HoverTooltip label={SECTION_TOOLTIPS[id]}>
+        <button
+          type="button"
+          onClick={() => onOpen(id)}
+          aria-expanded={isOpen}
+          className="flex w-full items-center gap-2 cursor-pointer select-none py-2 text-left"
         >
-          <path d="M9 18l6-6-6-6" />
-        </svg>
-        <span
-          className="text-fg-primary text-[13px] font-semibold"
-          style={{ fontFamily: "var(--font-body)" }}
-        >
-          {title}
-        </span>
-        <div className="flex-1 h-px bg-border-secondary/50" />
-      </summary>
-      <div className="pb-3 pt-1 pl-5 space-y-3">
-        {children}
-      </div>
-    </details>
+          <motion.svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            animate={{ rotate: isOpen ? 90 : 0 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="text-fg-tertiary flex-shrink-0"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </motion.svg>
+          <span
+            className="text-fg-primary text-[13px] font-semibold"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            {title}
+          </span>
+          <div className="flex-1 h-px bg-border-secondary/50" />
+        </button>
+      </HoverTooltip>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
+              opacity: { duration: 0.2, ease: "easeOut" },
+            }}
+            className="overflow-hidden"
+          >
+            <div className="pb-3 pt-1 pl-5 space-y-3">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -130,7 +197,9 @@ function LegendItem({ visual, label, description }: {
 
 export function TimelineLegend() {
   const [open, setOpen] = useState(false);
+  const [openSection, setOpenSection] = useState<SectionId>("branches");
   const handleClose = useCallback(() => setOpen(false), []);
+  const handleSectionOpen = useCallback((id: SectionId) => setOpenSection(id), []);
 
   useEffect(() => {
     if (!open) return;
@@ -206,7 +275,7 @@ export function TimelineLegend() {
                 <div className="px-4 sm:px-5 py-3 sm:py-4 space-y-1">
 
                   {/* ── Branches ── */}
-                  <LegendSection title="Branches" defaultOpen>
+                  <LegendSection id="branches" title="Branches" isOpen={openSection === "branches"} onOpen={handleSectionOpen}>
                     <LegendItem
                       visual={
                         <div className="flex items-center">
@@ -242,7 +311,7 @@ export function TimelineLegend() {
                   </LegendSection>
 
                   {/* ── Phases ── */}
-                  <LegendSection title="Phases">
+                  <LegendSection id="phases" title="Phases" isOpen={openSection === "phases"} onOpen={handleSectionOpen}>
                     <LegendItem
                       visual={
                         <span className="px-2 py-1 rounded-md bg-bg-brand-solid text-fg-primary text-[9px] font-semibold whitespace-nowrap">
@@ -280,7 +349,7 @@ export function TimelineLegend() {
                   </LegendSection>
 
                   {/* ── Tasks & Waves ── */}
-                  <LegendSection title="Tasks & Waves">
+                  <LegendSection id="tasks-waves" title="Tasks & Waves" isOpen={openSection === "tasks-waves"} onOpen={handleSectionOpen}>
                     <div className="space-y-2">
                       {WAVES.map(w => (
                         <div key={w.wave} className="flex items-center gap-3">
@@ -338,7 +407,7 @@ export function TimelineLegend() {
                   </LegendSection>
 
                   {/* ── Agents ── */}
-                  <LegendSection title="Agents">
+                  <LegendSection id="agents" title="Agents" isOpen={openSection === "agents"} onOpen={handleSectionOpen}>
                     {(["coordinator", "sub-agent", "team"] as AgentRole[]).map((role) => {
                       const meta = ROLE_META[role];
                       const styles = AGENT_STYLES[role];
