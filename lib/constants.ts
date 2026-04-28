@@ -402,6 +402,17 @@ export interface WaveNode {
   tasks: WorktreeTask[];
 }
 
+export type GateMode = "pause" | "conditional" | "skip-on-pass";
+export type GateStatus = "human-approved" | "auto-passed" | "waiting";
+
+export interface Gate {
+  id: string;
+  label: string;
+  afterWave: number;
+  mode: GateMode;
+  status: GateStatus;
+}
+
 export interface PhaseDescription {
   title: string;
   description: string;
@@ -415,7 +426,7 @@ export interface OrchestrationData {
   research: { external: ResearchItem[]; internal: ResearchItem[] };
   taskBriefs: TaskBrief[];
   waveMappings: WaveMapping[];
-  execution: { waves: WaveNode[] };
+  execution: { waves: WaveNode[]; gates: Gate[] };
   reviewSteps: { id: string; label: string; sublabel: string }[];
   phaseDescriptions: Record<PhaseId, PhaseDescription>;
 }
@@ -483,12 +494,15 @@ export const orchestrationData: OrchestrationData = {
     { id: "PRD-Task-010", name: "Password reset", wave: 3 },
     { id: "PRD-Task-011", name: "E2E auth tests", wave: 4 },
     { id: "PRD-Task-012", name: "Docs update", wave: 4 },
+    { id: "PRD-Task-013", name: "Performance audit", wave: 4 },
+    { id: "PRD-Task-014", name: "Release notes", wave: 4 },
+    { id: "PRD-Task-015", name: "Rollout plan", wave: 4 },
   ],
   waveMappings: [
     { wave: 1, color: WAVE_COLORS[1], taskIds: ["PRD-Task-001", "PRD-Task-002", "PRD-Task-003"] },
     { wave: 2, color: WAVE_COLORS[2], taskIds: ["PRD-Task-004", "PRD-Task-005", "PRD-Task-006", "PRD-Task-007"] },
     { wave: 3, color: WAVE_COLORS[3], taskIds: ["PRD-Task-008", "PRD-Task-009", "PRD-Task-010"] },
-    { wave: 4, color: WAVE_COLORS[4], taskIds: ["PRD-Task-011", "PRD-Task-012"] },
+    { wave: 4, color: WAVE_COLORS[4], taskIds: ["PRD-Task-011", "PRD-Task-012", "PRD-Task-013", "PRD-Task-014", "PRD-Task-015"] },
   ],
   execution: {
     waves: [
@@ -526,8 +540,14 @@ export const orchestrationData: OrchestrationData = {
         tasks: [
           { id: "PRD-Task-011", name: "E2E auth tests", status: "pending", worktreeBranch: "worktree/prd-1-task-011", mergeTarget: "feature/auth-system", wave: 4 },
           { id: "PRD-Task-012", name: "Docs update", status: "pending", worktreeBranch: "worktree/prd-1-task-012", mergeTarget: "feature/auth-system", wave: 4 },
+          { id: "PRD-Task-013", name: "Performance audit", status: "pending", worktreeBranch: "worktree/prd-1-task-013", mergeTarget: "feature/auth-system", wave: 4 },
+          { id: "PRD-Task-014", name: "Release notes", status: "pending", worktreeBranch: "worktree/prd-1-task-014", mergeTarget: "feature/auth-system", wave: 4 },
+          { id: "PRD-Task-015", name: "Rollout plan", status: "pending", worktreeBranch: "worktree/prd-1-task-015", mergeTarget: "feature/auth-system", wave: 4 },
         ],
       },
+    ],
+    gates: [
+      { id: "G1", label: "Gate 1", afterWave: 2, mode: "pause", status: "human-approved" },
     ],
   },
   reviewSteps: [
