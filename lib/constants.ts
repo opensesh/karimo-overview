@@ -551,7 +551,7 @@ export const orchestrationData: OrchestrationData = {
       description: "Tasks execute in dependency-ordered waves using your configured integration cadence. Gates between waves enforce quality checkpoints. Model routing assigns Sonnet or Opus based on complexity, with live worktree state tracking.",
       howItWorks: [
         "Integration cadence: worktree (parallel), wave (sequential), or feature (single branch)",
-        "Gate models: pause (human), conditional (auto if green), skip-on-pass",
+        "Gate modes: pause (human), conditional (auto if green), skip-on-pass",
         "Model routing based on complexity — Sonnet for simple, Opus for complex, with auto-escalation",
         "Live worktree tracking with auto-cleanup after merge",
       ],
