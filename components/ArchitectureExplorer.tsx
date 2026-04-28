@@ -355,7 +355,7 @@ export function ArchitectureExplorer() {
       <SectionLabel>FRAMEWORK</SectionLabel>
       <div className="mt-4 mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <h3 className="text-display text-2xl md:text-3xl lg:text-4xl text-fg-primary">
-          The harness
+          The Harness
         </h3>
         <Legend />
       </div>
